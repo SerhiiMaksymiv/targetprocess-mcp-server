@@ -1,0 +1,34 @@
+{
+  "name": "mcp-tp",
+  "type": "module",
+  "bin": {
+    "tp": "./build/src/index.js"
+  },
+  "scripts": {
+    "prebuild": "rimraf build dist",
+    "build": "tsc",
+    "postbuild": "shx chmod +x build/**/*.js",
+    "prestart": "npm run build",
+    "start": "node build/src/main.js"
+  },
+  "files": [
+    "build"
+  ],
+  "version": "1.0.0",
+  "description": "MCP server for Tartget Process",
+  "main": "build/src/index.js",
+  "keywords": ["mcp", "tp", "mcp-server", "targetprocess", "targetprocess-server"],
+  "author": "mcs",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "zod": "^3.25.76",
+    "@types/node": "^25.2.2",
+    "dotenv": "^17.2.4",
+    "@types/jsdom": "^27.0.0",
+    "typescript": "^5.9.3",
+    "rimraf": "^6.1.2",
+    "shx": "^0.4.0",
+    "jsdom": "^28.0.0"
+  }
+}
