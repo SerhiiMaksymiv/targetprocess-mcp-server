@@ -22,13 +22,7 @@ export class TpClient {
 
     let _urlParams = []
     for (const [key, value] of Object.entries(params.param)) {
-      _urlParams.push(`${key}=${value}`)
-    }
-
-    if (params.searchParam) {
-      for (const [key, value] of Object.entries(params.searchParam)) {
-        _urlParams.push(`${key}=${encodeURIComponent(value)}`)
-      }
+      _urlParams.push(`${key}=${encodeURIComponent(value)}`)
     }
 
     return _url + "/?" + _urlParams.join("&")
@@ -181,7 +175,7 @@ export class TpClient {
     const commentData = {
       description: comment,
       owner: {
-        id: config.tp!.ownerId,
+        id: "1504",
       },
       general: {
         id: userStoryId,
@@ -200,8 +194,6 @@ export class TpClient {
       param: {
         "format": "json",
         "take": "3",
-      },
-      searchParam: {
         "where": `Name contains '${text}'`,
         "include": "[Name, Description, Id]"
       },
@@ -213,8 +205,6 @@ export class TpClient {
       pathParam: { "Releases": '' },
       param: {
         "format": "json",
-      },
-      searchParam: {
         "where": `IsCurrent eq 'true'`,
       },
     }) as T
@@ -226,8 +216,6 @@ export class TpClient {
       pathParam: { "Releases": '' },
       param: {
         "format": "json",
-      },
-      searchParam: {
         "where": `Release.Name eq '${name}'`,
         "include": includeFilter,
       },

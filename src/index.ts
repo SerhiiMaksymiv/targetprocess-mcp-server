@@ -119,7 +119,7 @@ server.registerTool(
 );
 
 server.registerTool(
-  'get_release_user_stories_names',
+  'get_release_user_stories',
   {
     title: 'Get release user stories',
     description: 'Get release user stories',
@@ -323,23 +323,31 @@ server.registerTool(
     },
   },
   async ({ id, comment }) => {
-    const addCommentResponse = await tp.addComment<UserStoryComment>(id, comment);
-
-    if (!addCommentResponse) {
+    try {
+      const addCommentResponse = await tp.addComment<UserStoryComment>(id, comment);
+      if (!addCommentResponse) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to add comment to user story, id: ${id}\n JSON: ${JSON.stringify(addCommentResponse, null, 2)}`
+          }]
+        };
+      }
       return {
         content: [{
           type: 'text',
-          text: `Failed to add comment to user story, id: ${id}\n JSON: ${JSON.stringify(addCommentResponse, null, 2)}`
+          text: JSON.stringify(addCommentResponse)
+        }],
+      };
+    } catch (error) {
+      console.error("Error adding comment to user story:", error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to add comment to user story, id: ${id}\n Error: ${error}`
         }]
       };
     }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(addCommentResponse)
-      }],
-    };
   }
 )
 

@@ -20,7 +20,6 @@ export interface Config {
 export type TpClientParameters = {
   pathParam: { [key: string]: string | undefined }
   param: { [key: string]: string }
-  searchParam?: { [key: string]: string }
 }
 
 export interface TpResponse<T> {
