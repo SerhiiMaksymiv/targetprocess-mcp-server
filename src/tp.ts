@@ -24,7 +24,6 @@ export class TpClient {
     for (const [key, value] of Object.entries(params.param)) {
       _urlParams.push(`${key}=${encodeURIComponent(value)}`)
     }
-
     return _url + "/?" + _urlParams.join("&")
   }
 
