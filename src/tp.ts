@@ -212,7 +212,7 @@ export class TpClient {
   async getReleaseUserStories<T>({ name, withDescription = false }: { name: string, withDescription?: boolean }): Promise<T> {
     const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
     return this.get<T>({
-      pathParam: { "Releases": '' },
+      pathParam: { "UserStories": '' },
       param: {
         "format": "json",
         "where": `Release.Name eq '${name}'`,

@@ -435,68 +435,6 @@ server.registerTool(
   }
 )
 
-server.registerPrompt(
-  'create_bug',
-  {
-    title: 'Create a new bug',
-    description: `Create a new bug card with provided title that summarizes the problem in concise,
-      descriptive manner answering questions What? Where? When?,
-      and content explaining what happened in detail.
-      CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps: 
-        1) call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug content
-        2) format the new bug inside html <div> tags with Short Summary, Steps to Reproduce, Expected Behavior, Actual Behavior.
-        3) IF "get_user_story_content" tool was called in the first step, THEN add a comment to the user story with the ID provided in the first step
-        4) ELSE IF "get_bug_content" tool was called in the first step, THEN add a comment to the bug with the ID provided in the first step
-      `,
-    argsSchema: {
-      title: z.string().describe('Title of the bug report'),
-      userStoryId: z.string()
-        .length(6)
-        .describe(`User story id, usually user story or bug ID (e.g. 145789)`),
-    },
-  },
-  async ({ title, userStoryId }) => {
-    return {
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `Create a new bug based on "${userStoryId}" tp card with the title: "${title}"`,
-          },
-        },
-      ],
-    }
-  }
-)
-
-server.registerPrompt(
-  'search_by_keyword',
-  {
-    title: 'Search TP user stories, bugs, features, tasks by keyword or phrase',
-    description: `Search for tp cards (user stories, bugs, features, tasks) by keyword or partial name or partial keyphrase e.g. "Text Element".
-      IF user uses "find/get me/search for" or similar keyphrase for searching THEN consider using this tool
-      User can include "tp" or "tp card" or "ticket" in the prompt to search by partial name.`,
-    argsSchema: {
-      keyword: z.string()
-        .describe('Keyword or partial name or keyphrase to search for'),
-    },
-  },
-  async ({ keyword }) => {
-    return {
-      messages: [
-        {
-          role: "user",
-          content: {
-            type: "text",
-            text: `Search for tp cards (user stories, bugs, features, tasks) by partial name or partial keyphrase: "${keyword}".`
-          },
-        },
-      ],
-    }
-  }
-)
-
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
