@@ -36,6 +36,7 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 ---
 
 ## Installation
+### Local
 ```json
 {
   "mcpServers": {
@@ -45,15 +46,31 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
         "/path/to/repository"
       ],
       "env": {
-        "TP_TOKEN": "your-tp-token",
-        "TP_BASE_URL": "tp-api-endpoint",
+        "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
+        "TP_BASE_URL": "<tp-api-endpoint>",
         "TP_API_VERSION": "v1",
-        "TP_OWNER_ID": "1504",
-        "TP_PROJECT_ID": "59901",
-        "TP_TEAM_ID": "127063"
+        "TP_OWNER_ID": "<tp-owner-id>", // your user id
+        "TP_PROJECT_ID": "<tp-project-id>",
+        "TP_TEAM_ID": "<tp-team-id>"
       }
     }
 }
+```
+### From Repository
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git",
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here",
+        ...
+        "TP_TEAM_ID": ...
+      }
+    }
+  }
+}
+
 ```
 
 ## Local Development
