@@ -1,4 +1,4 @@
-import { Bug, UserStory, UserStoryComment, TpClientParameters, TestPlan, GeneralSearchResponse } from "./types.js";
+import { Bug, UserStory, UserStoryComment, TpClientParameters, TestPlan } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -187,9 +187,9 @@ export class TpClient {
     }, commentData) as T
   }
 
-  async searchContainsNameText<T>(text: string): Promise<T> {
-    return this.get<GeneralSearchResponse>({
-      pathParam: { "Generals": '' },
+  async searchContainsNameText<T>({ text, entityType }: { text: string, entityType: "Generals" | "UserStories" | "Bugs" | "Features" }): Promise<T> {
+    return this.get<T>({
+      pathParam: { [entityType]: '' },
       param: {
         "format": "json",
         "take": "25",

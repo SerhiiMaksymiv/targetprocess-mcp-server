@@ -8,10 +8,10 @@ import {
   UserStory,
   Bug,
   TestPlan,
-  GeneralSearchResponse,
   Release,
   TpResponse,
-  Feature
+  Feature,
+  General
 } from "./types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -399,17 +399,23 @@ server.registerTool(
     },
   },
   async ({ keyword }) => {
-    const generalResults = await tp.searchContainsNameText<GeneralSearchResponse>(keyword)
+    const results = await Promise.all<TpResponse<General>>([
+      tp.searchContainsNameText<TpResponse<UserStory>>({ text: keyword, entityType: "UserStories" }),
+      tp.searchContainsNameText<TpResponse<Bug>>({ text: keyword, entityType: "Bugs" }),
+      tp.searchContainsNameText<TpResponse<Feature>>({ text: keyword, entityType: "Features" }),
+    ])
+
+    const generalResults = results.map((item: TpResponse<General>) => item.Items).flat()
 
     if (!generalResults) {
       return {
         content: [{
           type: 'text',
-          text: `Failed to search user stories by keyword: "${keyword}"\n JSON: ${JSON.stringify(generalResults, null, 2)}`
+          text: `Failed to find card by keyword: "${keyword}"\n JSON: ${JSON.stringify(generalResults, null, 2)}`
         }],
       }
     }
-    const items = generalResults.Items || [];
+    const items = generalResults || [];
     if (items.length == 0) {
       return {
         content: [{
@@ -426,7 +432,6 @@ server.registerTool(
         title: item.Name,
         id: item.Id,
         description: descriptionText,
-        type: item.EntityType.Name
       }
     })
 

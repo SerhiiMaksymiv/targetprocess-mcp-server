@@ -32,6 +32,11 @@ export interface GeneralSearchResponse {
   Items: General[]
 }
 
+export interface TpResponse<T> {
+  Next: string
+  Items: T[]
+}
+
 export interface General {
   ResourceType: string
   Id: number
