@@ -207,6 +207,50 @@ server.registerTool(
 );
 
 server.registerTool(
+  'get_release_features',
+  {
+    title: 'Get release features',
+    description: 'Get release features',
+    inputSchema: {
+      name: z.string()
+        .describe('Release name'),
+      results: z.number()
+        .default(50)
+        .optional()
+        .describe('Number of results to return, default is 100'),
+    },
+  },
+  async ({ name, results }) => {
+    const release = await tp.getReleaseFeatures<TpResponse<Release>>({ name, results })
+
+    if (!release) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get ${name} release features, JSON: ${JSON.stringify(release, null, 2)}`
+        }],
+      }
+    }
+    const items = release.Items || [];
+    if (items.length == 0) {
+      return {
+        content: [{
+          type: "text",
+          text: `No release features found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items)
+      }],
+    };
+  }
+);
+
+server.registerTool(
   'get_release_user_stories_with_description',
   {
     title: 'Get release user stories with description',

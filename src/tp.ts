@@ -260,4 +260,17 @@ export class TpClient {
       }
     }) as T
   }
+
+  async getReleaseFeatures<T>({ name, results = 50, withDescription = false }: { name: string, results?: number, withDescription?: boolean }): Promise<T> {
+    const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
+    return this.get<T>({
+      pathParam: { "Features": '' },
+      param: {
+        "format": "json",
+        "take": results,
+        "where": `Release.Name eq '${name}'`,
+        "include": includeFilter,
+      }
+    }) as T
+  }
 }
