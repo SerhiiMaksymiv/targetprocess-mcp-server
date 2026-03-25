@@ -10,7 +10,8 @@ import {
   TestPlan,
   GeneralSearchResponse,
   Release,
-  TpResponse
+  TpResponse,
+  Feature
 } from "./types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -133,7 +134,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseUserStories<TpResponse<Release>>({ name, results })
+    const release = await tp.getReleaseUserStories<TpResponse<UserStory>>({ name, results })
 
     if (!release) {
       return {
@@ -177,7 +178,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseBugs<TpResponse<Release>>({ name, results })
+    const release = await tp.getReleaseBugs<TpResponse<Bug>>({ name, results })
 
     if (!release) {
       return {
@@ -221,7 +222,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseFeatures<TpResponse<Release>>({ name, results })
+    const release = await tp.getReleaseFeatures<TpResponse<Feature>>({ name, results })
 
     if (!release) {
       return {
