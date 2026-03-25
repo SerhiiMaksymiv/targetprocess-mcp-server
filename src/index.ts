@@ -126,10 +126,14 @@ server.registerTool(
     inputSchema: {
       name: z.string()
         .describe('Release name'),
+      results: z.number()
+        .default(50)
+        .optional()
+        .describe('Number of results to return, default is 50'),
     },
   },
-  async ({ name }) => {
-    const release = await tp.getReleaseUserStories<TpResponse<Release>>({ name })
+  async ({ name, results }) => {
+    const release = await tp.getReleaseUserStories<TpResponse<Release>>({ name, results })
 
     if (!release) {
       return {
@@ -145,6 +149,50 @@ server.registerTool(
         content: [{
           type: "text",
           text: `No release user stories found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items)
+      }],
+    };
+  }
+);
+
+server.registerTool(
+  'get_release_bugs',
+  {
+    title: 'Get release bugs',
+    description: 'Get release bugs',
+    inputSchema: {
+      name: z.string()
+        .describe('Release name'),
+      results: z.number()
+        .default(100)
+        .optional()
+        .describe('Number of results to return, default is 100'),
+    },
+  },
+  async ({ name, results }) => {
+    const release = await tp.getReleaseBugs<TpResponse<Release>>({ name, results })
+
+    if (!release) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get ${name} release bugs, JSON: ${JSON.stringify(release, null, 2)}`
+        }],
+      }
+    }
+    const items = release.Items || [];
+    if (items.length == 0) {
+      return {
+        content: [{
+          type: "text",
+          text: `No release bugs found`,
         }],
       };
     }
@@ -204,25 +252,108 @@ server.registerTool(
 );
 
 server.registerTool(
-  'search_by_keyword',
+  'get_release_open_bugs',
   {
-    title: 'Search TP user stories by keyword or partial name',
-    description: `Searches tp cards (user stories, bugs) by keyword or partial name or partial keyphrase e.g. "Text Element"
-      returns JSON with the following fields:
-      [{
-        "id": number,
-        "name": string,
-        "description": string,
-        "type": string
-      }]
-    `,
+    title: 'Get release active bugs',
+    description: `Get release active bugs (bugs that are not closed, done, passed, ready to deploy)`,
+    inputSchema: {
+      name: z.string()
+        .describe('Release name'),
+      results: z.number()
+        .default(200)
+        .optional()
+        .describe('Number of results to return, default is 50'),
+      withDescription: z.boolean()
+        .describe('Include description in the response'),
+    },
+  },
+  async ({ name, results, withDescription }) => {
+    const release = await tp.getReleaseOpenBugs<TpResponse<Release>>({ name, results, withDescription })
+
+    if (!release) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get ${name} release bugs, JSON: ${JSON.stringify(release, null, 2)}`
+        }],
+      }
+    }
+    const items = release.Items || [];
+    if (items.length == 0) {
+      return {
+        content: [{
+          type: "text",
+          text: `No release bugs found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items)
+      }],
+    };
+  }
+);
+
+server.registerTool(
+  'get_release_open_user_stories',
+  {
+    title: 'Get release active user stories',
+    description: `Get release active user stories (user stories that are not closed, done, passed, ready to deploy)`,
+    inputSchema: {
+      name: z.string()
+        .describe('Release name'),
+      results: z.number()
+        .default(100)
+        .optional()
+        .describe('Number of results to return, default is 50'),
+      withDescription: z.boolean()
+        .describe('Include description in the response'),
+    },
+  },
+  async ({ name, results, withDescription }) => {
+    const release = await tp.getReleaseOpenUserStories<TpResponse<Release>>({ name, results, withDescription })
+
+    if (!release) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get ${name} release user stories, JSON: ${JSON.stringify(release, null, 2)}`
+        }],
+      }
+    }
+    const items = release.Items || [];
+    if (items.length == 0) {
+      return {
+        content: [{
+          type: "text",
+          text: `No release user stories found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items)
+      }],
+    };
+  }
+);
+
+server.registerTool(
+  'search_all_cards_by_keyword',
+  {
+    title: 'Search TP cards (user stories, bugs, features) by keyword or partial name',
+    description: `Searches tp cards (user stories, bugs, features) by keyword or partial name or partial keyphrase e.g. "Text Element"`,
     inputSchema: {
       keyword: z.string()
         .describe('Keyword or partial name or keyphrase to search for'),
     },
   },
   async ({ keyword }) => {
-    console.log(`Searching for:"${keyword}"`)
     const generalResults = await tp.searchContainsNameText<GeneralSearchResponse>(keyword)
 
     if (!generalResults) {
@@ -362,8 +493,7 @@ server.registerTool(
         1) IF you already have user story or bug card content, proceed to step 3 skipping step 2;
         2) ELSE call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug card content;
         3) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior;
-        4) add a comment to the card which was based on with the ID provided in the first step;
-      `,
+        4) add a comment to the card with bug Id provided in the first step and Title`,
     inputSchema: {
       title: z.string()
         .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),

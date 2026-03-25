@@ -192,7 +192,7 @@ export class TpClient {
       pathParam: { "Generals": '' },
       param: {
         "format": "json",
-        "take": "3",
+        "take": "25",
         "where": `Name contains '${text}'`,
         "include": "[Name, Description, Id]"
       },
@@ -209,15 +209,55 @@ export class TpClient {
     }) as T
   }
 
-  async getReleaseUserStories<T>({ name, withDescription = false }: { name: string, withDescription?: boolean }): Promise<T> {
+  async getReleaseUserStories<T>({ name, results = 50, withDescription = false }: { name: string, results?: number, withDescription?: boolean }): Promise<T> {
     const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
     return this.get<T>({
       pathParam: { "UserStories": '' },
       param: {
         "format": "json",
+        "take": results,
         "where": `Release.Name eq '${name}'`,
         "include": includeFilter,
-      },
+      }
+    }) as T
+  }
+
+  async getReleaseOpenUserStories<T>({ name, results = 100, withDescription = false }: { name: string, results?: number, withDescription?: boolean }): Promise<T> {
+    const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
+    return this.get<T>({
+      pathParam: { "UserStories": '' },
+      param: {
+        "format": "json",
+        "take": results,
+        "where": `Release.Name eq '${name}' and EntityState.Name ne 'Closed' and EntityState.Name ne 'Done' and EntityState.Name ne 'Passed Dev01  QA' and EntityState.Name ne 'Ready to Deploy to prod'`,
+        "include": includeFilter,
+      }
+    }) as T
+  }
+
+  async getReleaseOpenBugs<T>({ name, results = 200, withDescription = false }: { name: string, results?: number, withDescription?: boolean }): Promise<T> {
+    const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
+    return this.get<T>({
+      pathParam: { "Bugs": '' },
+      param: {
+        "format": "json",
+        "take": results,
+        "where": `Release.Name eq '${name}' and EntityState.Name ne 'Closed' and EntityState.Name ne 'Done' and EntityState.Name ne 'Passed Dev01  QA' and EntityState.Name ne 'Ready to Deploy to prod'`,
+        "include": includeFilter,
+      }
+    }) as T
+  }
+
+  async getReleaseBugs<T>({ name, results = 100, withDescription = false }: { name: string, results?: number, withDescription?: boolean }): Promise<T> {
+    const includeFilter = withDescription ? "[Name, Description, Id]" : "[Name, Id]"
+    return this.get<T>({
+      pathParam: { "Bugs": '' },
+      param: {
+        "format": "json",
+        "take": results,
+        "where": `Release.Name eq '${name}'`,
+        "include": includeFilter,
+      }
     }) as T
   }
 }

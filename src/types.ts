@@ -19,7 +19,7 @@ export interface Config {
 // ── TP types ───────────────────────────────────────────────────────────────────────
 export type TpClientParameters = {
   pathParam: { [key: string]: string | undefined }
-  param: { [key: string]: string }
+  param: { [key: string]: string | number }
 }
 
 export interface TpResponse<T> {
