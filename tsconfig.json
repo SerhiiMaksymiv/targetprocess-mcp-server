@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": ".",
-    "baseUrl": ".",
-    "outDir": "./build",
+    "outDir": "build/",
     "target": "ES2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -16,8 +14,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.json"
+    "src/**/*.ts"
   ],
   "exclude": [ "node_modules" ]
 }
