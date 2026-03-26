@@ -36,12 +36,12 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 ---
 
 ## Installation
-### Local
+### Local Installation for Development
 ```json
 {
   "mcpServers": {
     "targetprocess": {
-      "command": "/Users/mcs/.config/nvm/versions/node/v22.14.0/bin/node",
+      "command": "/Users/xxx/.config/nvm/versions/node/v22.14.0/bin/node",
       "args": [
         "/path/to/repository"
       ],
@@ -57,18 +57,29 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 }
 ```
 ### From Repository
+
+> [!NOTE] 
+> You need to have `node` and `npm` installed on your machine.
+
 ```json
 {
   "mcpServers": {
-    "github": {
-      "command": "https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git",
+    "targetprocess": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "targetprocess-mcp-server"
+      ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here",
-        ...
-        "TP_TEAM_ID": ...
+        "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
+        "TP_BASE_URL": "<tp-api-endpoint>",
+        "TP_API_VERSION": "v1",
+        "TP_OWNER_ID": "<tp-owner-id>", // your user id
+        "TP_PROJECT_ID": "<tp-project-id>",
+        "TP_TEAM_ID": "<tp-team-id>"
       }
     }
-  }
+  },
 }
 
 ```
