@@ -1,8 +1,8 @@
 {
-  "name": "mcp-tp",
+  "name": "targetprocess-mcp-server",
   "type": "module",
   "bin": {
-    "tp": "./build/src/index.js"
+    "tp": "build/src/index.js"
   },
   "scripts": {
     "prebuild": "rimraf build dist",
@@ -16,7 +16,7 @@
   ],
   "publishConfig": {
     "ignore": [
-      "!dist/",
+      "!build/",
       "src/",
       "test/"
     ]
@@ -28,7 +28,7 @@
   "engines": {
     "node": ">=20.x"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for Tartget Process",
   "main": "build/src/index.js",
   "keywords": [
@@ -51,5 +51,10 @@
     "shx": "^0.4.0",
     "tsup": "^8.5.0",
     "jsdom": "^28.0.0"
-  }
+  },
+  "devDependencies": {},
+  "bugs": {
+    "url": "https://github.com/SerhiiMaksymiv/targetprocess-mcp-server/issues"
+  },
+  "homepage": "https://github.com/SerhiiMaksymiv/targetprocess-mcp-server#readme"
 }
