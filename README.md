@@ -56,7 +56,7 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
     }
 }
 ```
-### From Repository
+### Claude Desktop
 
 > [!NOTE] 
 > You need to have `node` and `npm` installed on your machine.
@@ -82,6 +82,14 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
   },
 }
 
+```
+
+### Claude Code
+```bash
+claude mcp add tarteprocess -s user \
+  -- env TP_TOKEN=<your-tp-token> \
+  -- env TP_BASE_URL=<tp-api-endpoint> \
+     npx -y targetprocess-mcp-server
 ```
 
 ## Local Development
