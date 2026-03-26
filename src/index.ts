@@ -560,7 +560,7 @@ server.registerTool(
     },
   },
   async ({ title, id, bugContent }) => {
-    const bugResponse = await tp.creteBugBasedOnCardId<Bug>(title, id, bugContent);
+    const bugResponse = await tp.createBugBasedOnCardId<Bug>(title, id, bugContent);
 
     if (!bugResponse) {
       return {
@@ -595,7 +595,7 @@ server.registerTool(
     },
   },
   async ({ title, userStoryId }) => {
-    const testPlanResponse = await tp.creteTestPlan<TestPlan>(title, userStoryId);
+    const testPlanResponse = await tp.createTestPlan<TestPlan>(title, userStoryId);
 
     if (!testPlanResponse) {
       return {

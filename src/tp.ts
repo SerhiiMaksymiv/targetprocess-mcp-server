@@ -1,4 +1,4 @@
-import { Bug, UserStory, UserStoryComment, TpClientParameters, TestPlan } from "./types.js";
+import { Bug, UserStory, UserStoryComment, TpClientParameters, TestPlan, TpResponse } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -25,6 +25,25 @@ export class TpClient {
       _urlParams.push(`${key}=${encodeURIComponent(value)}`)
     }
     return _url + "/?" + _urlParams.join("&")
+  }
+
+  // @ts-ignore
+  private async getAll<T>(params: TpClientParameters): Promise<T[]> {
+    const allItems: T[] = []
+    let skip = 0
+    const take = 100
+
+    while (true) {
+      params.param["take"] = take
+      params.param["skip"] = skip
+      const page = await this.get<TpResponse<T>>(params)
+      if (!page?.Items?.length) break
+      allItems.push(...page.Items)
+      if (!page.Next) break
+      skip += take
+    }
+
+    return allItems
   }
 
   private async get<T>(params: TpClientParameters): Promise<T | null> {
@@ -88,7 +107,7 @@ export class TpClient {
     return response
   }
 
-  async creteBug<T>(title: string, bugContent: string): Promise<T> {
+  async createBug<T>(title: string, bugContent: string): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
@@ -113,7 +132,7 @@ export class TpClient {
     }, bug) as T
   }
 
-  async creteBugBasedOnCardId<T>(title: string, userStoryId: string, bugContent: string): Promise<T> {
+  async createBugBasedOnCardId<T>(title: string, userStoryId: string, bugContent: string): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
@@ -141,7 +160,7 @@ export class TpClient {
     }, bug) as T
   }
 
-  async creteTestPlan<T>(title: string, userStoryId: string): Promise<T> {
+  async createTestPlan<T>(title: string, userStoryId: string): Promise<T> {
     const testPlan = {
       "Name": title,
       "Project": {
