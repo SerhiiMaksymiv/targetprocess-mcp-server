@@ -1,0 +1,18 @@
+# Rules from: /Users/mcs/repos/lighterhouse/.gitignore
+node_modules
+lighthouse
+.DS_Store
+.idea
+test-results
+html-report
+.npmignore
+dist/
+allure-report/
+allure-results/
+audit-test-results/
+
+# npmignore - content above this line is automatically generated and modifications may be omitted
+# see npmjs.com/npmignore for more details.
+!build/
+src/
+test/

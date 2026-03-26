@@ -14,13 +14,33 @@
   "files": [
     "build"
   ],
+  "publishConfig": {
+    "ignore": [
+      "!dist/",
+      "src/",
+      "test/"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git"
+  },
+  "engines": {
+    "node": ">=20.x"
+  },
   "version": "1.0.0",
   "description": "MCP server for Tartget Process",
   "main": "build/src/index.js",
-  "keywords": ["mcp", "tp", "mcp-server", "targetprocess", "targetprocess-server"],
-  "author": "mcs",
+  "keywords": [
+    "mcp",
+    "tp",
+    "mcp-server",
+    "targetprocess",
+    "targetprocess-server"
+  ],
+  "author": "Serhii Maksymiv",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "zod": "^3.25.76",
     "@types/node": "^25.2.2",
@@ -29,6 +49,7 @@
     "typescript": "^5.9.3",
     "rimraf": "^6.1.2",
     "shx": "^0.4.0",
+    "tsup": "^8.5.0",
     "jsdom": "^28.0.0"
   }
 }
