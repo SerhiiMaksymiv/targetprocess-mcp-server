@@ -113,9 +113,6 @@ export class TpClient {
       "Project": {
         "Id": 59901
       },
-      [card.type]: {
-        "Id": card.id
-      },
       "customFields": [{
         "name": "Origin",
         "type": "DropDown",
@@ -127,6 +124,12 @@ export class TpClient {
         }
       }],
       "Description": bugContent,
+    } as any
+
+    if (card.type === "UserStory") {
+      bug["UserStory"] = {
+        "Id": card.id
+      }
     }
 
     return this.post<any, Bug>({
