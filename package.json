@@ -13,6 +13,7 @@
   "publishConfig": {
     "ignore": [
       "!build/",
+      ".claude/",
       "src/",
       "test/"
     ]

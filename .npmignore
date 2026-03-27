@@ -16,3 +16,4 @@ audit-test-results/
 !build/
 src/
 test/
+.claude/
