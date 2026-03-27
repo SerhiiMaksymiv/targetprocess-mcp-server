@@ -6,7 +6,7 @@ import { JSDOM } from "jsdom";
 
 import { TpClient } from "./tp.js";
 import {
-  UserStoryComment,
+  Comment,
   UserStory,
   Bug,
   TestPlan,
@@ -507,7 +507,7 @@ server.registerTool(
   },
   async ({ id, comment }) => {
     try {
-      const addCommentResponse = await tp.addComment<UserStoryComment>(id, comment);
+      const addCommentResponse = await tp.addComment<Comment>(id, comment);
       if (!addCommentResponse) {
         return {
           content: [{
@@ -530,6 +530,144 @@ server.registerTool(
           text: `Failed to add comment to user story, id: ${id}\n Error: ${error}`
         }]
       };
+    }
+  }
+)
+
+server.registerTool(
+  'get_user_story_comments',
+  {
+    title: 'Get user story comments',
+    description: 'Get comments for a TP user story by its ID',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP user story ID (e.g. 145789)'),
+      results: z.number()
+        .default(25)
+        .optional()
+        .describe('Number of comments to return, default is 25'),
+    },
+  },
+  async ({ id, results }) => {
+    const response = await tp.getUserStoryComments<TpResponse<Comment>>(id, results)
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get comments for user story id: ${id}`
+        }],
+      }
+    }
+
+    const items = response.Items || []
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No comments found for user story id: ${id}`,
+        }],
+      }
+    }
+
+    let parsedItems = []
+    try {
+      parsedItems = items.map((item) => {
+        const dom = new JSDOM(`<html><body><div id="content">${item.Description}</div></body></html>`)
+        const descriptionText = dom.window.document.getElementById('content')?.textContent
+        return {
+          id: item.Id,
+          description: descriptionText,
+          createDate: item.CreateDate,
+          owner: item.Owner.FullName,
+        }
+      })
+    } catch (error) {
+      console.error("Error parsing user story comments:", error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to parse user story comments for user story id: ${id}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(parsedItems)
+      }],
+    }
+  }
+)
+
+server.registerTool(
+  'get_bug_comments',
+  {
+    title: 'Get bug comments',
+    description: 'Get comments for a TP bug by its ID',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP bug ID (e.g. 145789)'),
+      results: z.number()
+        .default(25)
+        .optional()
+        .describe('Number of comments to return, default is 25'),
+    },
+  },
+  async ({ id, results }) => {
+    const response = await tp.getBugComments<TpResponse<Comment>>(id, results)
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get comments for bug id: ${id}`
+        }],
+      }
+    }
+
+    const items = response.Items || []
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No comments found for bug id: ${id}`,
+        }],
+      }
+    }
+
+    let parsedItems = []
+    try {
+      parsedItems = items.map((item) => {
+        const dom = new JSDOM(`<html><body><div id="content">${item.Description}</div></body></html>`)
+        const descriptionText = dom.window.document.getElementById('content')?.textContent
+        return {
+          id: item.Id,
+          description: descriptionText,
+          createDate: item.CreateDate,
+          owner: item.Owner.FullName,
+        }
+      })
+    } catch (error) {
+      console.error("Error parsing bug comments:", error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to parse bug comments for bug id: ${id}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(parsedItems)
+      }],
     }
   }
 )

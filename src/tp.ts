@@ -1,4 +1,4 @@
-import { Bug, UserStory, UserStoryComment, TpClientParameters, TestPlan, TpResponse } from "./types.js";
+import { Bug, UserStory, Comment, TpClientParameters, TestPlan, TpResponse } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -200,10 +200,40 @@ export class TpClient {
       },
     }
 
-    return this.post<any, UserStoryComment>({
+    return this.post<any, Comment>({
       pathParam: { "comments": '' },
       param: { "format": "json" },
     }, commentData) as T
+  }
+
+  async getBugComments<T>(bugId: string, results: number = 25): Promise<T> {
+    const response = await this.get<TpResponse<Comment>>({
+      pathParam: {
+        "Bugs": bugId,
+        "Comments": "",
+      },
+      param: {
+        "format": "json",
+        "take": results,
+      }
+    }) as T
+
+    return response
+  }
+
+  async getUserStoryComments<T>(userStoryId: string, results: number = 25): Promise<T> {
+    const response = await this.get<TpResponse<Comment>>({
+      pathParam: {
+        "UserStories": userStoryId,
+        "Comments": "",
+      },
+      param: {
+        "format": "json",
+        "take": results,
+      }
+    }) as T
+
+    return response
   }
 
   async searchContainsNameText<T>({ text, entityType }: { text: string, entityType: "Generals" | "UserStories" | "Bugs" | "Features" }): Promise<T> {
