@@ -687,10 +687,13 @@ server.registerTool(
     inputSchema: {
       title: z.string()
         .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),
-      id: z.string()
-        .min(5)
-        .max(6)
-        .describe(`Usually user story id or bug ID (e.g. 145789)`),
+      card: z.object({
+        id: z.string()
+          .min(5)
+          .max(6)
+          .describe(`Usually user story id or bug ID (e.g. 145789)`),
+        type: z.enum(["UserStory", "Bug"])
+      }),
       bugContent: z.string()
         .describe(`Comment content to add, explain what happened in detail.
                   Include expected behaviour and what actually occurred.
@@ -699,14 +702,14 @@ server.registerTool(
                   Number each step so anyone can follow them easily`),
     },
   },
-  async ({ title, id, bugContent }) => {
-    const bugResponse = await tp.createBugBasedOnCardId<Bug>(title, id, bugContent);
+  async ({ title, card, bugContent }) => {
+    const bugResponse = await tp.createBug<Bug>({ title, card, bugContent });
 
     if (!bugResponse) {
       return {
         content: [{
           type: 'text',
-          text: `Failed to create comment "${title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
+          text: `Failed to create bug "${title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
         }]
       };
     }

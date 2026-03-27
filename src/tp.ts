@@ -107,11 +107,14 @@ export class TpClient {
     return response
   }
 
-  async createBug<T>(title: string, bugContent: string): Promise<T> {
+  async createBug<T>({ title, card, bugContent }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string }): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
         "Id": 59901
+      },
+      [card.type]: {
+        "Id": card.id
       },
       "customFields": [{
         "name": "Origin",
@@ -132,7 +135,7 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createBugBasedOnCardId<T>(title: string, userStoryId: string, bugContent: string): Promise<T> {
+  async createBugBasedOnUserStory<T>(title: string, userStoryId: string, bugContent: string): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
