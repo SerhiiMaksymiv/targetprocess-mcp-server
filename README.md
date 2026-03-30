@@ -34,6 +34,28 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 - search for a card with 'Text Element' title
 
 ---
+## Available tools:
+Releases
+- `get_current_releases` — List all current releases (no params needed)
+- `get_release_bugs` — Get bugs for a release (name, optional results)
+- `get_release_features` — Get features for a release (name, optional results)
+- `get_release_user_stories` — Get user stories for a release (name, optional results)
+- `get_release_user_stories_with_description` — Same as above but includes full descriptions (name, withDescription)
+- `get_release_open_bugs` — Get only active/open bugs for a release (name, withDescription, optional results)
+- `get_release_open_user_stories` — Get only active/open user stories for a release (name, withDescription, optional results)
+
+Cards — Read
+- `get_bug_content` — Fetch full content of a bug by ID (id)
+- `get_user_story_content` — Fetch full content of a user story by ID (id)
+- `get_bug_comments` — Get comments on a bug (id, optional results)
+- `get_user_story_comments` — Get comments on a user story (id, optional results)
+- `search_all_cards_by_keyword` — Search bugs, stories, and features by keyword (keyword)
+
+Cards — Write
+- `add_comment` — Post a comment to any card (id, comment)
+- `create_bug` — Create a new bug linked to a card (card object with id+type, title, bugContent)
+- `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
+---
 
 ## Installation
 ### Local Installation for Development
@@ -87,9 +109,7 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 ### Claude Code
 ```bash
 claude mcp add tarteprocess -s user \
-  -- env TP_TOKEN=<your-tp-token> \
-  -- env TP_BASE_URL=<tp-api-endpoint> \
-     npx -y targetprocess-mcp-server
+  -e TP_TOKEN=<your-tp-token> -e TP_BASE_URL=<tp-api-endpoint> -- npx -y targetprocess-mcp-server
 ```
 
 ## Local Development
