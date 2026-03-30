@@ -414,3 +414,32 @@ export interface LinkedUserStory {
   Name: string
 }
 
+export interface LoggedUser {
+  ResourceType: string
+  Id: number
+  FirstName: string
+  LastName: string
+  Email: string
+  IsActive: boolean
+  IsAdministrator: boolean
+  Kind: string
+}
+
+export interface Context {
+  ResourceType: string
+  Acid: string
+  Edition: string
+  Version: string
+  IsFull: boolean
+  AnyProject: boolean
+  AnyTeam: boolean
+  IsNoTeamIncluded: boolean
+  LoggedUser: LoggedUser
+  Culture: any
+  SelectedProjects: any
+  SelectedTeams: any
+  Processes: any
+  GlobalTerms: any
+  AppContext: any
+  CustomFields: any
+}

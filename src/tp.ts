@@ -199,7 +199,7 @@ export class TpClient {
     const commentData = {
       description: comment,
       owner: {
-        id: "1504",
+        id: config.tp.ownerId
       },
       general: {
         id: userStoryId,
@@ -326,6 +326,13 @@ export class TpClient {
         "where": `Release.Name eq '${name}'`,
         "include": includeFilter,
       }
+    }) as T
+  }
+
+  async getContext<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: { "Context": '' },
+      param: { "format": "json", }
     }) as T
   }
 }

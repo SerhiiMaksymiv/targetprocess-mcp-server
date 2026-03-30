@@ -13,7 +13,8 @@ import {
   Release,
   TpResponse,
   Feature,
-  General
+  General,
+  Context
 } from "./types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -757,6 +758,43 @@ server.registerTool(
     };
   }
 )
+
+server.registerTool(
+  'get_logged_in_user',
+  {
+    title: 'Get logged in user',
+    description: 'Get logged in user',
+  },
+  async () => {
+    const ctx = await tp.getContext<Context>()
+
+    if (!ctx) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get context, JSON: ${JSON.stringify(ctx, null, 2)}`
+        }],
+      }
+    }
+
+    const loggedInUser = ctx.LoggedUser
+    if (!loggedInUser) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get logged in user in this context, JSON: ${JSON.stringify(ctx, null, 2)}`
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(loggedInUser)
+      }],
+    };
+  }
+);
 
 async function main() {
   const transport = new StdioServerTransport();
