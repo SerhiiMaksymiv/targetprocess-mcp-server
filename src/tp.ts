@@ -111,7 +111,7 @@ export class TpClient {
     const bug = {
       "Name": title,
       "Project": {
-        "Id": 59901
+        "Id": config.tp.projectId
       },
       "customFields": [{
         "name": "Origin",
@@ -120,7 +120,7 @@ export class TpClient {
       }],
       "assignedTeams": [{
         "team": {
-          "id": 127065
+          "id": config.tp.teamId
         }
       }],
       "Description": bugContent,
@@ -142,7 +142,7 @@ export class TpClient {
     const bug = {
       "Name": title,
       "Project": {
-        "Id": 59901
+        "Id": config.tp.projectId
       },
       "UserStory": {
         "Id": userStoryId
@@ -154,7 +154,7 @@ export class TpClient {
       }],
       "assignedTeams": [{
         "team": {
-          "id": 127065
+          "id": config.tp.teamId
         }
       }],
       "Description": bugContent,
@@ -170,7 +170,7 @@ export class TpClient {
     const testPlan = {
       "Name": title,
       "Project": {
-        "Id": 59901
+        "Id": config.tp.projectId
       },
       "LinkedGeneral": {
         "ResourceType": "General",

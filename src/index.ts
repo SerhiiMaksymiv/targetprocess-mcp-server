@@ -74,13 +74,31 @@ server.registerTool(
       };
     }
 
-    const dom = new JSDOM(`<html><body><div id="content">${description}</div></body></html>`)
-    const descriptionText = dom.window.document.getElementById('content')?.textContent
+    let userStoryResults = {
+      name: userStory.Name,
+      id: userStory.Id,
+      description: '',
+      feature: userStory.Feature?.Name,
+      featureId: userStory.Feature?.Id,
+    }
+
+    try {
+      const dom = new JSDOM(`<html><body><div id="content">${description}</div></body></html>`)
+      const descriptionText = dom.window.document.getElementById('content')?.textContent
+
+      if (descriptionText) {
+        userStoryResults.description = descriptionText
+      }
+
+    } catch (error) {
+      console.error("Error parsing user story description:", error);
+      console.error("Returning user story without description");
+    }
 
     return {
       content: [{
         type: 'text',
-        text: JSON.stringify(descriptionText)
+        text: JSON.stringify(userStoryResults)
       }],
     };
   }
