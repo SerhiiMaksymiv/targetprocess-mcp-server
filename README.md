@@ -25,13 +25,10 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 - "Show me currently active release"
 - "write me test cases based on 145322 tp user story"
 - "add a comment to 145155 card saying 'test'"
-
 - "write test cases based on 145640 user story"
 - "write detailed test cases based on 145642 user story, format them inside html <div> element and add them as a comment"
-
 - "create a bug based on 145637 user story where Add Tile flyout (for a Static Tile) not show"
-
-- search for a card with 'Text Element' title
+- "search for a card with 'Text Element' title"
 
 ---
 ## Available tools:
