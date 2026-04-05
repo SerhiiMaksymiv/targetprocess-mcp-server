@@ -13,6 +13,7 @@ Add a new tool to this MCP server by following these steps in order:
    - Define the `inputSchema` with Zod.
    - Return `{ content: [{ type: 'text', text: JSON.stringify(...) }] }`.
    - Strip HTML from any description fields using JSDOM before returning.
-5. Run `npm run build` and confirm it succeeds.
+5. Update the `## Available tools:` section in `README.md` — add a line for the new tool following the existing format.
+6. Run `npm run build` and confirm it succeeds.
 
 Always read the existing source files before making changes to follow established patterns.
