@@ -1,4 +1,4 @@
-import { Bug, UserStory, Comment, TpClientParameters, TestPlan, TpResponse } from "./types.js";
+import { TpClientParameters, TpResponse } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -17,7 +17,7 @@ export class TpClient {
   }
 
   private params(params: TpClientParameters): string {
-    let _url = this.baseUrl + (params.apiVersion ?? this.v1)
+    let _url = this.baseUrl + (params.apiVersion || this.v1)
     for (const [key, value] of Object.entries(params.pathParam)) {
       _url += value ? `/${key}/${value}` : `/${key}`
     }
@@ -88,7 +88,7 @@ export class TpClient {
   }
 
   async getUserStory<T>(userStoryId: string): Promise<T> {
-    const response = await this.get<UserStory>({
+    const response = await this.get<T>({
       pathParam: {
         "userStories": userStoryId,
       },
@@ -101,7 +101,7 @@ export class TpClient {
   }
 
   async getBug<T>(bugId: string): Promise<T> {
-    const response = await this.get<Bug>({
+    const response = await this.get<T>({
       pathParam: { "bugs": bugId },
       param: { "format": "json" }
     }) as T
@@ -134,7 +134,7 @@ export class TpClient {
       }
     }
 
-    return this.post<any, Bug>({
+    return this.post<any, T>({
       pathParam: { "bugs": '' },
       param: { "format": "json" },
     }, bug) as T
@@ -162,7 +162,7 @@ export class TpClient {
       "Description": bugContent,
     }
 
-    return this.post<any, Bug>({
+    return this.post<any, T>({
       pathParam: { "bugs": '' },
       param: { "format": "json" },
     }, bug) as T
@@ -191,7 +191,7 @@ export class TpClient {
       },
     }
 
-    return this.post<any, TestPlan>({
+    return this.post<any, T>({
       pathParam: { "testPlans": '' },
       param: { "format": "json" },
     }, testPlan) as T
@@ -208,14 +208,14 @@ export class TpClient {
       },
     }
 
-    return this.post<any, Comment>({
+    return this.post<any, T>({
       pathParam: { "comments": '' },
       param: { "format": "json" },
     }, commentData) as T
   }
 
   async getBugComments<T>(bugId: string, results: number = 25): Promise<T> {
-    const response = await this.get<TpResponse<Comment>>({
+    const response = await this.get<T>({
       pathParam: {
         "Bugs": bugId,
         "Comments": "",
@@ -230,7 +230,7 @@ export class TpClient {
   }
 
   async getUserStoryComments<T>(userStoryId: string, results: number = 25): Promise<T> {
-    const response = await this.get<TpResponse<Comment>>({
+    const response = await this.get<T>({
       pathParam: {
         "UserStories": userStoryId,
         "Comments": "",
