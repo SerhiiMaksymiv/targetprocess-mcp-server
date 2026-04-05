@@ -14,7 +14,10 @@ import {
   TpResponse,
   Feature,
   General,
-  Context
+  Context,
+  TpResponseV2,
+  TpResultItemV2,
+  TpResponseItemsV2,
 } from "./types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
@@ -776,6 +779,59 @@ server.registerTool(
     };
   }
 )
+
+server.registerTool(
+  'get_feature_user_stories',
+  {
+    title: 'Get feature user stories',
+    description: 'Get user stories for a TP feature by its ID',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP feature ID (e.g. 145636)'),
+    },
+  },
+  async ({ id }) => {
+    const response = await tp.getFeatureUserStories<TpResponseV2<TpResponseItemsV2<TpResultItemV2>>>(id)
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get user stories for feature id: ${id}`
+        }],
+      }
+    }
+
+    const items = response.items || []
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories found in outer items for feature id: ${id}`,
+        }],
+      }
+    }
+
+    const featureItems = items[0].items || []
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories found for feature id: ${id}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(featureItems)
+      }],
+    }
+  }
+);
 
 server.registerTool(
   'get_logged_in_user',

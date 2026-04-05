@@ -20,6 +20,7 @@ export interface Config {
 export type TpClientParameters = {
   pathParam: { [key: string]: string | undefined }
   param: { [key: string]: string | number }
+  apiVersion?: string
 }
 
 export interface TpResponse<T> {
@@ -423,6 +424,20 @@ export interface LoggedUser {
   IsActive: boolean
   IsAdministrator: boolean
   Kind: string
+}
+
+export interface TpResponseV2<TpResponseItemsV2> {
+  items: TpResponseItemsV2[]
+}
+
+export interface TpResponseItemsV2<T> {
+  items: T[]
+}
+
+export interface TpResultItemV2 {
+  id: number
+  name: string
+  resourceType: string
 }
 
 export interface Context {

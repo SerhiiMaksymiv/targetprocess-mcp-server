@@ -6,6 +6,8 @@ export class TpClient {
   private baseUrl: string = config.tp.url
   private token: string = config.tp.token
   private headers: HeadersInit
+  private readonly v1 = '/api/v1'
+  private readonly v2 = '/api/v2'
 
   constructor() {
     this.headers = {
@@ -15,7 +17,7 @@ export class TpClient {
   }
 
   private params(params: TpClientParameters): string {
-    let _url = this.baseUrl
+    let _url = this.baseUrl + (params.apiVersion ?? this.v1)
     for (const [key, value] of Object.entries(params.pathParam)) {
       _url += value ? `/${key}/${value}` : `/${key}`
     }
@@ -326,6 +328,18 @@ export class TpClient {
         "where": `Release.Name eq '${name}'`,
         "include": includeFilter,
       }
+    }) as T
+  }
+
+  async getFeatureUserStories<T>(featureId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: { "features": '' },
+      param: {
+        "format": "json",
+        "where": `(id==${featureId})`,
+        "select": `{userStories}`,
+      },
+      apiVersion: this.v2
     }) as T
   }
 
