@@ -94,7 +94,7 @@ export class TpClient {
       },
       param: {
         "format": "json",
-      }
+      },
     }) as T
 
     return response

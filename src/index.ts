@@ -491,23 +491,38 @@ server.registerTool(
         }],
       }
     }
-    const description = bug.Description || '';
-    if (!description) {
-      return {
-        content: [{
-          type: "text",
-          text: `No description for ${id} tp card`,
-        }],
-      };
+
+    let bugResult = {
+      name: bug.Name,
+      id: bug.Id,
+      description: '',
+      origin: ''
     }
 
-    const dom = new JSDOM(`<html><body><div id="content">${description}</div></body></html>`)
-    const descriptionText = dom.window.document.getElementById('content')?.textContent
+    try {
+      const dom = new JSDOM(`<html><body><div id="content">${bug.Description}</div></body></html>`)
+      const descriptionText = dom.window.document.getElementById('content')?.textContent
+
+      if (descriptionText) {
+        bugResult.description = descriptionText
+      }
+
+    } catch (error) {
+      console.error("Error parsing bug description:", error);
+      console.error("Returning bug without description");
+    }
+
+    try {
+      bugResult.origin = bug.CustomFields?.find((field) => field?.Value === "Origin")?.Value
+    } catch (error) {
+      console.error("Error parsing bug origin:", error);
+      console.error("Returning bug without origin");
+    }
 
     return {
       content: [{
         type: 'text',
-        text: JSON.stringify(descriptionText)
+        text: JSON.stringify(bugResult)
       }],
     };
   }
