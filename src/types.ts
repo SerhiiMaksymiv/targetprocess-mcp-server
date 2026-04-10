@@ -440,6 +440,14 @@ export interface TpResultItemV2 {
   resourceType: string
 }
 
+export interface TpResultItemV2WithCustomFields {
+  customFields: {
+    type: string
+    name: string
+    value: string
+  }[]
+}
+
 export interface Context {
   ResourceType: string
   Acid: string

@@ -368,6 +368,18 @@ export class TpClient {
     }) as T
   }
 
+  async getUserStoriesByFeatureId<T>(featureId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: { "userstories": '' },
+      param: {
+        "format": "json",
+        "where": `(Feature.Id==${featureId})`,
+        "select": `{id}`,
+      },
+      apiVersion: this.v2
+    }) as T
+  }
+
   async getContext<T>(): Promise<T> {
     return this.get<T>({
       pathParam: { "Context": '' },

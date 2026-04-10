@@ -5,20 +5,7 @@ import { z } from "zod";
 import { JSDOM } from "jsdom";
 
 import { TpClient } from "./tp.js";
-import {
-  Comment,
-  UserStory,
-  Bug,
-  TestPlan,
-  Release,
-  TpResponse,
-  Feature,
-  General,
-  Context,
-  TpResponseV2,
-  TpResultItemV2,
-  TpResponseItemsV2,
-} from "./types.js";
+import * as TP from "./types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 const server = new McpServer(
@@ -57,7 +44,7 @@ server.registerTool(
     },
   },
   async ({ id }) => {
-    const userStory = await tp.getUserStory<UserStory>(id)
+    const userStory = await tp.getUserStory<TP.UserStory>(id)
 
     if (!userStory) {
       return {
@@ -114,7 +101,7 @@ server.registerTool(
     description: 'Get current releases',
   },
   async ({ }) => {
-    const releases = await tp.getCurrentReleases<TpResponse<Release>>()
+    const releases = await tp.getCurrentReleases<TP.TpResponse<TP.Release>>()
 
     if (!releases) {
       return {
@@ -158,7 +145,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseUserStories<TpResponse<UserStory>>({ name, results })
+    const release = await tp.getReleaseUserStories<TP.TpResponse<TP.UserStory>>({ name, results })
 
     if (!release) {
       return {
@@ -202,7 +189,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseBugs<TpResponse<Bug>>({ name, results })
+    const release = await tp.getReleaseBugs<TP.TpResponse<TP.Bug>>({ name, results })
 
     if (!release) {
       return {
@@ -246,7 +233,7 @@ server.registerTool(
     },
   },
   async ({ name, results }) => {
-    const release = await tp.getReleaseFeatures<TpResponse<Feature>>({ name, results })
+    const release = await tp.getReleaseFeatures<TP.TpResponse<TP.Feature>>({ name, results })
 
     if (!release) {
       return {
@@ -291,7 +278,7 @@ server.registerTool(
     },
   },
   async ({ name, withDescription }) => {
-    const release = await tp.getReleaseUserStories<TpResponse<Release>>({ name, withDescription })
+    const release = await tp.getReleaseUserStories<TP.TpResponse<TP.Release>>({ name, withDescription })
 
     if (!release) {
       return {
@@ -337,7 +324,7 @@ server.registerTool(
     },
   },
   async ({ name, results, withDescription }) => {
-    const release = await tp.getReleaseOpenBugs<TpResponse<Release>>({ name, results, withDescription })
+    const release = await tp.getReleaseOpenBugs<TP.TpResponse<TP.Release>>({ name, results, withDescription })
 
     if (!release) {
       return {
@@ -383,7 +370,7 @@ server.registerTool(
     },
   },
   async ({ name, results, withDescription }) => {
-    const release = await tp.getReleaseOpenUserStories<TpResponse<Release>>({ name, results, withDescription })
+    const release = await tp.getReleaseOpenUserStories<TP.TpResponse<TP.Release>>({ name, results, withDescription })
 
     if (!release) {
       return {
@@ -423,13 +410,13 @@ server.registerTool(
     },
   },
   async ({ keyword }) => {
-    const results = await Promise.all<TpResponse<General>>([
-      tp.searchContainsNameText<TpResponse<UserStory>>({ text: keyword, entityType: "UserStories" }),
-      tp.searchContainsNameText<TpResponse<Bug>>({ text: keyword, entityType: "Bugs" }),
-      tp.searchContainsNameText<TpResponse<Feature>>({ text: keyword, entityType: "Features" }),
+    const results = await Promise.all<TP.TpResponse<TP.General>>([
+      tp.searchContainsNameText<TP.TpResponse<TP.UserStory>>({ text: keyword, entityType: "UserStories" }),
+      tp.searchContainsNameText<TP.TpResponse<TP.Bug>>({ text: keyword, entityType: "Bugs" }),
+      tp.searchContainsNameText<TP.TpResponse<TP.Feature>>({ text: keyword, entityType: "Features" }),
     ])
 
-    const generalResults = results.map((item: TpResponse<General>) => item.Items).flat()
+    const generalResults = results.map((item: TP.TpResponse<TP.General>) => item.Items).flat()
 
     if (!generalResults) {
       return {
@@ -481,7 +468,7 @@ server.registerTool(
     },
   },
   async ({ id }) => {
-    const bug = await tp.getBug<Bug>(id)
+    const bug = await tp.getBug<TP.Bug>(id)
 
     if (!bug) {
       return {
@@ -544,7 +531,7 @@ server.registerTool(
   },
   async ({ id, comment }) => {
     try {
-      const addCommentResponse = await tp.addComment<Comment>(id, comment);
+      const addCommentResponse = await tp.addComment<TP.Comment>(id, comment);
       if (!addCommentResponse) {
         return {
           content: [{
@@ -588,7 +575,7 @@ server.registerTool(
     },
   },
   async ({ id, results }) => {
-    const response = await tp.getUserStoryComments<TpResponse<Comment>>(id, results)
+    const response = await tp.getUserStoryComments<TP.TpResponse<TP.Comment>>(id, results)
 
     if (!response) {
       return {
@@ -657,7 +644,7 @@ server.registerTool(
     },
   },
   async ({ id, results }) => {
-    const response = await tp.getBugComments<TpResponse<Comment>>(id, results)
+    const response = await tp.getBugComments<TP.TpResponse<TP.Comment>>(id, results)
 
     if (!response) {
       return {
@@ -754,7 +741,7 @@ server.registerTool(
     },
   },
   async ({ title, card, bugContent, origin }) => {
-    const bugResponse = await tp.createBug<Bug>({ title, card, bugContent, origin });
+    const bugResponse = await tp.createBug<TP.Bug>({ title, card, bugContent, origin });
 
     if (!bugResponse) {
       return {
@@ -810,7 +797,7 @@ server.registerTool(
     },
   },
   async ({ title, bugContent, origin }) => {
-    const bugResponse = await tp.createBugOnly<Bug>({ title, bugContent, origin });
+    const bugResponse = await tp.createBugOnly<TP.Bug>({ title, bugContent, origin });
 
     if (!bugResponse) {
       return {
@@ -845,7 +832,7 @@ server.registerTool(
     },
   },
   async ({ title, userStoryId }) => {
-    const testPlanResponse = await tp.createTestPlan<TestPlan>(title, userStoryId);
+    const testPlanResponse = await tp.createTestPlan<TP.TestPlan>(title, userStoryId);
 
     if (!testPlanResponse) {
       return {
@@ -866,6 +853,101 @@ server.registerTool(
 )
 
 server.registerTool(
+  'get_not_covered_user_stories_in_feature',
+  {
+    title: 'Get not covered user stories in feature',
+    description: 'Get user stories for a TP feature by its ID that are not covered by any tests',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP feature ID (e.g. 145636)'),
+    },
+  },
+  async ({ id }) => {
+    const response = await tp.getUserStoriesByFeatureId<TP.TpResponseItemsV2<string>>(id)
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get user stories for feature id: ${id}`
+        }],
+      }
+    }
+
+    const userStoriesIds = response.items || []
+    if (userStoriesIds.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories found in outer items for feature id: ${id}`,
+        }],
+      }
+    }
+
+    const userStoriesPromise = userStoriesIds.map((id) => tp.getUserStory<TP.UserStory>(id))
+    let userStoriesResults = []
+    try {
+      userStoriesResults = await Promise.all(userStoriesPromise)
+    } catch (error) {
+      console.error("Error getting user stories:", error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get user stories for feature id: ${id}`,
+        }],
+      }
+    }
+
+    let userStories: {
+      id: number
+      name: string
+      description: string
+      featureId: number
+      featureName: string
+      covered: boolean
+    }[] = []
+
+    for (const userStory of userStoriesResults) {
+      const userStoryId = userStory.Id
+
+      const feature = userStory.Feature
+
+      const featureId = feature.Id
+      const featureName = feature.Name
+
+      const covered = userStory.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
+
+      userStories.push({
+        id: userStoryId,
+        name: userStory.Name,
+        description: userStory.Description,
+        featureId,
+        featureName,
+        covered,
+      })
+    }
+
+    if (userStories.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories unable to convert to TP card found for feature id: ${id}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(userStories)
+      }],
+    }
+  }
+)
+
+server.registerTool(
   'get_feature_user_stories',
   {
     title: 'Get feature user stories',
@@ -878,7 +960,7 @@ server.registerTool(
     },
   },
   async ({ id }) => {
-    const response = await tp.getFeatureUserStories<TpResponseV2<TpResponseItemsV2<TpResultItemV2>>>(id)
+    const response = await tp.getFeatureUserStories<TP.TpResponseV2<TP.TpResponseItemsV2<TP.TpResultItemV2>>>(id)
 
     if (!response) {
       return {
@@ -925,7 +1007,7 @@ server.registerTool(
     description: 'Get logged in user',
   },
   async () => {
-    const ctx = await tp.getContext<Context>()
+    const ctx = await tp.getContext<TP.Context>()
 
     if (!ctx) {
       return {
