@@ -921,7 +921,7 @@ server.registerTool(
 
     try {
       for (const userStory of userStoriesResults) {
-        const covered = userStory.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
+        const covered = userStory?.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
 
         userStories.push({
           id: userStory.Id,
