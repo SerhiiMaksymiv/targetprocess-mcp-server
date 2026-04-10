@@ -904,36 +904,39 @@ server.registerTool(
       id: number
       name: string
       description: string
-      featureId: number
-      featureName: string
+      featureId?: number
+      featureName?: string
       covered: boolean
     }[] = []
 
-    for (const userStory of userStoriesResults) {
-      const userStoryId = userStory.Id
+    try {
+      for (const userStory of userStoriesResults) {
+        const covered = userStory.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
 
-      const feature = userStory.Feature
+        userStories.push({
+          id: userStory.Id,
+          name: userStory.Name,
+          description: userStory.Description,
+          featureId: userStory.Feature.Id,
+          featureName: userStory.Feature.Name,
+          covered,
+        })
+      }
 
-      const featureId = feature.Id
-      const featureName = feature.Name
-
-      const covered = userStory.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
-
-      userStories.push({
-        id: userStoryId,
-        name: userStory.Name,
-        description: userStory.Description,
-        featureId,
-        featureName,
-        covered,
-      })
-    }
-
-    if (userStories.length === 0) {
+      if (userStories.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No user stories unable to convert to TP card found for feature id: ${id}`,
+          }],
+        }
+      }
+    } catch (error) {
+      console.error("Error getting user stories:", error);
       return {
         content: [{
           type: 'text',
-          text: `No user stories unable to convert to TP card found for feature id: ${id}`,
+          text: `Failed to get user stories array for feature id: ${id}`,
         }],
       }
     }

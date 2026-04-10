@@ -89,12 +89,8 @@ export class TpClient {
 
   async getUserStory<T>(userStoryId: string): Promise<T> {
     const response = await this.get<T>({
-      pathParam: {
-        "userStories": userStoryId,
-      },
-      param: {
-        "format": "json",
-      },
+      pathParam: { "userStories": userStoryId },
+      param: { "format": "json" },
     }) as T
 
     return response
