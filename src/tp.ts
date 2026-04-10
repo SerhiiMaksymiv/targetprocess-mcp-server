@@ -364,7 +364,7 @@ export class TpClient {
     }) as T
   }
 
-  async getUserStoriesByFeatureId<T>(featureId: string): Promise<T> {
+  async getUserStoriesIdsByFeatureId<T>(featureId: string): Promise<T> {
     return this.get<T>({
       pathParam: { "userstories": '' },
       param: {

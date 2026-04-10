@@ -70,6 +70,7 @@ server.registerTool(
       description: '',
       feature: userStory.Feature?.Name,
       featureId: userStory.Feature?.Id,
+      customFields: userStory.CustomFields,
     }
 
     try {
@@ -865,7 +866,7 @@ server.registerTool(
     },
   },
   async ({ id }) => {
-    const response = await tp.getUserStoriesByFeatureId<TP.TpResponseItemsV2<string>>(id)
+    const response = await tp.getUserStoriesIdsByFeatureId<TP.TpResponseItemsV2<{ id: string }>>(id)
 
     if (!response) {
       return {
@@ -886,17 +887,17 @@ server.registerTool(
       }
     }
 
-    const userStoriesPromise = userStoriesIds.map((id) => tp.getUserStory<TP.UserStory>(id))
+    const userStoriesPromise = userStoriesIds.map((item: { id: string }) => tp.getUserStory<TP.UserStory>(item.id))
     let userStoriesResults = []
     try {
-      const results = await Promise.all<TP.UserStory>(userStoriesPromise)
+      const results = await Promise.all(userStoriesPromise)
       userStoriesResults = results.map((item: TP.UserStory) => item).flat()
     } catch (error) {
       console.error("Error getting user stories:", error);
       return {
         content: [{
           type: 'text',
-          text: `Failed to get user stories for feature id: ${id}. Error: ${error}`,
+          text: `Failed to get user stories for feature id: ${id}. Error: ${error}.`
         }],
       }
     }
@@ -921,7 +922,7 @@ server.registerTool(
 
     try {
       for (const userStory of userStoriesResults) {
-        const covered = userStory?.CustomFields.find((field) => field.Name === "Test Automation")?.Value === "Done"
+        const covered = userStory?.CustomFields.find((field: any) => field.Name === "Test Automation")?.Value === "Done"
 
         userStories.push({
           id: userStory.Id,
@@ -937,7 +938,7 @@ server.registerTool(
       return {
         content: [{
           type: 'text',
-          text: `Failed to get user stories array for feature id: ${id}: Error: ${error}`,
+          text: `Failed to get user stories array for feature id: ${id}: Error: ${error}.`
         }],
       }
     }
