@@ -710,7 +710,7 @@ server.registerTool(
 )
 
 server.registerTool(
-  'create_bug',
+  'create_bug_based_on_card',
   {
     title: 'Create a new bug card based on provided card id',
     description: `Create a new bug card based on provided card id that summarizes the problem in concise,
@@ -737,10 +737,80 @@ server.registerTool(
                   Be specific and avoid assumptions.
                   Clearly outline the actions needed to trigger the bug.
                   Number each step so anyone can follow them easily`),
+      origin: z.enum([
+        "Production - Customer",
+        "Production - Internal",
+        "Pre-Release - Customer",
+        "Pre-Release - Internal",
+        "Regression - Dev01",
+        "Regression - Team Env",
+        "Manual QA",
+        "Developer Raised",
+        "Operations",
+      ])
+        .default("Manual QA")
+        .optional()
+        .describe('Where the bug was found, defaults to "Manual QA"'),
     },
   },
-  async ({ title, card, bugContent }) => {
-    const bugResponse = await tp.createBug<Bug>({ title, card, bugContent });
+  async ({ title, card, bugContent, origin }) => {
+    const bugResponse = await tp.createBug<Bug>({ title, card, bugContent, origin });
+
+    if (!bugResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to create bug "${title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(bugResponse)
+      }],
+    };
+  }
+)
+
+server.registerTool(
+  'create_bug',
+  {
+    title: 'Create a new bug card',
+    description: `Create a new bug card that summarizes the problem in concise,
+      descriptive manner answering questions What? Where? When?,
+      and content explaining what happened in detail.
+      CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
+        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior;
+        2) add a comment to the newly created bug with its Id and Title`,
+    inputSchema: {
+      title: z.string()
+        .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),
+      bugContent: z.string()
+        .describe(`Bug description content, explain what happened in detail.
+                  Include expected behaviour and what actually occurred.
+                  Be specific and avoid assumptions.
+                  Clearly outline the actions needed to trigger the bug.
+                  Number each step so anyone can follow them easily`),
+      origin: z.enum([
+        "Production - Customer",
+        "Production - Internal",
+        "Pre-Release - Customer",
+        "Pre-Release - Internal",
+        "Regression - Dev01",
+        "Regression - Team Env",
+        "Manual QA",
+        "Developer Raised",
+        "Operations",
+      ])
+        .default("Manual QA")
+        .optional()
+        .describe('Where the bug was found, defaults to "Manual QA"'),
+    },
+  },
+  async ({ title, bugContent, origin }) => {
+    const bugResponse = await tp.createBugOnly<Bug>({ title, bugContent, origin });
 
     if (!bugResponse) {
       return {

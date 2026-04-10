@@ -109,7 +109,7 @@ export class TpClient {
     return response
   }
 
-  async createBug<T>({ title, card, bugContent }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string }): Promise<T> {
+  async createBug<T>({ title, card, bugContent, origin = "Manual QA" }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string }): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
@@ -118,7 +118,7 @@ export class TpClient {
       "customFields": [{
         "name": "Origin",
         "type": "DropDown",
-        "value": "Manual QA"
+        "value": origin
       }],
       "assignedTeams": [{
         "team": {
@@ -132,6 +132,31 @@ export class TpClient {
       bug["UserStory"] = {
         "Id": card.id
       }
+    }
+
+    return this.post<any, T>({
+      pathParam: { "bugs": '' },
+      param: { "format": "json" },
+    }, bug) as T
+  }
+
+  async createBugOnly<T>({ title, bugContent, origin = "Manual QA" }: { title: string, bugContent: string, origin?: string }): Promise<T> {
+    const bug = {
+      "Name": title,
+      "Project": {
+        "Id": config.tp.projectId
+      },
+      "customFields": [{
+        "name": "Origin",
+        "type": "DropDown",
+        "value": origin
+      }],
+      "assignedTeams": [{
+        "team": {
+          "id": config.tp.teamId
+        }
+      }],
+      "Description": bugContent,
     }
 
     return this.post<any, T>({
