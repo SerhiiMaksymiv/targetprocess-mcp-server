@@ -12,8 +12,8 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 ---
 
 ## Features
-  - Create Bugs based on user story
-  - Retreive TP entities: bugs, user stories
+  - Create standalone bugs or bugs linked to a user story/bug card
+  - Retrieve TP entities: bugs, user stories, features, releases
 
 - **LLM-Friendly Tools**
   - Designed for Claude MCP AI agents
@@ -50,8 +50,11 @@ Cards — Read
 
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
-- `create_bug` — Create a new bug linked to a card (card object with id+type, title, bugContent)
+- `create_bug` — Create a standalone bug (title, bugContent, optional origin)
+- `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
 - `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
+
+> `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
 ---
 
 ## Installation
