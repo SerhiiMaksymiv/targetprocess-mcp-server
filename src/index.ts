@@ -889,13 +889,23 @@ server.registerTool(
     const userStoriesPromise = userStoriesIds.map((id) => tp.getUserStory<TP.UserStory>(id))
     let userStoriesResults = []
     try {
-      userStoriesResults = await Promise.all(userStoriesPromise)
+      const results = await Promise.all<TP.UserStory>(userStoriesPromise)
+      userStoriesResults = results.map((item: TP.UserStory) => item).flat()
     } catch (error) {
       console.error("Error getting user stories:", error);
       return {
         content: [{
           type: 'text',
-          text: `Failed to get user stories for feature id: ${id}`,
+          text: `Failed to get user stories for feature id: ${id}. Error: ${error}`,
+        }],
+      }
+    }
+
+    if (userStoriesResults.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories promise found for feature id: ${id}`,
         }],
       }
     }
@@ -922,21 +932,21 @@ server.registerTool(
           covered,
         })
       }
-
-      if (userStories.length === 0) {
-        return {
-          content: [{
-            type: 'text',
-            text: `No user stories unable to convert to TP card found for feature id: ${id}`,
-          }],
-        }
-      }
     } catch (error) {
       console.error("Error getting user stories:", error);
       return {
         content: [{
           type: 'text',
-          text: `Failed to get user stories array for feature id: ${id}`,
+          text: `Failed to get user stories array for feature id: ${id}: Error: ${error}`,
+        }],
+      }
+    }
+
+    if (userStories.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No user stories unable to convert to TP card found for feature id: ${id}`,
         }],
       }
     }
