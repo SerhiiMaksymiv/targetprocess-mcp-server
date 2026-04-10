@@ -41,6 +41,10 @@ Releases
 - `get_release_open_bugs` — Get only active/open bugs for a release (name, withDescription, optional results)
 - `get_release_open_user_stories` — Get only active/open user stories for a release (name, withDescription, optional results)
 
+Features
+- `get_feature_user_stories` — Get all user stories for a feature by its ID (id)
+- `get_not_covered_user_stories_in_feature` — Get user stories in a feature not yet covered by tests, includes `covered` field based on "Test Automation" custom field (id)
+
 Cards — Read
 - `get_bug_content` — Fetch full content of a bug by ID (id)
 - `get_user_story_content` — Fetch full content of a user story by ID (id)
@@ -53,6 +57,9 @@ Cards — Write
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin)
 - `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
 - `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
+
+User
+- `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
 
 > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
 ---
