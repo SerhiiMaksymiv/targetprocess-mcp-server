@@ -24,7 +24,7 @@ export type TpClientParameters = {
 }
 
 export interface TpResponse<T> {
-  Next?: string
+  Next: string
   Items: T[]
 }
 
