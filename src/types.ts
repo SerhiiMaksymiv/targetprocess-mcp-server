@@ -272,7 +272,28 @@ export interface Team {
   ResourceType: string
   Id: number
   Name: string
-  EmojiIcon: string
+  Description: any
+  StartDate: any
+  EndDate: any
+  CreateDate: string
+  ModifyDate: string
+  LastCommentDate: any
+  Tags: string
+  NumericPriority: number
+  EntityVersion: number
+  EntityType: EntityType
+  LastEditor: LastEditor
+  Owner: Owner
+  Creator: Creator
+  LastCommentedUser: any
+  Project: any
+  LinkedTestPlan: any
+  Milestone: any
+  Icon: any
+  EmojiIcon: any
+  IsActive: boolean
+  Abbreviation: string
+  CustomFields: any[]
 }
 
 export interface ResponsibleTeam {

@@ -383,6 +383,13 @@ export class TpClient {
     }) as T
   }
 
+  async getTeams<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: { "Teams": '' },
+      param: { "format": "json" },
+    }) as T
+  }
+
   async getContext<T>(): Promise<T> {
     return this.get<T>({
       pathParam: { "Context": '' },

@@ -61,6 +61,9 @@ Cards — Write
 Projects
 - `get_projects` — Get all Targetprocess projects (no params needed)
 
+Teams
+- `get_teams` — Get all Targetprocess teams returning id and name (no params needed)
+
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
 

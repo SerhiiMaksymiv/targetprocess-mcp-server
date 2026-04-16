@@ -1046,6 +1046,43 @@ server.registerTool(
 );
 
 server.registerTool(
+  'get_teams',
+  {
+    title: 'Get teams',
+    description: 'Get all Targetprocess teams',
+  },
+  async ({}) => {
+    const response = await tp.getTeams<TP.TpResponse<TP.Team>>()
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get teams, JSON: ${JSON.stringify(response, null, 2)}`
+        }],
+      }
+    }
+
+    const items = response.Items || [];
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No teams found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items.map((t) => ({ id: t.Id, name: t.Name })))
+      }],
+    };
+  }
+);
+
+server.registerTool(
   'get_logged_in_user',
   {
     title: 'Get logged in user',
