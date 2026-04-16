@@ -24,7 +24,7 @@ export type TpClientParameters = {
 }
 
 export interface TpResponse<T> {
-  Next: string
+  Next?: string
   Items: T[]
 }
 
@@ -382,7 +382,48 @@ export interface Project {
   ResourceType: string
   Id: number
   Name: string
+  Description: any
+  StartDate: any
+  EndDate: any
+  CreateDate: string
+  ModifyDate: string
+  LastCommentDate: any
+  Tags: string
+  NumericPriority: number
+  EntityVersion: number
+  EntityType: EntityType
+  LastEditor: LastEditor
+  Owner: Owner
+  Creator: Creator
+  LastCommentedUser: any
+  Project: any
+  LinkedTestPlan: any
+  Milestone: any
+  Effort: number
+  EffortCompleted: number
+  EffortToDo: number
+  IsActive: boolean
+  IsProduct: boolean
+  Abbreviation: string
+  MailReplyAddress: any
+  Color: any
+  Progress: number
+  PlannedStartDate: any
+  PlannedEndDate: any
+  LastStateChangeDate: string
+  IsPrivate: any
+  Units: string
+  Program: any
   Process: Process
+  EntityState: EntityState
+  Company: Company
+  CustomFields: any[]
+}
+
+export interface Company {
+  ResourceType: string
+  Id: number
+  Name: string
 }
 
 export interface Process {

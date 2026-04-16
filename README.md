@@ -58,6 +58,9 @@ Cards — Write
 - `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
 - `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
 
+Projects
+- `get_projects` — Get all Targetprocess projects (no params needed)
+
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
 
@@ -77,7 +80,6 @@ User
       "env": {
         "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
         "TP_BASE_URL": "<tp-api-endpoint>",
-        "TP_API_VERSION": "v1",
         "TP_OWNER_ID": "<tp-owner-id>", // your user id
         "TP_PROJECT_ID": "<tp-project-id>",
         "TP_TEAM_ID": "<tp-team-id>"
@@ -102,7 +104,6 @@ User
       "env": {
         "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
         "TP_BASE_URL": "<tp-api-endpoint>",
-        "TP_API_VERSION": "v1",
         "TP_OWNER_ID": "<tp-owner-id>", // your user id
         "TP_PROJECT_ID": "<tp-project-id>",
         "TP_TEAM_ID": "<tp-team-id>"
@@ -115,7 +116,7 @@ User
 
 ### Claude Code
 ```bash
-claude mcp add tarteprocess -s user \
+claude mcp add targetprocess -s user \
   -e TP_TOKEN=<your-tp-token> -e TP_BASE_URL=<tp-api-endpoint> -- npx -y targetprocess-mcp-server
 ```
 

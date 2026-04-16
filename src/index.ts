@@ -701,9 +701,8 @@ server.registerTool(
   'create_bug_based_on_card',
   {
     title: 'Create a new bug card based on provided card id',
-    description: `Create a new bug card based on provided card id that summarizes the problem in concise,
-      descriptive manner answering questions What? Where? When?,
-      and content explaining what happened in detail.
+    description: `Create a new bug card based on provided card id that summarizes the problem in concise, descriptive manner answering questions What? Where? When?, and content explaining what happened in detail. 
+      NOTE: this tool requires a user story or bug card as a reference (i.e. card ID).
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps: 
         1) IF you already have user story or bug card content, proceed to step 3 skipping step 2;
         2) ELSE call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug card content;
@@ -766,9 +765,8 @@ server.registerTool(
   'create_bug',
   {
     title: 'Create a new bug card',
-    description: `Create a new bug card that summarizes the problem in concise,
-      descriptive manner answering questions What? Where? When?,
-      and content explaining what happened in detail.
+    description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
+      NOTE: this tool does not require a user story or bug card referenced.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior;
         2) add a comment to the newly created bug with its Id and Title`,
@@ -776,11 +774,7 @@ server.registerTool(
       title: z.string()
         .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),
       bugContent: z.string()
-        .describe(`Bug description content, explain what happened in detail.
-                  Include expected behaviour and what actually occurred.
-                  Be specific and avoid assumptions.
-                  Clearly outline the actions needed to trigger the bug.
-                  Number each step so anyone can follow them easily`),
+        .describe(`Bug description content, explain what happened in detail. Include expected behaviour and what actually occurred. Be specific and avoid assumptions. Clearly outline the actions needed to trigger the bug. Number each step so anyone can follow them easily`),
       origin: z.enum([
         "Production - Customer",
         "Production - Internal",
@@ -1011,6 +1005,43 @@ server.registerTool(
         text: JSON.stringify(featureItems)
       }],
     }
+  }
+);
+
+server.registerTool(
+  'get_projects',
+  {
+    title: 'Get projects',
+    description: 'Get all Targetprocess projects',
+  },
+  async ({}) => {
+    const response = await tp.getProjects<TP.TpResponse<TP.Project>>()
+
+    if (!response) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get projects, JSON: ${JSON.stringify(response, null, 2)}`
+        }],
+      }
+    }
+
+    const items = response.Items || [];
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No projects found`,
+        }],
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items.map((p) => ({ id: p.Id, name: p.Name })))
+      }],
+    };
   }
 );
 
