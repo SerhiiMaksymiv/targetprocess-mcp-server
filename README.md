@@ -66,6 +66,7 @@ Teams
 
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
+- `get_in_progress_tasks_and_bugs` — Get all Tasks and Bugs in "In Progress" or "Code Review / Test" state assigned to a user (userId)
 
 > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
 ---

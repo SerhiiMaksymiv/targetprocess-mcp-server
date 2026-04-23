@@ -1119,6 +1119,61 @@ server.registerTool(
   }
 );
 
+server.registerTool(
+  'get_in_progress_tasks_and_bugs',
+  {
+    title: 'Get in-progress tasks and bugs for a user',
+    description: 'Get all Tasks and Bugs currently in "In Progress" state assigned to a given user ID',
+    inputSchema: {
+      userId: z.string()
+        .describe('Targetprocess user ID (e.g. 123)'),
+    },
+  },
+  async ({ userId }) => {
+    const result = await tp.getInProgressTasksAndBugs(userId)
+
+    const tasks = result.tasks.map((t) => ({
+      type: 'Task',
+      id: t.Id,
+      name: t.Name,
+      state: t.EntityState?.Name,
+      userStoryId: t.UserStory?.Id,
+      userStoryName: t.UserStory?.Name,
+      featureId: t.UserStory?.Feature?.Id,
+      featureName: t.UserStory?.Feature?.Name,
+    }))
+
+    const bugs = result.bugs.map((b) => ({
+      type: 'Bug',
+      id: b.Id,
+      name: b.Name,
+      state: b.EntityState?.Name,
+      userStoryId: b.UserStory?.Id,
+      userStoryName: b.UserStory?.Name,
+      featureId: b.UserStory?.Feature?.Id ?? b.Feature?.Id,
+      featureName: b.UserStory?.Feature?.Name ?? b.Feature?.Name,
+    }))
+
+    const items = [...tasks, ...bugs]
+
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No in-progress tasks or bugs found for user ID: ${userId}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items),
+      }],
+    }
+  }
+);
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);

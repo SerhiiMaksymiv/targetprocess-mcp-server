@@ -1,4 +1,4 @@
-import { TpClientParameters, TpResponse } from "./types.js";
+import { TpClientParameters, TpResponse, Task, Bug } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -388,6 +388,22 @@ export class TpClient {
       pathParam: { "Teams": '' },
       param: { "format": "json" },
     }) as T
+  }
+
+  async getInProgressTasksAndBugs(userId: string): Promise<{ tasks: Task[], bugs: Bug[] }> {
+    const where = `(EntityState.Name eq 'In Progress') and (AssignedUser.Id eq ${userId})`
+    const include = "[Id,Name,EntityState[Name],UserStory[Id,Name,Feature[Id,Name]]]"
+    const param = { "format": "json", "where": where, "include": include, "orderByDesc": "ModifyDate" }
+
+    const [tasks, bugs] = await Promise.all([
+      this.get<TpResponse<Task>>({ pathParam: { "Tasks": '' }, param }),
+      this.get<TpResponse<Bug>>({ pathParam: { "Bugs": '' }, param }),
+    ])
+
+    return {
+      tasks: tasks?.Items ?? [],
+      bugs: bugs?.Items ?? [],
+    }
   }
 
   async getContext<T>(): Promise<T> {

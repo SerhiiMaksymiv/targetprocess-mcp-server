@@ -477,6 +477,19 @@ export interface LinkedUserStory {
   Name: string
 }
 
+export interface Task {
+  ResourceType: string
+  Id: number
+  Name: string
+  EntityState: EntityState
+  UserStory: {
+    ResourceType: string
+    Id: number
+    Name: string
+    Feature: Feature | null
+  } | null
+}
+
 export interface LoggedUser {
   ResourceType: string
   Id: number
