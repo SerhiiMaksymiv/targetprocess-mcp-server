@@ -105,6 +105,15 @@ export class TpClient {
     return response
   }
 
+  async getFeature<T>(featureId: string): Promise<T> {
+    const response = await this.get<T>({
+      pathParam: { "features": featureId },
+      param: { "format": "json" }
+    }) as T
+
+    return response
+  }
+
   async createBug<T>({ title, card, bugContent, origin = "Manual QA" }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string }): Promise<T> {
     const bug = {
       "Name": title,
@@ -189,28 +198,51 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createTestPlan<T>(title: string, userStoryId: string): Promise<T> {
-    const testPlan = {
+  async createTestCase<T>(name: string, description: string, testPlanId: string): Promise<T> {
+    const testCase = {
+      "Name": name,
+      "Project": { "Id": config.tp.projectId },
+      "Description": description,
+      "TestPlans": [{
+        "Id": testPlanId
+      }],
+    }
+
+    return this.post<any, T>({
+      pathParam: { "testCases": '' },
+      param: { "format": "json" },
+    }, testCase) as T
+  }
+
+  async createTestPlan<T>(title: string, resourceId: string, resourceType: 'UserStory' | 'Bug' | 'Feature' = 'UserStory', options?: { description?: string; startDate?: string; endDate?: string }): Promise<T> {
+    const testPlan: Record<string, any> = {
       "Name": title,
       "Project": {
         "Id": config.tp.projectId
       },
       "LinkedGeneral": {
         "ResourceType": "General",
-        "Id": userStoryId,
+        "Id": resourceId,
         "Name": title,
       },
       "LinkedAssignable": {
         "ResourceType": "Assignable",
-        "Id": userStoryId,
-        "Name": title,
-      },
-      "LinkedUserStory": {
-        "ResourceType": "UserStory",
-        "Id": userStoryId,
+        "Id": resourceId,
         "Name": title,
       },
     }
+
+    if (resourceType === 'UserStory') {
+      testPlan["LinkedUserStory"] = { "ResourceType": "UserStory", "Id": resourceId, "Name": title }
+    } else if (resourceType === 'Bug') {
+      testPlan["LinkedBug"] = { "ResourceType": "Bug", "Id": resourceId, "Name": title }
+    } else if (resourceType === 'Feature') {
+      testPlan["LinkedFeature"] = { "ResourceType": "Feature", "Id": resourceId, "Name": title }
+    }
+
+    if (options?.description) testPlan["Description"] = options.description
+    if (options?.startDate) testPlan["StartDate"] = options.startDate
+    if (options?.endDate) testPlan["EndDate"] = options.endDate
 
     return this.post<any, T>({
       pathParam: { "testPlans": '' },

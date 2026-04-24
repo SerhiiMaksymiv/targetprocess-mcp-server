@@ -57,6 +57,7 @@ Cards — Write
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin)
 - `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
 - `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
+- `add_test_case` — Generate test cases for a user story, create a linked test plan, and add each test case to it (userStoryId, testPlanTitle, testCases array of {name, description})
 
 Projects
 - `get_projects` — Get all Targetprocess projects (no params needed)

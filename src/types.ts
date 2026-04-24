@@ -477,6 +477,17 @@ export interface LinkedUserStory {
   Name: string
 }
 
+export interface TestCase {
+  ResourceType: string
+  Id: number
+  Name: string
+  Description: string
+  CreateDate: string
+  ModifyDate: string
+  Project: Project
+  LinkedTestPlan: TestPlan | null
+}
+
 export interface LoggedUser {
   ResourceType: string
   Id: number

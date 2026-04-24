@@ -815,25 +815,32 @@ server.registerTool(
 server.registerTool(
   'create_test_plan',
   {
-    title: 'Create a new test plan for a user story',
-    description: `Create a new test plan with provided title and user story id`,
+    title: 'Create a new test plan linked to a TP card',
+    description: `Create a new test plan linked to a UserStory, Bug, or Feature. Name and Project are required by the API; Description, StartDate, and EndDate are optional.`,
     inputSchema: {
       title: z.string()
-        .describe(`Test plan title that is taken from user story title`),
-      userStoryId: z.string()
+        .describe('Test plan title — use the linked card name with a prefix (e.g. "Test Plan: User story title")'),
+      resourceId: z.string()
         .min(5)
         .max(6)
-        .describe(`User story id, usually user story or bug ID (e.g. 145789)`),
+        .describe('ID of the card to link this test plan to (e.g. 145789)'),
+      resourceType: z.enum(['UserStory', 'Bug', 'Feature'])
+        .default('UserStory')
+        .optional()
+        .describe('Type of the linked card — UserStory, Bug, or Feature (default: UserStory)'),
+      description: z.string()
+        .optional()
+        .describe('Optional description of the test plan scope or goals')
     },
   },
-  async ({ title, userStoryId }) => {
-    const testPlanResponse = await tp.createTestPlan<TP.TestPlan>(title, userStoryId);
+  async ({ title, resourceId, resourceType, description }) => {
+    const testPlanResponse = await tp.createTestPlan<TP.TestPlan>(title, resourceId, resourceType, { description });
 
     if (!testPlanResponse) {
       return {
         content: [{
           type: 'text',
-          text: `Failed to create testPlanResponse "${title}"\n JSON: ${JSON.stringify(testPlanResponse, null, 2)}`
+          text: `Failed to create test plan "${title}" for ${resourceType} id: ${resourceId}`
         }]
       };
     }
@@ -1014,7 +1021,7 @@ server.registerTool(
     title: 'Get projects',
     description: 'Get all Targetprocess projects',
   },
-  async ({}) => {
+  async ({ }) => {
     const response = await tp.getProjects<TP.TpResponse<TP.Project>>()
 
     if (!response) {
@@ -1051,7 +1058,7 @@ server.registerTool(
     title: 'Get teams',
     description: 'Get all Targetprocess teams',
   },
-  async ({}) => {
+  async ({ }) => {
     const response = await tp.getTeams<TP.TpResponse<TP.Team>>()
 
     if (!response) {
@@ -1118,6 +1125,122 @@ server.registerTool(
     };
   }
 );
+
+server.registerTool(
+  'write_test_cases',
+  {
+    title: 'Write test cases for a TP card (UserStory, Bug, or Feature)',
+    description: `Fetches a TP card (UserStory, Bug, or Feature) content by ID.
+      CRITICAL WORKFLOW — after receiving the card content, you MUST:
+        1) Thoroughly analyze the card name and description to understand the feature or issue being tested
+        2) Write detailed test cases covering: happy path, edge cases, boundary conditions, and error scenarios
+        3) Format each test case description inside an html <div> element structured as:
+            <div>
+              <p><strong>Preconditions:</strong> ...</p>
+              <p><strong>Test Steps:</strong><ol><li>...</li></ol></p>
+              <p><strong>Expected Result:</strong> ...</p>
+              <p><strong>Test Type:</strong> ...</p>
+            </div>
+        4) Call "create_test_plan" tool passing: resourceId (the card id), resourceType, testPlanTitle (use the card name prefixed with "Test Plan: "), and the testCases array
+        5) Call "add_test_case_to_test_plan" tool passing: testPlanId (the test plan id), and the testCases array`,
+    inputSchema: {
+      resourceId: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP card ID (e.g. 145789)'),
+      resourceType: z.enum(['UserStory', 'Bug', 'Feature'])
+        .default('UserStory')
+        .optional()
+        .describe('Type of the TP card — UserStory, Bug, or Feature (default: UserStory)'),
+    },
+  },
+  async ({ resourceId, resourceType = 'UserStory' }) => {
+    let card: TP.UserStory | TP.Bug | TP.Feature | null = null
+
+    if (resourceType === 'Bug') {
+      card = await tp.getBug<TP.Bug>(resourceId)
+    } else if (resourceType === 'Feature') {
+      card = await tp.getFeature<TP.Feature>(resourceId)
+    } else {
+      card = await tp.getUserStory<TP.UserStory>(resourceId)
+    }
+
+    if (!card) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get ${resourceType} with id: ${resourceId}`
+        }],
+      }
+    }
+
+    let description = ''
+    try {
+      const dom = new JSDOM(`<html><body><div id="content">${card.Description}</div></body></html>`)
+      description = dom.window.document.getElementById('content')?.textContent || ''
+    } catch (error) {
+      console.error("Error parsing card description:", error)
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          id: card.Id,
+          name: card.Name,
+          resourceType,
+          description,
+          customFields: card.CustomFields,
+        })
+      }],
+    }
+  }
+)
+
+server.registerTool(
+  'add_test_cases_to_test_plan',
+  {
+    title: 'Adds generated test cases to a test plan linked to a TP card (UserStory, Bug, or Feature).',
+    description: `Adds generated test cases to a test plan linked to a TP card (UserStory, Bug, or Feature).`,
+    inputSchema: {
+      testPlanId: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP card ID to link the test plan to (e.g. 145789)'),
+      testCases: z.array(z.object({
+        name: z.string()
+          .describe('Test case title (concise, action-oriented)'),
+        description: z.string()
+          .describe('Test case steps and expected results formatted as HTML'),
+      }))
+        .min(1)
+        .describe('Array of test cases to create in the new test plan'),
+    },
+  },
+  async ({ testPlanId, testCases }) => {
+    const created: { id: number; name: string }[] = []
+    const failed: string[] = []
+
+    for (const tc of testCases) {
+      const result = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
+      if (result) {
+        created.push({ id: result.Id, name: result.Name })
+      } else {
+        failed.push(tc.name)
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify({
+          created,
+          failed,
+        })
+      }]
+    }
+  }
+)
 
 async function main() {
   const transport = new StdioServerTransport();
