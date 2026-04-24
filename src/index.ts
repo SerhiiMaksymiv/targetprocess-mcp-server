@@ -819,7 +819,7 @@ server.registerTool(
     description: `Create a new test plan linked to a UserStory, Bug, or Feature. Name and Project are required by the API; Description, StartDate, and EndDate are optional.`,
     inputSchema: {
       title: z.string()
-        .describe('Test plan title — use the linked card name with a prefix (e.g. "Test Plan: User story title")'),
+        .describe('Test plan title — use the linked card name'),
       resourceId: z.string()
         .min(5)
         .max(6)
