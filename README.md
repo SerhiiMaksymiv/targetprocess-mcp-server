@@ -24,9 +24,9 @@ It acts as a **bridge between LLM agents and the Targetprocess API**, providing:
 
 - "Show me currently active release"
 - "write me test cases based on 145322 tp user story"
+- "write detailed test cases based on 145642 bug, format them inside html <div> element, create a test plan and add test cases to it"
 - "add a comment to 145155 card saying 'test'"
-- "write test cases based on 145640 user story"
-- "write detailed test cases based on 145642 user story, format them inside html <div> element and add them as a comment"
+- "write test cases based on 145640 feature"
 - "create a bug based on 145637 user story where Add Tile flyout (for a Static Tile) not show"
 - "search for a card with 'Text Element' title"
 
@@ -56,8 +56,12 @@ Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin)
 - `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
-- `create_test_plan` — Create a test plan linked to a user story (title, userStoryId)
-- `add_test_case` — Generate test cases for a user story, create a linked test plan, and add each test case to it (userStoryId, testPlanTitle, testCases array of {name, description})
+- `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)
+- `add_test_cases` — Create a test plan and add generated test cases to it in one call (resourceId, testPlanTitle, testCases array of {name, description}, optional resourceType)
+
+Test Case Workflows
+- `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed HTML-formatted test cases covering happy path, edge cases, and error scenarios, creates a linked test plan, then calls `add_test_cases_to_test_plan` (resourceId, optional resourceType)
+- `add_test_cases_to_test_plan` — Add an array of pre-generated test cases to an existing test plan by its ID (testPlanId, testCases array of {name, description})
 
 Projects
 - `get_projects` — Get all Targetprocess projects (no params needed)
