@@ -60,8 +60,8 @@ Cards — Write
 - `add_test_cases` — Create a test plan and add generated test cases to it in one call (resourceId, testPlanTitle, testCases array of {name, description}, optional resourceType)
 
 Test Case Workflows
-- `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed HTML-formatted test cases covering happy path, edge cases, and error scenarios, creates a linked test plan, then calls `add_test_cases_to_test_plan` (resourceId, optional resourceType)
-- `add_test_cases_to_test_plan` — Add an array of pre-generated test cases to an existing test plan by its ID (testPlanId, testCases array of {name, description})
+- `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed test cases covering happy path, edge cases, and error scenarios, creates a linked test plan via `create_test_plan`, then calls `add_test_cases_to_test_plan`. Each test case description contains Preconditions and Test Type as HTML; steps are passed as a structured array (resourceId, optional resourceType)
+- `add_test_cases_to_test_plan` — Add pre-generated test cases to an existing test plan. Each test case has a `name`, an HTML `description` (Preconditions and Test Type only), and a `steps` array of `{ description, result }` objects — steps are created via the TP test step API rather than embedded in the description (testPlanId, testCases array of {name, description, steps})
 
 Projects
 - `get_projects` — Get all Targetprocess projects (no params needed)

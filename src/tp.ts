@@ -216,7 +216,7 @@ export class TpClient {
 
   async createTestPlan<T>(title: string, resourceId: string, resourceType: 'UserStory' | 'Bug' | 'Feature' = 'UserStory', options?: { description?: string; startDate?: string; endDate?: string }): Promise<T> {
     const testPlan: Record<string, any> = {
-      "Name": title,
+      "Name": `Test Plan: ${title}`,
       "Project": {
         "Id": config.tp.projectId
       },
@@ -265,6 +265,19 @@ export class TpClient {
       pathParam: { "comments": '' },
       param: { "format": "json" },
     }, commentData) as T
+  }
+
+  async addTestStep<T>(testCaseId: string, testStep: { description: string, result: string }): Promise<T> {
+    const testStepData = {
+      "Description": testStep.description,
+      "Result": testStep.result,
+      "TestCase": { "Id": testCaseId },
+    }
+
+    return this.post<any, T>({
+      pathParam: { "testSteps": '' },
+      param: { "format": "json" },
+    }, testStepData) as T
   }
 
   async getBugComments<T>(bugId: string, results: number = 25): Promise<T> {

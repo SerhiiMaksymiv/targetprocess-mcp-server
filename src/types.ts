@@ -488,6 +488,15 @@ export interface TestCase {
   LinkedTestPlan: TestPlan | null
 }
 
+export interface TestStep {
+  ResourceType: string
+  Id: number
+  Description: string
+  Result: string
+  RunOrder: number
+  TestCase: TestCase
+}
+
 export interface LoggedUser {
   ResourceType: string
   Id: number

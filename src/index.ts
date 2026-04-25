@@ -1134,15 +1134,12 @@ server.registerTool(
       CRITICAL WORKFLOW — after receiving the card content, you MUST:
         1) Thoroughly analyze the card name and description to understand the feature or issue being tested
         2) Write detailed test cases covering: happy path, edge cases, boundary conditions, and error scenarios
-        3) Format each test case description inside an html <div> element structured as:
-            <div>
-              <p><strong>Preconditions:</strong> ...</p>
-              <p><strong>Test Steps:</strong><ol><li>...</li></ol></p>
-              <p><strong>Expected Result:</strong> ...</p>
-              <p><strong>Test Type:</strong> ...</p>
-            </div>
-        4) Call "create_test_plan" tool passing: resourceId (the card id), resourceType, testPlanTitle (use the card name prefixed with "Test Plan: "), and the testCases array
-        5) Call "add_test_case_to_test_plan" tool passing: testPlanId (the test plan id), and the testCases array`,
+        3) For each test case produce:
+            - name: concise action-oriented title
+            - description: HTML <div> with Preconditions and Test Type sections only (no steps here)
+            - steps: ordered array of { description: "<step action>", result: "<expected result>" }
+        4) Call "create_test_plan" tool passing: resourceId (the card id), resourceType, testPlanTitle (use the card name/title)
+        5) Call "add_test_cases_to_test_plan" tool passing: testPlanId (the test plan id), and the testCases array with name, description, and steps`,
     inputSchema: {
       resourceId: z.string()
         .min(5)
@@ -1206,37 +1203,54 @@ server.registerTool(
       testPlanId: z.string()
         .min(5)
         .max(6)
-        .describe('TP card ID to link the test plan to (e.g. 145789)'),
+        .describe('Test plan ID to add test cases to (e.g. 145789)'),
       testCases: z.array(z.object({
         name: z.string()
           .describe('Test case title (concise, action-oriented)'),
         description: z.string()
-          .describe('Test case steps and expected results formatted as HTML'),
+          .describe('Test case context formatted as HTML — include Preconditions and Test Type sections, but NOT test steps (those go in the steps field)'),
+        steps: z.array(z.object({
+          description: z.string()
+            .describe('Step action text'),
+          result: z.string()
+            .describe('Expected result for this step'),
+        }))
+          .min(1)
+          .describe('Ordered list of test steps with their expected results'),
       }))
         .min(1)
-        .describe('Array of test cases to create in the new test plan'),
+        .describe('Array of test cases to create in the test plan'),
     },
   },
   async ({ testPlanId, testCases }) => {
-    const created: { id: number; name: string }[] = []
+    const created: { id: number; name: string; stepsAdded: number; stepsFailed: number }[] = []
     const failed: string[] = []
 
     for (const tc of testCases) {
-      const result = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
-      if (result) {
-        created.push({ id: result.Id, name: result.Name })
-      } else {
+      const testCase = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
+      if (!testCase) {
         failed.push(tc.name)
+        continue
       }
+
+      let stepsAdded = 0
+      let stepsFailed = 0
+      for (const step of tc.steps) {
+        const stepResult = await tp.addTestStep<TP.TestStep>(String(testCase.Id), step)
+        if (stepResult) {
+          stepsAdded++
+        } else {
+          stepsFailed++
+        }
+      }
+
+      created.push({ id: testCase.Id, name: testCase.Name, stepsAdded, stepsFailed })
     }
 
     return {
       content: [{
         type: 'text',
-        text: JSON.stringify({
-          created,
-          failed,
-        })
+        text: JSON.stringify({ created, failed })
       }]
     }
   }
