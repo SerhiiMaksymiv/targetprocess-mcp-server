@@ -706,8 +706,8 @@ server.registerTool(
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps: 
         1) IF you already have user story or bug card content, proceed to step 3 skipping step 2;
         2) ELSE call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug card content;
-        3) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior;
-        4) add a comment to the card with bug Id provided in the first step and Title`,
+        3) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
+        4) add a comment to the card with created bug Id and its Title`,
     inputSchema: {
       title: z.string()
         .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),
@@ -768,7 +768,7 @@ server.registerTool(
     description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
       NOTE: this tool does not require a user story or bug card referenced.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
-        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior;
+        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
         2) add a comment to the newly created bug with its Id and Title`,
     inputSchema: {
       title: z.string()
