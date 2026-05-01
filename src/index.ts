@@ -1225,7 +1225,7 @@ server.registerTool(
             - name: concise action-oriented title
             - description: HTML <div> with Preconditions and Test Type sections only (no steps here)
             - steps: ordered array of { description: "<step action>", result: "<expected result>" }
-        4) Call "create_test_plan" tool passing: resourceId (the card id), resourceType, testPlanTitle (use the card name/title)
+        4) Call "create_test_plan" tool passing: resourceId (the card id), resourceType, testPlanTitle (use the card name/title), NOTE: IF test plan already exists - skip this step and proceed to step 5.
         5) Call "add_test_cases_to_test_plan" tool passing: testPlanId (the test plan id), and the testCases array with name, description, and steps`,
     inputSchema: {
       resourceId: z.string()
