@@ -766,10 +766,9 @@ server.registerTool(
   {
     title: 'Create a new bug card',
     description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
-      NOTE: this tool does not require a user story or bug card referenced.
+      NOTE: this tool does not require a user story or bug card reference.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
-        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
-        2) add a comment to the newly created bug with its Id and Title`,
+        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);`,
     inputSchema: {
       title: z.string()
         .describe('Bug card title that summarizes the problem in concise, descriptive, and actionable manner, enabling a developer to understand the issue without opening the report'),
@@ -1125,6 +1124,94 @@ server.registerTool(
     };
   }
 );
+
+server.registerTool(
+  'get_user_story_test_cases',
+  {
+    title: 'Get test cases for TP UserStory card',
+    description: `Fetches a TP UserStory Linked Test Plan and fetches its Test Cases by provided card ID.`,
+    inputSchema: {
+      resourceId: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP UserStory ID (e.g. 145789)')
+    },
+  },
+  async ({ resourceId }) => {
+    const userStoryResponse = await tp.getUserStoryTestPlan<TP.TpResponseV2<Record<"linkedTestPlan", TP.TpResultItemV2>>>(resourceId)
+
+    if (!userStoryResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get test user story, JSON: ${JSON.stringify(userStoryResponse, null, 2)}`
+        }],
+      }
+    }
+
+    const items = userStoryResponse.items
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No items in ${resourceId} user story response`,
+        }],
+      };
+    }
+
+    const testPlan = items[0].linkedTestPlan
+    if (!testPlan) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No linked test plan found for user story id: ${resourceId}`,
+        }],
+      };
+    }
+
+    const testCases = await tp.getTestPlanTestCases<TP.TpResponse<TP.TestCase>>(String(testPlan.id))
+    if (testCases.Items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No test cases found in test plan id: ${testPlan.id}`,
+        }],
+      };
+    }
+
+    const testCaseItems = testCases.Items
+    if (!testCaseItems || testCaseItems.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No test case items found in test plan id: ${testPlan.id}`,
+        }],
+      };
+    }
+
+
+    const testCasesData = await Promise.all(testCaseItems.map(async (item) => {
+      const testCaseSteps = await tp.getTestCaseSteps<TP.TpResponse<TP.TestStep>>(String(item.Id))
+      return {
+        testCaseId: item.Id,
+        testCaseName: item.Name,
+        testCaseDescription: item.Description,
+        testCaseSteps: testCaseSteps.Items.map((step) => ({
+          description: step.Description,
+          result: step.Result,
+          runOrder: step.RunOrder,
+        }))
+      }
+    }))
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(testCasesData)
+      }],
+    };
+  }
+)
 
 server.registerTool(
   'write_test_cases',

@@ -50,6 +50,7 @@ Cards — Read
 - `get_user_story_content` — Fetch full content of a user story by ID (id)
 - `get_bug_comments` — Get comments on a bug (id, optional results)
 - `get_user_story_comments` — Get comments on a user story (id, optional results)
+- `get_user_story_test_cases` — Fetch the linked test plan and all its test cases (with steps) for a user story (resourceId)
 - `search_all_cards_by_keyword` — Search bugs, stories, and features by keyword (keyword)
 
 Cards — Write

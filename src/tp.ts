@@ -421,6 +421,55 @@ export class TpClient {
     }) as T
   }
 
+  async getUserStoryTestPlan<T>(userStoryId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: { "userStories": userStoryId },
+      param: {
+        "format": "json",
+        "select": `{id,storyName:name,linkedtestplan}`,
+      },
+      apiVersion: this.v2
+    }) as T
+  }
+
+  async getCardTestPlan<T>(cardId: string, resourceType: 'UserStory' | 'Bug' | 'Feature' = 'UserStory'): Promise<T> {
+    let requestPath = ""
+    if (resourceType === 'UserStory') {
+      requestPath = "userStories"
+    } else if (resourceType === 'Bug') {
+      requestPath = "bugs"
+    } else if (resourceType === 'Feature') {
+      requestPath = "features"
+    }
+    return this.get<T>({
+      pathParam: { [requestPath]: cardId },
+      param: {
+        "format": "json",
+        "select": `{id,linkedtestplan}`,
+      },
+    }) as T
+  }
+
+  async getTestPlanTestCases<T>(testPlanId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: {
+        "testPlans": testPlanId,
+        "testcases": "",
+      },
+      param: { "format": "json" },
+    }) as T
+  }
+
+  async getTestCaseSteps<T>(testCaseId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: {
+        "testCases": testCaseId,
+        "teststeps": "",
+      },
+      param: { "format": "json", },
+    }) as T
+  }
+
   async getProjects<T>(): Promise<T> {
     return this.get<T>({
       pathParam: { "Projects": '' },
