@@ -400,11 +400,61 @@ server.registerTool(
   }
 );
 
-server.registerTool(
-  'search_all_cards_by_keyword',
+server.registerTool('search_user_stories_by_keyword', {
+  title: 'Search related user stories by keyword or phrase partial text in description',
+  description: `Searches related user stories by keyword or phrase or partial name or partial keyphrase in description e.g. "Text Element", "Fonts"
+    NOTE: after results are returned, try filter results by most relevant to what user is looking for in the description text`,
+  inputSchema: {
+    keyword: z.string()
+      .describe('Keyword or partial name or keyphrase to search for in description'),
+  },
+},
+  async ({ keyword }) => {
+    const results = await tp.searchContainsDescriptionText<TP.TpResponse<TP.UserStory>>({ text: keyword, entityType: "UserStories" })
+    if (!results) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to search for keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
+        }],
+      }
+    }
+
+    const items = results.Items || []
+
+    if (items.length == 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to find card by keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
+        }],
+      }
+    }
+
+    const parsedItems = items.map((item) => {
+      const dom = new JSDOM(`<html><body><div id="content">${item.Description}</div></body></html>`)
+      const descriptionText = dom.window.document.getElementById('content')?.textContent
+      return {
+        title: item.Name,
+        id: item.Id,
+        description: descriptionText,
+      }
+    })
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(parsedItems)
+      }],
+    };
+  }
+)
+
+server.registerTool('search_all_cards_by_keyword',
   {
     title: 'Search TP cards (user stories, bugs, features) by keyword or partial name',
-    description: `Searches tp cards (user stories, bugs, features) by keyword or partial name or partial keyphrase e.g. "Text Element"`,
+    description: `Searches tp cards (user stories, bugs, features) by keyword or partial name or partial keyphrase e.g. "Text Element"
+      NOTE: this is a fallback tool if "search_user_stories_by_keyword" tool does not satisfy the user's query`,
     inputSchema: {
       keyword: z.string()
         .describe('Keyword or partial name or keyphrase to search for'),

@@ -51,6 +51,7 @@ export class TpClient {
   private async get<T>(params: TpClientParameters): Promise<T | null> {
     params.param["access_token"] = this.token
     let _url = this.params(params)
+    console.error(JSON.stringify({ "TP_URL": _url }, null, 2))
     try {
       const response = await fetch(_url, {
         method: "GET",
@@ -318,6 +319,17 @@ export class TpClient {
         "take": "25",
         "where": `Name contains '${text}'`,
         "include": "[Name, Description, Id]"
+      },
+    }) as T
+  }
+
+  async searchContainsDescriptionText<T>({ text, entityType }: { text: string, entityType: "Generals" | "UserStories" | "Bugs" | "Features" }): Promise<T> {
+    return this.get<T>({
+      pathParam: { [entityType]: '' },
+      param: {
+        "where": `Description contains '${text}' and EntityState.Name eq 'Done'`,
+        "format": "json",
+        "take": "50",
       },
     }) as T
   }
