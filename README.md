@@ -51,14 +51,13 @@ Cards — Read
 - `get_bug_comments` — Get comments on a bug (id, optional results)
 - `get_user_story_comments` — Get comments on a user story (id, optional results)
 - `get_user_story_test_cases` — Fetch the linked test plan and all its test cases (with steps) for a user story (resourceId)
-- `search_all_cards_by_keyword` — Search bugs, stories, and features by keyword (keyword)
+- `search_tp_cards` — Search TP cards by keyword or phrase in description (keyword, optional entityType: UserStories | Bugs, default: UserStories)
 
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin)
 - `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
 - `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)
-- `add_test_cases` — Create a test plan and add generated test cases to it in one call (resourceId, testPlanTitle, testCases array of {name, description}, optional resourceType)
 
 Test Case Workflows
 - `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed test cases covering happy path, edge cases, and error scenarios, creates a linked test plan via `create_test_plan`, then calls `add_test_cases_to_test_plan`. Each test case description contains Preconditions and Test Type as HTML; steps are passed as a structured array (resourceId, optional resourceType)
