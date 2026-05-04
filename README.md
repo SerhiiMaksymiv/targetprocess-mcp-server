@@ -56,8 +56,15 @@ Cards — Read
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin)
-- `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)
-- `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)
+  > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
+> [!NOTE]  
+> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
+- `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)  
+> [!NOTE]  
+> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
+- `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)  
+> [!NOTE]  
+> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
 
 Test Case Workflows
 - `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed test cases covering happy path, edge cases, and error scenarios, creates a linked test plan via `create_test_plan`, then calls `add_test_cases_to_test_plan`. Each test case description contains Preconditions and Test Type as HTML; steps are passed as a structured array (resourceId, optional resourceType)
@@ -72,7 +79,7 @@ Teams
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
 
-> `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
+
 ---
 
 ## Installation
@@ -89,7 +96,7 @@ User
         "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
         "TP_BASE_URL": "<tp-api-endpoint>",
         "TP_OWNER_ID": "<tp-owner-id>", // your user id
-        "TP_PROJECT_ID": "<tp-project-id>",
+        "TP_PROJECT_ID": "<tp-project-id>"
         "TP_TEAM_ID": "<tp-team-id>"
       }
     }
@@ -111,10 +118,10 @@ User
       ],
       "env": {
         "TP_TOKEN": "<your-tp-token>" // Settings -> Authentication and Security -> New Access Token,
-        "TP_BASE_URL": "<tp-api-endpoint>",
-        "TP_OWNER_ID": "<tp-owner-id>", // your user id
-        "TP_PROJECT_ID": "<tp-project-id>",
-        "TP_TEAM_ID": "<tp-team-id>"
+        "TP_BASE_URL": "<tp-api-endpoint>", // required
+        "TP_OWNER_ID": "<tp-owner-id>", // required, your user id
+        "TP_PROJECT_ID": "<tp-project-id>", // optional see available tools 
+        "TP_TEAM_ID": "<tp-team-id>" // optional see available tools
       }
     }
   },
