@@ -64,7 +64,7 @@ Cards — Write
 > requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
 - `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)  
 > [!NOTE]  
-> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
+> requires `TP_PROJECT_ID`, 
 
 Test Case Workflows
 - `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed test cases covering happy path, edge cases, and error scenarios, creates a linked test plan via `create_test_plan`, then calls `add_test_cases_to_test_plan`. Each test case description contains Preconditions and Test Type as HTML; steps are passed as a structured array (resourceId, optional resourceType)
