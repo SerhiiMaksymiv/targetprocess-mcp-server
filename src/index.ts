@@ -414,7 +414,7 @@ server.registerTool('search_tp_cards', {
   },
 },
   async ({ keyword, entityType = "UserStories" }) => {
-    const results = await tp.searchContainsDescriptionText<TP.TpResponse<TP.UserStory>>({ text: keyword, entityType })
+    const results = await tp.searchContainsDescriptionText<TP.TpResponse<TP.General>>({ text: keyword, entityType })
     if (!results) {
       return {
         content: [{
