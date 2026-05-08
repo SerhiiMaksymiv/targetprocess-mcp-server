@@ -55,16 +55,16 @@ Cards — Read
 
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
-- `create_bug` — Create a standalone bug (title, bugContent, optional origin)
+- `create_bug` — Create a standalone bug (title, bugContent, optional origin, optional projectId, optional teamId)
   > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
 > [!NOTE]  
-> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
-- `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin)  
+> `projectId` and `teamId` are optional — fall back to `TP_PROJECT_ID` and `TP_TEAM_ID` from config  
+- `create_bug_based_on_card` — Create a bug linked to an existing user story or bug card (card object with id+type, title, bugContent, optional origin, optional projectId, optional teamId)  
 > [!NOTE]  
-> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
-- `create_user_story` — Create a new user story (title, optional description, optional featureId, optional releaseId)  
+> `projectId` and `teamId` are optional — fall back to `TP_PROJECT_ID` and `TP_TEAM_ID` from config  
+- `create_user_story` — Create a new user story (title, optional description, optional featureId, optional releaseId, optional projectId, optional teamId)  
 > [!NOTE]  
-> requires `TP_PROJECT_ID`, `TP_TEAM_ID`  
+> `projectId` and `teamId` are optional — fall back to `TP_PROJECT_ID` and `TP_TEAM_ID` from config  
 - `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)  
 > [!NOTE]  
 > requires `TP_PROJECT_ID`, 

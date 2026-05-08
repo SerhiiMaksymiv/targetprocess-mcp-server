@@ -740,10 +740,16 @@ server.registerTool(
         .default("Manual QA")
         .optional()
         .describe('Where the bug was found, defaults to "Manual QA"'),
+      projectId: z.string()
+        .optional()
+        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+      teamId: z.string()
+        .optional()
+        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
     },
   },
-  async ({ title, card, bugContent, origin }) => {
-    const bugResponse = await tp.createBug<TP.Bug>({ title, card, bugContent, origin });
+  async ({ title, card, bugContent, origin, projectId, teamId }) => {
+    const bugResponse = await tp.createBug<TP.Bug>({ title, card, bugContent, origin, projectId, teamId });
 
     if (!bugResponse) {
       return {
@@ -790,10 +796,16 @@ server.registerTool(
         .default("Manual QA")
         .optional()
         .describe('Where the bug was found, defaults to "Manual QA"'),
+      projectId: z.string()
+        .optional()
+        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+      teamId: z.string()
+        .optional()
+        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
     },
   },
-  async ({ title, bugContent, origin }) => {
-    const bugResponse = await tp.createBugOnly<TP.Bug>({ title, bugContent, origin });
+  async ({ title, bugContent, origin, projectId, teamId }) => {
+    const bugResponse = await tp.createBugOnly<TP.Bug>({ title, bugContent, origin, projectId, teamId });
 
     if (!bugResponse) {
       return {
@@ -834,10 +846,16 @@ server.registerTool(
         .max(6)
         .optional()
         .describe('Optional Release ID to link this user story to (e.g. 145200)'),
+      projectId: z.string()
+        .optional()
+        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+      teamId: z.string()
+        .optional()
+        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
     },
   },
-  async ({ title, description, featureId, releaseId }) => {
-    const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId });
+  async ({ title, description, featureId, releaseId, projectId, teamId }) => {
+    const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId });
 
     if (!userStoryResponse) {
       return {

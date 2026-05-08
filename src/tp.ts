@@ -115,11 +115,11 @@ export class TpClient {
     return response
   }
 
-  async createBug<T>({ title, card, bugContent, origin = "Manual QA" }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string }): Promise<T> {
+  async createBug<T>({ title, card, bugContent, origin = "Manual QA", projectId, teamId }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string, projectId?: string, teamId?: string }): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
-        "Id": config.tp.projectId
+        "Id": projectId || config.tp.projectId
       },
       "customFields": [{
         "name": "Origin",
@@ -128,7 +128,7 @@ export class TpClient {
       }],
       "assignedTeams": [{
         "team": {
-          "id": config.tp.teamId
+          "id": teamId || config.tp.teamId
         }
       }],
       "Description": bugContent,
@@ -146,11 +146,11 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createBugOnly<T>({ title, bugContent, origin = "Manual QA" }: { title: string, bugContent: string, origin?: string }): Promise<T> {
+  async createBugOnly<T>({ title, bugContent, origin = "Manual QA", projectId, teamId }: { title: string, bugContent: string, origin?: string, projectId?: string, teamId?: string }): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
-        "Id": config.tp.projectId
+        "Id": projectId || config.tp.projectId
       },
       "customFields": [{
         "name": "Origin",
@@ -159,7 +159,7 @@ export class TpClient {
       }],
       "assignedTeams": [{
         "team": {
-          "id": config.tp.teamId
+          "id": teamId || config.tp.teamId
         }
       }],
       "Description": bugContent,
@@ -171,11 +171,11 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createUserStory<T>({ title, description, featureId, releaseId }: { title: string, description?: string, featureId?: string, releaseId?: string }): Promise<T> {
+  async createUserStory<T>({ title, description, featureId, releaseId, projectId, teamId }: { title: string, description?: string, featureId?: string, releaseId?: string, projectId?: string, teamId?: string }): Promise<T> {
     const userStory: Record<string, any> = {
       "Name": title,
-      "Project": { "Id": config.tp.projectId },
-      "assignedTeams": [{ "team": { "id": config.tp.teamId } }],
+      "Project": { "Id": projectId || config.tp.projectId },
+      "assignedTeams": [{ "team": { "id": teamId || config.tp.teamId } }],
     }
 
     if (description) userStory["Description"] = description
