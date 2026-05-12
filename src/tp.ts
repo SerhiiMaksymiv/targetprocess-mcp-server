@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import { basename } from "path";
 import { TpClientParameters, TpResponse } from "./types.js";
 import { config } from "./config.js";
 
@@ -518,5 +520,30 @@ export class TpClient {
       pathParam: { "Context": '' },
       param: { "format": "json", }
     }) as T
+  }
+
+  async addAttachedFile(generalId: string, filePath: string): Promise<string | null> {
+    const fileContent = readFileSync(filePath)
+    const fileName = basename(filePath)
+
+    const formData = new FormData()
+    formData.append("generalId", generalId)
+    formData.append("file", new Blob([fileContent]), fileName)
+
+    const url = `${this.baseUrl}/UploadFile.ashx?access_token=${this.token}`
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return response.text()
+    } catch (error) {
+      console.error("Error uploading file:", error)
+      return null
+    }
   }
 }

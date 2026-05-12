@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { execSync } from "child_process";
+import { homedir } from "os";
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { JSDOM } from "jsdom";
@@ -1402,6 +1405,105 @@ server.registerTool(
         type: 'text',
         text: JSON.stringify({ created, failed })
       }]
+    }
+  }
+)
+
+server.registerTool(
+  'add_attached_file_to_card',
+  {
+    title: 'Attach a file to a TP card',
+    description: 'Upload and attach a local file to a Targetprocess entity (UserStory, Bug, Feature, etc.) by its ID',
+    inputSchema: {
+      generalId: z.string()
+        .min(5)
+        .max(6)
+        .describe('TP entity ID to attach the file to (e.g. 145789)'),
+      filePath: z.string()
+        .describe('Absolute path to the local file to upload (e.g. /Users/mcs/Desktop/image.png)'),
+    },
+  },
+  async ({ generalId, filePath }) => {
+    try {
+      const result = await tp.addAttachedFile(generalId, filePath)
+      if (!result) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to attach file "${filePath}" to card id: ${generalId}`
+          }]
+        }
+      }
+      return {
+        content: [{
+          type: 'text',
+          text: result
+        }]
+      }
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error attaching file to card ${generalId}: ${error}`
+        }]
+      }
+    }
+  }
+)
+
+server.registerTool(
+  'find_file_on_disk',
+  {
+    title: 'Find a file on disk by name',
+    description: `Search for a file by name on the local filesystem.
+      First tries an exact (case-insensitive) match.
+      If nothing is found, retries using the first half of the filename (without extension) as a wildcard — e.g. "screenshot_bug" becomes "*screensho*".
+      Returns a list of matching absolute paths.`,
+    inputSchema: {
+      fileName: z.string()
+        .describe('Filename to search for, with or without extension (e.g. "screenshot.png" or "report")'),
+      searchDir: z.string()
+        .optional()
+        .describe('Directory to search in — defaults to the user home directory'),
+    },
+  },
+  async ({ fileName, searchDir }) => {
+    const dir = searchDir || homedir()
+
+    const runFind = (pattern: string): string[] => {
+      try {
+        const out = execSync(`find "${dir}" -iname "${pattern}" 2>/dev/null`, {
+          encoding: 'utf8',
+          timeout: 15000,
+        })
+        return out.trim().split('\n').filter(Boolean)
+      } catch {
+        return []
+      }
+    }
+
+    // Exact match
+    let files = runFind(fileName)
+    if (files.length > 0) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ match: 'exact', files }) }]
+      }
+    }
+
+    // Partial match: first half of name without extension
+    const dotIndex = fileName.lastIndexOf('.')
+    const nameOnly = dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName
+    const half = nameOnly.slice(0, Math.ceil(nameOnly.length / 2))
+
+    files = runFind(`*${half}*`)
+    if (files.length > 0) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ match: 'partial', keyword: half, files }) }]
+      }
+    }
+
+    return {
+      content: [{ type: 'text', text: `No files found matching "${fileName}" or partial keyword "${half}" in ${dir}` }]
     }
   }
 )
