@@ -65,6 +65,9 @@ Cards — Write
 - `create_user_story` — Create a new user story (title, optional description, optional featureId, optional releaseId, optional projectId, optional teamId)  
 > [!NOTE]  
 > `projectId` and `teamId` are optional — fall back to `TP_PROJECT_ID` and `TP_TEAM_ID` from config  
+- `create_feature` — Create a new feature (title, optional description, optional epicId, optional releaseId, optional projectId, optional teamId)  
+> [!NOTE]  
+> `projectId` and `teamId` are optional — fall back to `TP_PROJECT_ID` and `TP_TEAM_ID` from config  
 - `create_test_plan` — Create a test plan linked to a UserStory, Bug, or Feature (title, resourceId, optional resourceType, optional description/startDate/endDate)  
 > [!NOTE]  
 > requires `TP_PROJECT_ID`, 

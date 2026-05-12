@@ -879,6 +879,56 @@ server.registerTool(
 )
 
 server.registerTool(
+  'create_feature',
+  {
+    title: 'Create a new feature',
+    description: `Create a new Feature in Targetprocess.`,
+    inputSchema: {
+      title: z.string()
+        .describe('Feature title'),
+      description: z.string()
+        .optional()
+        .describe('Optional feature description (when provided, format as HTML)'),
+      epicId: z.string()
+        .min(5)
+        .max(6)
+        .optional()
+        .describe('Optional Epic ID to link this feature to (e.g. 145636)'),
+      releaseId: z.string()
+        .min(5)
+        .max(6)
+        .optional()
+        .describe('Optional Release ID to link this feature to (e.g. 145200)'),
+      projectId: z.string()
+        .optional()
+        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+      teamId: z.string()
+        .optional()
+        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
+    },
+  },
+  async ({ title, description, epicId, releaseId, projectId, teamId }) => {
+    const featureResponse = await tp.createFeature<TP.Feature>({ title, description, epicId, releaseId, projectId, teamId });
+
+    if (!featureResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to create feature "${title}"\n JSON: ${JSON.stringify(featureResponse, null, 2)}`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(featureResponse)
+      }],
+    };
+  }
+)
+
+server.registerTool(
   'create_test_plan',
   {
     title: 'Create a new test plan linked to a TP card',
@@ -1413,7 +1463,8 @@ server.registerTool(
   'add_attached_file_to_card',
   {
     title: 'Attach a file to a TP card',
-    description: 'Upload and attach a local file to a Targetprocess entity (UserStory, Bug, Feature, etc.) by its ID',
+    description: `Upload and attach a local file to a Targetprocess entity (UserStory, Bug, Feature, etc.) by its ID
+      NOTE: before calling this tool, you MUST call "find_file_on_disk" tool to find the local file path. IF user didn't provide a valid file path`,
     inputSchema: {
       generalId: z.string()
         .min(5)
