@@ -105,6 +105,29 @@ export class TpClient {
     return response
   }
 
+  async createUserStory<T>({ title, description, featureId }: { title: string, description: string, featureId: string }): Promise<T> {
+    const userStory = {
+      "Name": title,
+      "Description": description,
+      "Project": {
+        "Id": config.tp.projectId
+      },
+      "Feature": {
+        "Id": featureId
+      },
+      "assignedTeams": [{
+        "team": {
+          "id": config.tp.teamId
+        }
+      }],
+    }
+
+    return this.post<any, T>({
+      pathParam: { "UserStories": '' },
+      param: { "format": "json" },
+    }, userStory) as T
+  }
+
   async createBug<T>({ title, card, bugContent, origin = "Manual QA" }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string }): Promise<T> {
     const bug = {
       "Name": title,
