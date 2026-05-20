@@ -1211,6 +1211,44 @@ server.registerTool(
   }
 );
 
+server.registerTool(
+  'create_task',
+  {
+    title: 'Create a new task',
+    description: 'Create a new task linked to a user story.',
+    inputSchema: {
+      title: z.string()
+        .describe('Task title'),
+      userStoryId: z.string()
+        .min(5)
+        .max(6)
+        .describe('User story ID to link the task to (e.g. 145789)'),
+      description: z.string()
+        .optional()
+        .describe('Task description (optional)'),
+    },
+  },
+  async ({ title, userStoryId, description }) => {
+    const taskResponse = await tp.createTask<TP.Task>({ title, userStoryId, description });
+
+    if (!taskResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to create task "${title}"\n JSON: ${JSON.stringify(taskResponse, null, 2)}`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(taskResponse)
+      }],
+    };
+  }
+)
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
