@@ -105,6 +105,30 @@ export class TpClient {
     return response
   }
 
+  async getTask<T>(taskId: string): Promise<T> {
+    const response = await this.get<T>({
+      pathParam: { "Tasks": taskId },
+      param: {
+        "format": "json",
+        "include": "[Id,Name,UserStory[Id,Name,Feature[Id,Name]]]",
+      }
+    }) as T
+
+    return response
+  }
+
+  async getBugWithRelations<T>(bugId: string): Promise<T> {
+    const response = await this.get<T>({
+      pathParam: { "Bugs": bugId },
+      param: {
+        "format": "json",
+        "include": "[Id,Name,UserStory[Id,Name,Feature[Id,Name]]]",
+      }
+    }) as T
+
+    return response
+  }
+
   async createUserStory<T>({ title, description, featureId }: { title: string, description: string, featureId: string }): Promise<T> {
     const userStory = {
       "Name": title,

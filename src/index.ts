@@ -1249,6 +1249,78 @@ server.registerTool(
   }
 )
 
+server.registerTool(
+  'get_commit_message',
+  {
+    title: 'Get commit message for a task or bug',
+    description: `Returns the formatted commit message string for a given task or bug ID.
+Formats:
+- Task on a user story: "F#<featureId> US#<userStoryId> T#<taskId> <title>"
+- Bug on a user story: "F#<featureId> US#<userStoryId> B#<bugId> <title>"
+- Standalone bug (no user story): "B#<bugId> <title>"`,
+    inputSchema: {
+      id: z.string()
+        .describe('The task or bug ID (e.g. 145789)'),
+      type: z.enum(['task', 'bug'])
+        .describe('Whether the ID refers to a task or a bug'),
+    },
+  },
+  async ({ id, type }) => {
+    if (type === 'task') {
+      const task = await tp.getTask<TP.Task>(id)
+
+      if (!task) {
+        return {
+          content: [{ type: 'text', text: `Failed to get task with id: ${id}` }],
+        }
+      }
+
+      const userStory = task.UserStory
+      const feature = userStory?.Feature
+
+      if (!userStory) {
+        return {
+          content: [{ type: 'text', text: `Task ${id} has no linked user story` }],
+        }
+      }
+
+      const prefix = feature
+        ? `F#${feature.Id} US#${userStory.Id} T#${task.Id}`
+        : `US#${userStory.Id} T#${task.Id}`
+
+      return {
+        content: [{ type: 'text', text: `${prefix} ${task.Name}` }],
+      }
+    }
+
+    // type === 'bug'
+    const bug = await tp.getBugWithRelations<TP.Bug>(id)
+
+    if (!bug) {
+      return {
+        content: [{ type: 'text', text: `Failed to get bug with id: ${id}` }],
+      }
+    }
+
+    const userStory = bug.UserStory
+    const feature = userStory?.Feature ?? bug.Feature
+
+    if (!userStory) {
+      return {
+        content: [{ type: 'text', text: `B#${bug.Id} ${bug.Name}` }],
+      }
+    }
+
+    const prefix = feature
+      ? `F#${feature.Id} US#${userStory.Id} B#${bug.Id}`
+      : `US#${userStory.Id} B#${bug.Id}`
+
+    return {
+      content: [{ type: 'text', text: `${prefix} ${bug.Name}` }],
+    }
+  }
+)
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
