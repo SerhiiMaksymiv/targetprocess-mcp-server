@@ -710,7 +710,7 @@ server.registerTool(
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) IF you already have user story or bug card content, proceed to step 3 skipping step 2;
         2) ELSE call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug card content;
-        3) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
+        3) format the new bug inside html <div> tags with Environment, Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior and Attachments sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
         4) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
         5) IF the user specified a project by name (not ID), call "get_projects" to find the matching project and use its ID as projectId;
         6) add a comment to the card with created bug Id and its Title`,
@@ -900,7 +900,7 @@ server.registerTool(
     description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
       NOTE: this tool does not require a user story or bug card reference.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
-        1) format the new bug inside html <div> tags with Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>, step to reproduce should be wrapped in <ol>);
+        1) format the new bug inside html <div> tags with Environment, Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior and Attachments sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>, step to reproduce should be wrapped in <ol>);
         2) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
         3) IF the user specified a project by name (not ID), call "get_projects" to find the matching project and use its ID as projectId;`,
     inputSchema: {
