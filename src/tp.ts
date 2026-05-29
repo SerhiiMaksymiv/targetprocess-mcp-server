@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
-import { TpClientParameters, TpResponse, BugInputSchema } from "./types.js";
+import { TpClientParameters, TpResponse, BugInputSchema, Bug, Task } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -640,6 +640,67 @@ export class TpClient {
       pathParam: ["Context"],
       param: { "format": "json" }
     }) as T
+  }
+
+  async getInProgressTasksAndBugs(userId: string): Promise<{ tasks: Task[], bugs: Bug[] }> {
+    const where = `(EntityState.Name eq 'In Progress') and (AssignedUser.Id eq ${userId})`
+    const include = "[Id,Name,EntityState[Name],UserStory[Id,Name,Feature[Id,Name]]]"
+    const param = { "format": "json", "where": where, "include": include, "orderByDesc": "ModifyDate" }
+
+    const [tasks, bugs] = await Promise.all([
+      this.get<TpResponse<Task>>({ pathParam: ["Tasks"], param }),
+      this.get<TpResponse<Bug>>({ pathParam: ["Bugs"], param }),
+    ])
+
+    return {
+      tasks: tasks?.Items ?? [],
+      bugs: bugs?.Items ?? [],
+    }
+  }
+
+  async getTask<T>(taskId: string): Promise<T> {
+    const response = await this.get<T>({
+      pathParam: ["Tasks", taskId],
+      param: {
+        "format": "json",
+        "include": "[Id,Name,UserStory[Id,Name,Feature[Id,Name]]]",
+      }
+    }) as T
+
+    return response
+  }
+
+  async getBugWithRelations<T>(bugId: string): Promise<T> {
+    const response = await this.get<T>({
+      pathParam: ["Bugs", bugId],
+      param: {
+        "format": "json",
+        "include": "[Id,Name,UserStory[Id,Name,Feature[Id,Name]]]",
+      }
+    }) as T
+
+    return response
+  }
+
+  async createTask<T>({ title, description, userStoryId }: { title: string, description?: string, userStoryId: string }): Promise<T> {
+    const task: Record<string, any> = {
+      "Name": title,
+      "Project": {
+        "Id": config.tp.projectId
+      },
+      "UserStory": {
+        "Id": userStoryId
+      },
+    }
+
+    if (description) {
+      task["Description"] = description
+    }
+
+    return this.post<any, T>({
+      pathParam: ["Tasks"],
+      param: { "format": "json" },
+    }, task) as T
   }
 
   async addAttachedFile(generalId: string, source: { filePath: string } | { fileContent: string; fileName: string }): Promise<string | null> {

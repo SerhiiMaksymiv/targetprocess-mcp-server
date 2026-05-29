@@ -173,6 +173,19 @@ export interface Release {
   CustomFields: CustomField[]
 }
 
+export interface Task {
+  ResourceType: string
+  Id: number
+  Name: string
+  EntityState: EntityState
+  UserStory: {
+    ResourceType: string
+    Id: number
+    Name: string
+    Feature: Feature | null
+  } | null
+}
+
 export interface Bug {
   ResourceType: string
   Id: number

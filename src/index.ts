@@ -1838,6 +1838,171 @@ server.registerTool(
   }
 )
 
+server.registerTool(
+  'get_in_progress_tasks_and_bugs',
+  {
+    title: 'Get in-progress tasks and bugs for a user',
+    description: 'Get all Tasks and Bugs currently in "In Progress" state assigned to a given user ID',
+    inputSchema: {
+      userId: z.string()
+        .describe('Targetprocess user ID (e.g. 123)'),
+    },
+  },
+  async ({ userId }) => {
+    const result = await tp.getInProgressTasksAndBugs(userId)
+
+    const tasks = result.tasks.map((t) => ({
+      type: 'Task',
+      id: t.Id,
+      name: t.Name,
+      state: t.EntityState?.Name,
+      userStoryId: t.UserStory?.Id,
+      userStoryName: t.UserStory?.Name,
+      featureId: t.UserStory?.Feature?.Id,
+      featureName: t.UserStory?.Feature?.Name,
+    }))
+
+    const bugs = result.bugs.map((b) => ({
+      type: 'Bug',
+      id: b.Id,
+      name: b.Name,
+      state: b.EntityState?.Name,
+      userStoryId: b.UserStory?.Id,
+      userStoryName: b.UserStory?.Name,
+      featureId: b.UserStory?.Feature?.Id ?? b.Feature?.Id,
+      featureName: b.UserStory?.Feature?.Name ?? b.Feature?.Name,
+    }))
+
+    const items = [...tasks, ...bugs]
+
+    if (items.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: `No in-progress tasks or bugs found for user ID: ${userId}`,
+        }],
+      }
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(items),
+      }],
+    }
+  }
+);
+
+server.registerTool(
+  'create_task',
+  {
+    title: 'Create a new task',
+    description: 'Create a new task linked to a user story.',
+    inputSchema: {
+      title: z.string()
+        .describe('Task title'),
+      userStoryId: z.string()
+        .min(5)
+        .max(6)
+        .describe('User story ID to link the task to (e.g. 145789)'),
+      description: z.string()
+        .optional()
+        .describe('Task description (optional)'),
+    },
+  },
+  async ({ title, userStoryId, description }) => {
+    const taskResponse = await tp.createTask<TP.Task>({ title, userStoryId, description });
+
+    if (!taskResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to create task "${title}"\n JSON: ${JSON.stringify(taskResponse, null, 2)}`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(taskResponse)
+      }],
+    };
+  }
+)
+
+server.registerTool(
+  'get_commit_message',
+  {
+    title: 'Get commit message for a task or bug',
+    description: `Returns the formatted commit message string for a given task or bug ID.
+Formats:
+- Task on a user story: "F#<featureId> US#<userStoryId> T#<taskId> <title>"
+- Bug on a user story: "F#<featureId> US#<userStoryId> B#<bugId> <title>"
+- Standalone bug (no user story): "B#<bugId> <title>"`,
+    inputSchema: {
+      id: z.string()
+        .describe('The task or bug ID (e.g. 145789)'),
+      type: z.enum(['task', 'bug'])
+        .describe('Whether the ID refers to a task or a bug'),
+    },
+  },
+  async ({ id, type }) => {
+    if (type === 'task') {
+      const task = await tp.getTask<TP.Task>(id)
+
+      if (!task) {
+        return {
+          content: [{ type: 'text', text: `Failed to get task with id: ${id}` }],
+        }
+      }
+
+      const userStory = task.UserStory
+      const feature = userStory?.Feature
+
+      if (!userStory) {
+        return {
+          content: [{ type: 'text', text: `Task ${id} has no linked user story` }],
+        }
+      }
+
+      const prefix = feature
+        ? `F#${feature.Id} US#${userStory.Id} T#${task.Id}`
+        : `US#${userStory.Id} T#${task.Id}`
+
+      return {
+        content: [{ type: 'text', text: `${prefix} ${task.Name}` }],
+      }
+    }
+
+    // type === 'bug'
+    const bug = await tp.getBugWithRelations<TP.Bug>(id)
+
+    if (!bug) {
+      return {
+        content: [{ type: 'text', text: `Failed to get bug with id: ${id}` }],
+      }
+    }
+
+    const userStory = bug.UserStory
+    const feature = userStory?.Feature ?? bug.Feature
+
+    if (!userStory) {
+      return {
+        content: [{ type: 'text', text: `B#${bug.Id} ${bug.Name}` }],
+      }
+    }
+
+    const prefix = feature
+      ? `F#${feature.Id} US#${userStory.Id} B#${bug.Id}`
+      : `US#${userStory.Id} B#${bug.Id}`
+
+    return {
+      content: [{ type: 'text', text: `${prefix} ${bug.Name}` }],
+    }
+  }
+)
+
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
