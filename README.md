@@ -48,6 +48,10 @@ Features
 User Stories
 - `get_user_story_bugs` — Get all bugs linked to a user story by its ID (id)
 
+Tasks
+- `get_in_progress_tasks_and_bugs` — Get all Tasks and Bugs currently in "In Progress" state assigned to a given user (userId)
+- `create_task` — Create a new task linked to a user story (title, userStoryId, optional description)
+
 Cards — Read
 - `get_card_current_status` — Get EntityState, TeamState, and assigned teams for a card (id, optional resourceType: UserStory | Bug | Feature, default: UserStory)
 - `get_bug_content` — Fetch full content of a bug by ID (id)
@@ -99,6 +103,12 @@ Teams
 
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
+
+Developer Tools
+- `get_commit_message` — Returns a formatted commit message string for a task or bug ID (id, type: task | bug)
+  > Format for task on a user story: `F#<featureId> US#<userStoryId> T#<taskId> <title>`
+  > Format for bug on a user story: `F#<featureId> US#<userStoryId> B#<bugId> <title>`
+  > Format for standalone bug: `B#<bugId> <title>`
 
 
 ---
