@@ -706,10 +706,10 @@ server.registerTool(
   {
     title: 'Create a new bug card based on provided card id',
     description: `Create a new bug card based on provided card id that summarizes the problem in concise, descriptive manner answering questions What? Where? When?, and content explaining what happened in detail. 
-      NOTE: this tool requires a user story or bug card as a reference (i.e. card ID).
+      NOTE: this tool requires a user story, bug, or feature card as a reference (i.e. card ID).
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
-        1) IF you already have user story or bug card content, proceed to step 3 skipping step 2;
-        2) ELSE call "get_user_story_content" tool or "get_bug_content" tool to get user story or bug card content;
+        1) IF you already have user story, bug, or feature card content, proceed to step 3 skipping step 2;
+        2) ELSE call "get_user_story_content" tool, "get_bug_content" tool, or fetch the feature to get card content;
         3) format the new bug inside html <div> tags with Environment, Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior and Attachments sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>);
         4) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
         5) IF the user specified a project by name (not ID), call "get_projects" to find the matching project and use its ID as projectId;
@@ -721,8 +721,8 @@ server.registerTool(
         id: z.string()
           .min(5)
           .max(6)
-          .describe(`Usually user story id or bug ID (e.g. 145789)`),
-        type: z.enum(["UserStory", "Bug"])
+          .describe(`Usually user story id, bug ID, or feature ID (e.g. 145789)`),
+        type: z.enum(["UserStory", "Bug", "Feature"])
       }),
       bugContent: z.string()
         .describe(`Comment content to add, explain what happened in detail.

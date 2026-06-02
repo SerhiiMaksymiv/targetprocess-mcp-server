@@ -116,7 +116,7 @@ export class TpClient {
     return response
   }
 
-  async createBug<T>({ title, card, bugContent, origin = "Manual QA", projectId, teamId }: { title: string, card: { id: string, type: "UserStory" | "Bug" }, bugContent: string, origin?: string, projectId?: string, teamId?: string }): Promise<T> {
+  async createBug<T>({ title, card, bugContent, origin = "Manual QA", projectId, teamId }: { title: string, card: { id: string, type: "UserStory" | "Bug" | "Feature" }, bugContent: string, origin?: string, projectId?: string, teamId?: string }): Promise<T> {
     const bug = {
       "Name": title,
       "Project": {
@@ -136,9 +136,9 @@ export class TpClient {
     } as any
 
     if (card.type === "UserStory") {
-      bug["UserStory"] = {
-        "Id": card.id
-      }
+      bug["UserStory"] = { "Id": card.id }
+    } else if (card.type === "Feature") {
+      bug["Feature"] = { "Id": card.id }
     }
 
     return this.post<any, T>({
