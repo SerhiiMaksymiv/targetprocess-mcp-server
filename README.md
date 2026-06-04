@@ -51,6 +51,8 @@ User Stories
 Tasks
 - `get_in_progress_tasks_and_bugs` — Get all Tasks and Bugs currently in "In Progress" state assigned to a given user (userId)
 - `create_task` — Create a new task linked to a user story (title, userStoryId, optional description)
+- `list_my_user_stories` — List User Stories assigned to the current user, optionally filtered by state (optional state, optional take, optional skip)
+- `list_my_bugs` — List Bugs assigned to the current user, optionally filtered by state (optional state, optional take, optional skip)
 
 Cards — Read
 - `get_card_current_status` — Get EntityState, TeamState, and assigned teams for a card (id, optional resourceType: UserStory | Bug | Feature, default: UserStory)
@@ -106,6 +108,10 @@ User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
 - `get_users` — Get all Targetprocess users (no params needed)
 - `get_user_by_id` — Get a single Targetprocess user by their ID (id)
+
+Time Tracking
+- `log_time` — Log time spent on a Task, User Story, or Bug (entityId, entityType: Task | UserStory | Bug, hours, optional description, optional date)
+- `get_my_time_logs` — Get recent time log entries submitted by the current user (optional take)
 
 Developer Tools
 - `get_commit_message` — Returns a formatted commit message string for a task or bug ID (id, type: task | bug)
