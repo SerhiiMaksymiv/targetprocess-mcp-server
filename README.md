@@ -63,6 +63,7 @@ Cards — Read
 
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
+- `add_comment_with_user` — Post a comment to any card and mention a specific user (id, comment, user object from `get_users`)
 - `update_bug` — Update an existing bug (id, optional title, optional bugContent, optional origin, optional projectId, optional teamId, optional entityStateId)
   > Resolve state name → ID via `get_bug_workflows` before passing `entityStateId`
 - `update_user_story` — Update an existing user story (id, optional title, optional description, optional projectId, optional teamId, optional entityStateId)
@@ -103,6 +104,8 @@ Teams
 
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
+- `get_users` — Get all Targetprocess users (no params needed)
+- `get_user_by_id` — Get a single Targetprocess user by their ID (id)
 
 Developer Tools
 - `get_commit_message` — Returns a formatted commit message string for a task or bug ID (id, type: task | bug)

@@ -88,7 +88,6 @@ export interface Comment {
   Owner: Owner
 }
 
-
 export interface UserStory {
   ResourceType: string
   Id: number
@@ -412,6 +411,12 @@ export interface EntityType {
   IsUnitInHourOnly: boolean
 }
 
+export interface EntityTypeV2 {
+  resourceType: string
+  id: number
+  name: string
+}
+
 export interface LastEditor {
   ResourceType: string
   Id: number
@@ -483,6 +488,14 @@ export interface Process {
   Id: number
 }
 
+export interface ProcessListItem {
+  ResourceType: string
+  Id: number
+  Name: string
+  IsDefault: boolean
+  Description: string | null
+}
+
 export interface ProcessV2 {
   resourceType: string
   id: number
@@ -545,6 +558,51 @@ export interface LoggedUser {
   Kind: string
 }
 
+export interface User {
+  ResourceType: string
+  Id: number
+  FirstName: string
+  LastName: string
+  Email: string
+  Login: string
+  FullName: string
+  CreateDate: string
+  ModifyDate: string
+  DeleteDate: any
+  IsActive: boolean
+  IsAdministrator: boolean
+  Locale: any
+  Kind: string
+  GlobalId: string
+  IsIntegration: boolean
+  AccessStartDate: any
+  AccessEndDate: any
+  FrontdoorUserId: any
+  FrontdoorUserRoles: any
+  PasswordHashAlgorithm: string
+  EntityVersion: number
+  LastLoginDate: string
+  WeeklyAvailableHours: number
+  CurrentAllocation: number
+  CurrentAvailableHours: any
+  AvailableFrom: any
+  AvailableFutureAllocation: any
+  AvailableFutureHours: any
+  IsObserver: boolean
+  IsContributor: boolean
+  LegacySkills: any
+  ActiveDirectoryName: any
+  RichEditor: string
+  Role: Role
+  CustomFields: CustomField[]
+}
+
+export interface Role {
+  ResourceType: string
+  Id: number
+  Name: string
+}
+
 export interface TpResponseV2<TpResponseItemsV2> {
   next: string
   items: TpResponseItemsV2[]
@@ -556,6 +614,33 @@ export interface WorkflowV2 {
   process: string
   entityType: string
   entityStates: WorkflowEntityStateV2[]
+}
+
+export interface WorkflowV2WithSubStates {
+  id: number
+  name: string
+  isInitial: boolean
+  isFinal: boolean
+  isDefaultFinal: boolean
+  isPlanned: boolean
+  workflow: WorkflowProcessV2
+  entityType: EntityTypeV2
+  subEntityStates: SubEntityStateV2[]
+}
+
+export interface WorkflowProcessV2 {
+  id: number
+  process: { id: number }
+}
+
+export interface SubEntityStateV2 {
+  id: number
+  name: string
+  entityType: EntityTypeV2
+  isInitial: boolean
+  isFinal: boolean
+  isDefaultFinal: boolean
+  isPlanned: boolean
 }
 
 export interface WorkflowEntityStateV2 {

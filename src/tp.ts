@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
-import { TpClientParameters, TpResponse, BugInputSchema, Bug, Task } from "./types.js";
+import { TpClientParameters, TpResponse, BugInputSchema, Bug, Task, LoggedUser } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -328,6 +328,39 @@ export class TpClient {
     }, testPlan) as T
   }
 
+  async getUser<T>(userId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Users", userId],
+      param: { "format": "json" },
+    }) as T
+  }
+
+  async getUsers<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Users"],
+      param: { "format": "json" },
+    }) as T
+  }
+
+  async addCommentWithUser<T>(userStoryId: string, comment: string, user: LoggedUser): Promise<T> {
+    const userAt = user ? `cc - <div>@user:${user.Email}[${user.FirstName} ${user.LastName}]&nbsp;</div>` : ''
+    const commentContent = `${comment}\nn${userAt}`
+    const commentData = {
+      description: commentContent,
+      owner: {
+        id: config.tp.ownerId
+      },
+      general: {
+        id: userStoryId,
+      },
+    }
+
+    return this.post<any, T>({
+      pathParam: ["comments"],
+      param: { "format": "json" },
+    }, commentData) as T
+  }
+
   async addComment<T>(userStoryId: string, comment: string): Promise<T> {
     const commentData = {
       description: comment,
@@ -604,6 +637,19 @@ export class TpClient {
         "select": `{Id,Name,Process,EntityType,EntityStates.Select({Id,Name}) as EntityStates}`,
         "where": `(process.id=${config.tp.processId} and entityType.name="userStory" and parentWorkflow=null)`,
         "take": "1",
+      },
+      apiVersion: this.v2
+    }) as T
+  }
+
+  async getUserStoryWorkflowsWithSubStates<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["EntityState"],
+      param: {
+        "format": "json",
+        "select": `{id,name,isInitial,isFinal,isDefaultFinal,isPlanned,workflow:{workflow.id,process:{workflow.process.id}},entityType:{entityType.name},subEntityStates:subEntityStates.Select({id,name,entityType:{entityType.name},isInitial,isFinal,isDefaultFinal,isPlanned})}`,
+        "where": `(parentEntityState==null and workflow.process.id in [${config.tp.processId}])`,
+        "take": "1000",
       },
       apiVersion: this.v2
     }) as T
