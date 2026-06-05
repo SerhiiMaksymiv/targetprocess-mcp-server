@@ -13,6 +13,8 @@ import { handleGetUserById } from "./handlers/get_user_by_id.js";
 import { handleGetCurrentReleases } from "./handlers/get_current_releases.js";
 import { handleGetBugContent } from "./handlers/get_bug_content.js";
 import { handleGetLoggedInUser } from "./handlers/get_logged_in_user.js";
+import { handleGetUserStoryContent } from "./handlers/get_user_story_content.js";
+import { handleGetCommitMessage } from "./handlers/get_commit_message.js";
 
 const server = new McpServer(
   {
@@ -49,56 +51,7 @@ server.registerTool(
         .describe('TP (or tp) ID (e.g. 145789)')
     },
   },
-  async ({ id }) => {
-    const userStory = await tp.getUserStory<TP.UserStory>(id)
-
-    if (!userStory) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to get user story, id: ${id}\n JSON: ${JSON.stringify(userStory, null, 2)}`
-        }],
-      }
-    }
-    const description = userStory.Description || '';
-    if (!description) {
-      return {
-        content: [{
-          type: "text",
-          text: `No description for ${id} tp card`,
-        }],
-      };
-    }
-
-    let userStoryResults = {
-      name: userStory.Name,
-      id: userStory.Id,
-      description: '',
-      feature: userStory.Feature?.Name,
-      featureId: userStory.Feature?.Id,
-      customFields: userStory.CustomFields,
-    }
-
-    try {
-      const dom = new JSDOM(`<html><body><div id="content">${description}</div></body></html>`)
-      const descriptionText = dom.window.document.getElementById('content')?.textContent
-
-      if (descriptionText) {
-        userStoryResults.description = descriptionText
-      }
-
-    } catch (error) {
-      console.error("Error parsing user story description:", error);
-      console.error("Returning user story without description");
-    }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(userStoryResults)
-      }],
-    };
-  }
+  async ({ id }) => handleGetUserStoryContent(tp, id)
 );
 
 server.registerTool(
@@ -1932,60 +1885,7 @@ Formats:
         .describe('Whether the ID refers to a task or a bug'),
     },
   },
-  async ({ id, type }) => {
-    if (type === 'task') {
-      const task = await tp.getTask<TP.Task>(id)
-
-      if (!task) {
-        return {
-          content: [{ type: 'text', text: `Failed to get task with id: ${id}` }],
-        }
-      }
-
-      const userStory = task.UserStory
-      const feature = userStory?.Feature
-
-      if (!userStory) {
-        return {
-          content: [{ type: 'text', text: `Task ${id} has no linked user story` }],
-        }
-      }
-
-      const prefix = feature
-        ? `F#${feature.Id} US#${userStory.Id} T#${task.Id}`
-        : `US#${userStory.Id} T#${task.Id}`
-
-      return {
-        content: [{ type: 'text', text: `${prefix} ${task.Name}` }],
-      }
-    }
-
-    // type === 'bug'
-    const bug = await tp.getBugWithRelations<TP.Bug>(id)
-
-    if (!bug) {
-      return {
-        content: [{ type: 'text', text: `Failed to get bug with id: ${id}` }],
-      }
-    }
-
-    const userStory = bug.UserStory
-    const feature = userStory?.Feature ?? bug.Feature
-
-    if (!userStory) {
-      return {
-        content: [{ type: 'text', text: `B#${bug.Id} ${bug.Name}` }],
-      }
-    }
-
-    const prefix = feature
-      ? `F#${feature.Id} US#${userStory.Id} B#${bug.Id}`
-      : `US#${userStory.Id} B#${bug.Id}`
-
-    return {
-      content: [{ type: 'text', text: `${prefix} ${bug.Name}` }],
-    }
-  }
+  async ({ id, type }) => handleGetCommitMessage(tp, id, type)
 )
 
 server.registerTool(
