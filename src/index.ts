@@ -21,7 +21,7 @@ import { handleGetReleaseFeatures } from "./handlers/get_release_features.js";
 import { handleGetReleaseOpenBugs } from "./handlers/get_release_open_bugs.js";
 import { handleGetReleaseOpenUserStories } from "./handlers/get_release_open_user_stories.js";
 import { handleGetUsers } from "./handlers/get_users.js";
-import { handleGetTeams } from "./handlers/get_teams.js";
+import { handleGetTeams, handleGetTeamsAndTeamAssignments } from "./handlers/get_teams.js";
 import { handleAddComment } from "./handlers/add_comment.js";
 import { handleGetUserStoryComments } from "./handlers/get_user_story_comments.js";
 import { handleGetBugComments } from "./handlers/get_bug_comments.js";
@@ -38,6 +38,7 @@ import { handleGetMyTimeLogs } from "./handlers/get_my_time_logs.js";
 import { handleGetFeatureUserStories } from "./handlers/get_feature_user_stories.js";
 import { handleGetUserStoryBugs } from "./handlers/get_user_story_bugs.js";
 import { handleGetCardCurrentStatus } from "./handlers/get_card_current_status.js";
+import { handleUpdateUserStorySubState } from "./handlers/update_user_story_sub_state.js";
 
 const server = new McpServer(
   {
@@ -524,6 +525,31 @@ server.registerTool(
 )
 
 server.registerTool(
+  'update_user_story_state',
+  {
+    title: 'Update a user story card sub state',
+    description: `Update a user story card sub state with data provided from user input.
+    CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
+      1) call "get_user_story_content" to find the matching team, assigned (responsible) team and their IDs
+      1) call "get_user_story_workflows" to find matching state and use its ID in entityStateId`,
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('User story card ID (e.g. 145789)'),
+      entityStateId: z.string()
+        .optional()
+        .describe('Entity state ID, resolve it via "get_user_story_workflows" first'),
+      teamId: z.string()
+        .optional()
+        .describe('Team ID, resolve it via "get_teams" first'),
+      teamAssignmentId: z.string()
+        .optional()
+        .describe('Team Assignment ID, resolve it via "get_user_story_content" first'),
+    },
+  }, async ({ id, teamId, teamAssignmentId, entityStateId }) => handleUpdateUserStorySubState(tp, { id, teamId, teamAssignmentId, entityStateId }))
+
+server.registerTool(
   'update_user_story',
   {
     title: 'Update a user story card',
@@ -874,6 +900,11 @@ server.registerTool(
   },
   async () => handleGetProjects(tp)
 );
+
+server.registerTool('get_teams_and_team_assignments', {
+  title: 'Get teams and team assignments',
+  description: 'Get all Targetprocess teams and team assignments',
+}, async () => handleGetTeamsAndTeamAssignments(tp))
 
 server.registerTool(
   'get_teams',
@@ -1268,8 +1299,7 @@ server.registerTool(
       id: w.id,
       processId: w.workflow.process.id,
       entityType: w.entityType.name,
-      entityState: w.name,
-      entitySubStates: w.subEntityStates.map((es) => ({
+      entityStates: w.subEntityStates.map((es) => ({
         id: es.id,
         name: es.name,
       })),

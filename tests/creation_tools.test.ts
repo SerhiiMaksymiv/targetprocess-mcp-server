@@ -4,6 +4,7 @@ import { handleCreateUserStory } from '../src/handlers/create_user_story.js'
 import { handleCreateFeature } from '../src/handlers/create_feature.js'
 import { handleCreateTask } from '../src/handlers/create_task.js'
 import { handleUpdateBug } from '../src/handlers/update_bug.js'
+import { handleUpdateUserStorySubState } from '../src/handlers/update_user_story_sub_state.js'
 import type { TpClient } from '../src/tp.js'
 
 const mockTp = {
@@ -12,6 +13,7 @@ const mockTp = {
   createFeature: vi.fn(),
   createTask: vi.fn(),
   updateBug: vi.fn(),
+  updateUserStorySubState: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -151,5 +153,43 @@ describe('handleUpdateBug', () => {
     await handleUpdateBug(mockTp, { id: '100', title: 'T', bugContent: 'B', entityStateId: '5' })
 
     expect(mockTp.updateBug).toHaveBeenCalledWith({ id: '100', title: 'T', bugContent: 'B', entityStateId: '5' })
+  })
+})
+
+describe('handleUpdateUserStorySubState', () => {
+  it('returns updated user story on success', async () => {
+    vi.mocked(mockTp.updateUserStorySubState).mockResolvedValue({ Id: 145789, Name: 'My Story' } as any)
+
+    const result = await handleUpdateUserStorySubState(mockTp, { id: '145789', entityStateId: '42' })
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.Id).toBe(145789)
+    expect(parsed.Name).toBe('My Story')
+  })
+
+  it('returns failure message when response is null', async () => {
+    vi.mocked(mockTp.updateUserStorySubState).mockResolvedValue(null as any)
+
+    const result = await handleUpdateUserStorySubState(mockTp, { id: '145789' })
+
+    expect(result.content[0].text).toContain('Failed to update user story sub state id: 145789')
+  })
+
+  it('calls updateUserStorySubState with all provided params', async () => {
+    vi.mocked(mockTp.updateUserStorySubState).mockResolvedValue({ Id: 1 } as any)
+
+    await handleUpdateUserStorySubState(mockTp, {
+      id: '145789',
+      teamId: '10',
+      teamAssignmentId: '99',
+      entityStateId: '42',
+    })
+
+    expect(mockTp.updateUserStorySubState).toHaveBeenCalledWith({
+      id: '145789',
+      teamId: '10',
+      teamAssignmentId: '99',
+      entityStateId: '42',
+    })
   })
 })

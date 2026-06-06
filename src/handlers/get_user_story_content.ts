@@ -31,6 +31,8 @@ export async function handleGetUserStoryContent(tp: TpClient, id: string) {
     feature: userStory.Feature?.Name,
     featureId: userStory.Feature?.Id,
     customFields: userStory.CustomFields,
+    assignedTeams: userStory.ResponsibleTeam,
+    team: userStory.Team,
   }
 
   try {

@@ -298,6 +298,22 @@ export interface Owner {
   FullName: string
 }
 
+export interface Assignable {
+  ResourceType: string
+  Id: number
+  Name: string
+}
+
+export interface TeamAssignment {
+  ResourceType: string
+  Id: number
+  StartDate: string
+  EndDate: string
+  Team: Team
+  Assignable: Assignable
+  EntityState: EntityState
+}
+
 export interface Team {
   ResourceType: string
   Id: number

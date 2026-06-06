@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "rimraf build dist",
     "build": "tsc",
-    "postbuild": "shx chmod +x build/**/*.js",
+    "postbuild": "node chmod.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

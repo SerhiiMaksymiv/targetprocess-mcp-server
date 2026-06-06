@@ -24,3 +24,27 @@ export async function handleGetTeams(tp: TpClient) {
     content: [{ type: 'text' as const, text: JSON.stringify(items.map((t) => ({ id: t.Id, name: t.Name }))) }],
   }
 }
+
+export async function handleGetTeamsAndTeamAssignments(tp: TpClient) {
+  const teams = await tp.getTeams<TP.TpResponse<TP.Team>>()
+  const teamAssignments = await tp.getTeamAssignments<TP.TpResponse<TP.TeamAssignment>>()
+
+  if (!teams || !teamAssignments) {
+    return {
+      content: [{
+        type: 'text' as const,
+        text: `Failed to get teams and team assignments, JSON: ${JSON.stringify({ teams, teamAssignments }, null, 2)}`
+      }],
+    }
+  }
+
+  return {
+    content: [{
+      type: 'text' as const,
+      text: JSON.stringify({
+        teams: teams.Items.map((t) => ({ id: t.Id, name: t.Name })),
+        teamAssignments: teamAssignments.Items.map((t) => ({ id: t.Id, name: t.Team.Name })),
+      }),
+    }],
+  }
+}

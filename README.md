@@ -70,6 +70,9 @@ Cards — Write
   > Resolve state name → ID via `get_bug_workflows` before passing `entityStateId`
 - `update_user_story` — Update an existing user story (id, optional title, optional description, optional projectId, optional teamId, optional entityStateId)
   > Resolve state name → ID via `get_user_story_workflows` before passing `entityStateId`
+- `update_user_story_state` — Update the sub-state (team assignment entity state) for a user story (id, optional entityStateId, optional teamId, optional teamAssignmentId)
+  > 1. Call `get_user_story_content` first to find the assigned team and `teamAssignmentId`
+  > 2. Call `get_user_story_workflows` to resolve the target state name → `entityStateId`
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin, optional projectId, optional teamId, optional entityStateName)
   > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
   > `entityStateName` accepted values: `Backlog`, `In Triage`, `Ready for Dev`, `In Dev`, `Blocked`, `PR Raised`, `Ready for Feature PCH`, `Ready for Feature QA`, `In Feature QA`, `Failed Feature QA`, `Ready for Merge`, `Ready to Deploy to Dev01`, `Ready for Dev01 QA`, `In Dev01 QA`, `Failed Dev01 QA`, `Ready to Deploy to prod`, `Closed`
@@ -103,6 +106,7 @@ Projects
 
 Teams
 - `get_teams` — Get all Targetprocess teams returning id and name (no params needed)
+- `get_teams_and_team_assignments` — Get all teams and team assignments (id and name for each) (no params needed)
 
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
@@ -195,7 +199,7 @@ npx vitest            # watch mode
 
 ### Coverage
 
-**31 of 44 tools (70%) are covered by unit tests.**
+**33 of 46 tools (72%) are covered by unit tests.**
 
 | Test file | Handlers covered |
 |---|---|
@@ -207,8 +211,8 @@ npx vitest            # watch mode
 | `get_logged_in_user.test.ts` | `get_logged_in_user` |
 | `get_user_by_id.test.ts` | `get_user_by_id` |
 | `release_tools.test.ts` | `get_release_user_stories`, `get_release_bugs`, `get_release_features`, `get_release_open_bugs`, `get_release_open_user_stories` |
-| `user_team_tools.test.ts` | `get_users`, `get_teams` |
+| `user_team_tools.test.ts` | `get_users`, `get_teams`, `get_teams_and_team_assignments` |
 | `comment_tools.test.ts` | `add_comment`, `get_user_story_comments`, `get_bug_comments` |
-| `creation_tools.test.ts` | `create_bug`, `create_user_story`, `create_feature`, `create_task`, `update_bug` |
+| `creation_tools.test.ts` | `create_bug`, `create_user_story`, `create_feature`, `create_task`, `update_bug`, `update_user_story_state` |
 | `my_work_tools.test.ts` | `get_in_progress_tasks_and_bugs`, `list_my_user_stories`, `list_my_bugs`, `log_time`, `get_my_time_logs` |
 | `entity_tools.test.ts` | `get_feature_user_stories`, `get_user_story_bugs`, `get_card_current_status` |

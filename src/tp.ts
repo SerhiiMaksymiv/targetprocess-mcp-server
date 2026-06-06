@@ -73,6 +73,8 @@ export class TpClient {
   private async post<T, U>(params: TpClientParameters, data: T): Promise<U | null> {
     params.param["access_token"] = this.token
     let _url = this.params(params)
+    console.error(JSON.stringify({ "TP_POST_URL": _url }))
+    console.error(JSON.stringify({ "TP_POST_BODY": data }))
     try {
       const response = await fetch(_url, {
         method: "POST",
@@ -147,8 +149,38 @@ export class TpClient {
     }, bug) as T
   }
 
+  async updateUserStorySubState<T>({
+    id,
+    teamId,
+    teamAssignmentId,
+    entityStateId
+  }: { id: string, teamId?: string, teamAssignmentId?: string, entityStateId?: string }): Promise<T> {
+    const userStory: Record<string, any> = { "id": id }
 
-  async updateUserStory<T>({ id, title, description, projectId, teamId, entityStateId }: { id: string, title?: string, description?: string, projectId?: string, teamId?: string, entityStateId?: string }): Promise<T> {
+    if (entityStateId) userStory["assignedTeams"] = [{
+      "id": teamAssignmentId,
+      "team": {
+        "id": teamId
+      },
+      "entityState": {
+        "id": entityStateId
+      }
+    }]
+
+    return this.post<any, T>({
+      pathParam: ["UserStories", id],
+      param: { "format": "json" },
+    }, userStory) as T
+  }
+
+  async updateUserStory<T>({
+    id,
+    title,
+    description,
+    projectId,
+    teamId,
+    entityStateId
+  }: { id: string, title?: string, description?: string, projectId?: string, teamId?: string, teamAssignmentId?: string, entityStateId?: string }): Promise<T> {
     const userStory: Record<string, any> = { "Id": id }
 
     if (title) userStory["Name"] = title
@@ -618,6 +650,13 @@ export class TpClient {
   async getProcesses<T>(): Promise<T> {
     return this.get<T>({
       pathParam: ["Processes"],
+      param: { "format": "json" },
+    }) as T
+  }
+
+  async getTeamAssignments<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["TeamAssignments"],
       param: { "format": "json" },
     }) as T
   }

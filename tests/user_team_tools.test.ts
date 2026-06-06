@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { handleGetUsers } from '../src/handlers/get_users.js'
-import { handleGetTeams } from '../src/handlers/get_teams.js'
+import { handleGetTeams, handleGetTeamsAndTeamAssignments } from '../src/handlers/get_teams.js'
 import type { TpClient } from '../src/tp.js'
 
 const mockTp = {
   getUsers: vi.fn(),
   getTeams: vi.fn(),
+  getTeamAssignments: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -80,5 +81,42 @@ describe('handleGetTeams', () => {
     const result = await handleGetTeams(mockTp)
 
     expect(result.content[0].text).toBe('No teams found')
+  })
+})
+
+describe('handleGetTeamsAndTeamAssignments', () => {
+  it('returns teams and team assignments as JSON', async () => {
+    vi.mocked(mockTp.getTeams).mockResolvedValue({
+      Next: '',
+      Items: [{ Id: 10, Name: 'Alpha Team' }] as any,
+    })
+    vi.mocked(mockTp.getTeamAssignments).mockResolvedValue({
+      Next: '',
+      Items: [{ Id: 99, Team: { Name: 'Alpha Team' } }] as any,
+    })
+
+    const result = await handleGetTeamsAndTeamAssignments(mockTp)
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.teams).toEqual([{ id: 10, name: 'Alpha Team' }])
+    expect(parsed.teamAssignments).toEqual([{ id: 99, name: 'Alpha Team' }])
+  })
+
+  it('returns failure message when teams returns null', async () => {
+    vi.mocked(mockTp.getTeams).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTeamAssignments).mockResolvedValue({ Next: '', Items: [] })
+
+    const result = await handleGetTeamsAndTeamAssignments(mockTp)
+
+    expect(result.content[0].text).toContain('Failed to get teams and team assignments')
+  })
+
+  it('returns failure message when team assignments returns null', async () => {
+    vi.mocked(mockTp.getTeams).mockResolvedValue({ Next: '', Items: [{ Id: 10, Name: 'Alpha Team' }] as any })
+    vi.mocked(mockTp.getTeamAssignments).mockResolvedValue(null as any)
+
+    const result = await handleGetTeamsAndTeamAssignments(mockTp)
+
+    expect(result.content[0].text).toContain('Failed to get teams and team assignments')
   })
 })
