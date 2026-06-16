@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
-import { TpClientParameters, TpResponse, BugInputSchema, Bug, Task, LoggedUser } from "./types.js";
+import { TpClientParameters, TpResponse, TpResult, Relation, BugInputSchema, Bug, Task, LoggedUser } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -73,6 +73,8 @@ export class TpClient {
   private async post<T, U>(params: TpClientParameters, data: T): Promise<U | null> {
     params.param["access_token"] = this.token
     let _url = this.params(params)
+    console.error(JSON.stringify({ "TP_POST_URL": _url }))
+    console.error(JSON.stringify({ "TP_POST_BODY": data }))
     try {
       const response = await fetch(_url, {
         method: "POST",
@@ -86,6 +88,54 @@ export class TpClient {
     } catch (error) {
       console.error("Error making TP request:", error);
       return null;
+    }
+  }
+
+  // Like post(), but on failure returns the HTTP status and raw response body
+  // instead of null, so callers can surface TP's error detail to the user.
+  private async postRaw<T, U>(params: TpClientParameters, data: T): Promise<TpResult<U>> {
+    params.param["access_token"] = this.token
+    let _url = this.params(params)
+    console.error(JSON.stringify({ "TP_POST_URL": _url }))
+    console.error(JSON.stringify({ "TP_POST_BODY": data }))
+    try {
+      const response = await fetch(_url, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify(data),
+      });
+      const text = await response.text()
+      if (!response.ok) {
+        console.error(JSON.stringify({ "TP_POST_ERROR_STATUS": response.status, "TP_POST_ERROR_BODY": text }))
+        return { ok: false, status: response.status, body: text }
+      }
+      return { ok: true, data: (text ? JSON.parse(text) : null) as U }
+    } catch (error) {
+      console.error("Error making TP request:", error);
+      return { ok: false, status: 0, body: String(error) }
+    }
+  }
+
+  // DELETE request that, like postRaw(), surfaces the HTTP status and raw
+  // response body on failure so callers can report TP's error detail.
+  private async del<U>(params: TpClientParameters): Promise<TpResult<U>> {
+    params.param["access_token"] = this.token
+    let _url = this.params(params)
+    console.error(JSON.stringify({ "TP_DELETE_URL": _url }))
+    try {
+      const response = await fetch(_url, {
+        method: "DELETE",
+        headers: this.headers,
+      });
+      const text = await response.text()
+      if (!response.ok) {
+        console.error(JSON.stringify({ "TP_DELETE_ERROR_STATUS": response.status, "TP_DELETE_ERROR_BODY": text }))
+        return { ok: false, status: response.status, body: text }
+      }
+      return { ok: true, data: (text ? JSON.parse(text) : null) as U }
+    } catch (error) {
+      console.error("Error making TP request:", error);
+      return { ok: false, status: 0, body: String(error) }
     }
   }
 
@@ -147,8 +197,38 @@ export class TpClient {
     }, bug) as T
   }
 
+  async updateUserStorySubState<T>({
+    id,
+    teamId,
+    teamAssignmentId,
+    entityStateId
+  }: { id: string, teamId?: string, teamAssignmentId?: string, entityStateId?: string }): Promise<T> {
+    const userStory: Record<string, any> = { "id": id }
 
-  async updateUserStory<T>({ id, title, description, projectId, teamId, entityStateId }: { id: string, title?: string, description?: string, projectId?: string, teamId?: string, entityStateId?: string }): Promise<T> {
+    if (entityStateId) userStory["assignedTeams"] = [{
+      "id": teamAssignmentId,
+      "team": {
+        "id": teamId
+      },
+      "entityState": {
+        "id": entityStateId
+      }
+    }]
+
+    return this.post<any, T>({
+      pathParam: ["UserStories", id],
+      param: { "format": "json" },
+    }, userStory) as T
+  }
+
+  async updateUserStory<T>({
+    id,
+    title,
+    description,
+    projectId,
+    teamId,
+    entityStateId
+  }: { id: string, title?: string, description?: string, projectId?: string, teamId?: string, teamAssignmentId?: string, entityStateId?: string }): Promise<T> {
     const userStory: Record<string, any> = { "Id": id }
 
     if (title) userStory["Name"] = title
@@ -622,6 +702,13 @@ export class TpClient {
     }) as T
   }
 
+  async getTeamAssignments<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["TeamAssignments"],
+      param: { "format": "json" },
+    }) as T
+  }
+
   async getTeams<T>(): Promise<T> {
     return this.get<T>({
       pathParam: ["Teams"],
@@ -822,6 +909,59 @@ export class TpClient {
         "skip": skip,
       },
     }) as T
+  }
+
+  // TP's Relations endpoint silently returns nothing for an OR across
+  // Master.Id/Slave.Id, so we query each side separately and merge the results.
+  async getCardRelations(cardId: string): Promise<TpResponse<Relation>> {
+    const include = "[Id,RelationType[Name],Master[Id,Name,EntityType],Slave[Id,Name,EntityType]]"
+    const query = (side: "Master" | "Slave") => this.get<TpResponse<Relation>>({
+      pathParam: ["Relations"],
+      param: {
+        "format": "json",
+        "where": `${side}.Id eq ${cardId}`,
+        "include": include,
+        "take": 100,
+      },
+    })
+
+    const [asMaster, asSlave] = await Promise.all([query("Master"), query("Slave")])
+    const items = [...(asMaster?.Items ?? []), ...(asSlave?.Items ?? [])]
+
+    return { Next: "", Items: items }
+  }
+
+  async getRelationTypes<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["RelationTypes"],
+      param: {
+        "format": "json",
+        "include": "[Id,Name]",
+        "take": 100,
+      },
+    }) as T
+  }
+
+  // RelationType must be referenced by Id — passing it by Name makes TP try to
+  // create a new RelationType resource, which returns 405 Method Not Allowed.
+  async createRelation<T>({ masterId, slaveId, relationTypeId }: { masterId: string, slaveId: string, relationTypeId: string }): Promise<TpResult<T>> {
+    const relation = {
+      "Master": { "Id": masterId },
+      "Slave": { "Id": slaveId },
+      "RelationType": { "Id": relationTypeId },
+    }
+
+    return this.postRaw<any, T>({
+      pathParam: ["Relations"],
+      param: { "format": "json" },
+    }, relation)
+  }
+
+  async deleteRelation<T>(relationId: string): Promise<TpResult<T>> {
+    return this.del<T>({
+      pathParam: ["Relations", relationId],
+      param: { "format": "json" },
+    })
   }
 
   async addAttachedFile(generalId: string, source: { filePath: string } | { fileContent: string; fileName: string }): Promise<string | null> {

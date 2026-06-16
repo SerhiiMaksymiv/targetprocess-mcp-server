@@ -61,6 +61,8 @@ Cards — Read
 - `get_bug_comments` — Get comments on a bug (id, optional results)
 - `get_user_story_comments` — Get comments on a user story (id, optional results)
 - `get_user_story_test_cases` — Fetch the linked test plan and all its test cases (with steps) for a user story (resourceId)
+- `get_card_relations` — Get all relations (Dependency, Blocker, Relation, Link, Duplicate) for a card, with direction and the related card (id)
+- `get_relation_types` — List the relation types available in this instance (id + name); use to find the `relationType` name for `create_card_relation` (no params)
 - `search_tp_cards` — Search TP cards by keyword or phrase in description (keyword, optional entityType: UserStories | Bugs, default: UserStories)
 
 Cards — Write
@@ -70,6 +72,14 @@ Cards — Write
   > Resolve state name → ID via `get_bug_workflows` before passing `entityStateId`
 - `update_user_story` — Update an existing user story (id, optional title, optional description, optional projectId, optional teamId, optional entityStateId)
   > Resolve state name → ID via `get_user_story_workflows` before passing `entityStateId`
+- `create_card_relation` — Create a relation between two cards (masterId, slaveId, optional relationType name, default: "Depends on")
+  > The Slave depends on the Master — the Master must be done first
+  > `relationType` is matched by name against this instance's types; resolve exact names via `get_relation_types` (it's resolved to an ID before the API call, since TP rejects relation types passed by name)
+- `delete_card_relation` — Remove a relation by its relation ID (relationId)
+  > Get the `relationId` from `get_card_relations` first — it's the relation's own ID, not a card ID
+- `update_user_story_state` — Update the sub-state (team assignment entity state) for a user story (id, optional entityStateId, optional teamId, optional teamAssignmentId)
+  > 1. Call `get_user_story_content` first to find the assigned team and `teamAssignmentId`
+  > 2. Call `get_user_story_workflows` to resolve the target state name → `entityStateId`
 - `create_bug` — Create a standalone bug (title, bugContent, optional origin, optional projectId, optional teamId, optional entityStateName)
   > `origin` accepted values: `Production - Customer`, `Production - Internal`, `Pre-Release - Customer`, `Pre-Release - Internal`, `Regression - Dev01`, `Regression - Team Env`, `Manual QA` *(default)*, `Developer Raised`, `Operations`
   > `entityStateName` accepted values: `Backlog`, `In Triage`, `Ready for Dev`, `In Dev`, `Blocked`, `PR Raised`, `Ready for Feature PCH`, `Ready for Feature QA`, `In Feature QA`, `Failed Feature QA`, `Ready for Merge`, `Ready to Deploy to Dev01`, `Ready for Dev01 QA`, `In Dev01 QA`, `Failed Dev01 QA`, `Ready to Deploy to prod`, `Closed`
@@ -106,6 +116,7 @@ Projects
 
 Teams
 - `get_teams` — Get all Targetprocess teams returning id and name (no params needed)
+- `get_teams_and_team_assignments` — Get all teams and team assignments (id and name for each) (no params needed)
 
 User
 - `get_logged_in_user` — Get the currently logged-in user's info (no params needed)
@@ -186,3 +197,32 @@ cd targetprocess-mcp-server
 npm install
 npm run build
 ```
+
+## Testing
+
+Tests live in `tests/` and use [Vitest](https://vitest.dev/). All tool handlers are extracted to `src/handlers/` and tested with mocked `TpClient` instances — no network calls are made.
+
+```bash
+npx vitest run        # run all tests once
+npx vitest            # watch mode
+```
+
+### Coverage
+
+**33 of 46 tools (72%) are covered by unit tests.**
+
+| Test file | Handlers covered |
+|---|---|
+| `get_bug_content.test.ts` | `get_bug_content` |
+| `get_user_story_content.test.ts` | `get_user_story_content` |
+| `get_commit_message.test.ts` | `get_commit_message` |
+| `get_current_releases.test.ts` | `get_current_releases` |
+| `get_projects.test.ts` | `get_projects` |
+| `get_logged_in_user.test.ts` | `get_logged_in_user` |
+| `get_user_by_id.test.ts` | `get_user_by_id` |
+| `release_tools.test.ts` | `get_release_user_stories`, `get_release_bugs`, `get_release_features`, `get_release_open_bugs`, `get_release_open_user_stories` |
+| `user_team_tools.test.ts` | `get_users`, `get_teams`, `get_teams_and_team_assignments` |
+| `comment_tools.test.ts` | `add_comment`, `get_user_story_comments`, `get_bug_comments` |
+| `creation_tools.test.ts` | `create_bug`, `create_user_story`, `create_feature`, `create_task`, `update_bug`, `update_user_story_state` |
+| `my_work_tools.test.ts` | `get_in_progress_tasks_and_bugs`, `list_my_user_stories`, `list_my_bugs`, `log_time`, `get_my_time_logs` |
+| `entity_tools.test.ts` | `get_feature_user_stories`, `get_user_story_bugs`, `get_card_current_status` |

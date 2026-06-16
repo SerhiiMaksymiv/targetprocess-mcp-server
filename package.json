@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "rimraf build dist",
     "build": "tsc",
-    "postbuild": "shx chmod +x build/**/*.js",
+    "postbuild": "node chmod.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -27,7 +27,7 @@
   "engines": {
     "node": ">=20.x"
   },
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "MCP server for Tartget Process",
   "main": "build/index.js",
   "keywords": [

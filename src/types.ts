@@ -45,6 +45,10 @@ export interface TpResponse<T> {
   Items: T[]
 }
 
+export type TpResult<U> =
+  | { ok: true; data: U }
+  | { ok: false; status: number; body: string }
+
 export interface GeneralSearchResponse {
   Next: string
   Items: General[]
@@ -296,6 +300,22 @@ export interface Owner {
   LastName: string
   Login: string
   FullName: string
+}
+
+export interface Assignable {
+  ResourceType: string
+  Id: number
+  Name: string
+}
+
+export interface TeamAssignment {
+  ResourceType: string
+  Id: number
+  StartDate: string
+  EndDate: string
+  Team: Team
+  Assignable: Assignable
+  EntityState: EntityState
 }
 
 export interface Team {
@@ -722,6 +742,27 @@ export interface CardStatus {
   entityState: CardStatusEntityState
   teamState: CardStatusTeamState
   teams: CardStatusAssignedTeam[]
+}
+
+export interface RelationType {
+  ResourceType: string
+  Id: number
+  Name: string
+}
+
+export interface RelationEntity {
+  ResourceType: string
+  Id: number
+  Name: string
+  EntityType: EntityType
+}
+
+export interface Relation {
+  ResourceType: string
+  Id: number
+  RelationType: RelationType
+  Master: RelationEntity
+  Slave: RelationEntity
 }
 
 export interface TimeLog {
