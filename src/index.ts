@@ -998,6 +998,153 @@ server.registerTool(
 )
 
 server.registerTool(
+  'create_formatted_user_story',
+  {
+    title: 'Create a formatted user story',
+    description: `Create a new user story in Targetprocess with a structured, template-driven description.
+      The description is assembled from discrete sections (header, definitions, acceptance criteria, Gherkin scenarios, edge cases, references, notes) and stored as HTML.
+      CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
+        1) IF the user specified a feature by name (not ID), call "get_feature_user_stories" or "search_tp_cards" to resolve the feature ID;
+        2) IF the user specified a release by name (not ID), call "get_current_releases" to resolve the release ID;
+        3) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
+        4) IF the user specified a project by name (not ID), call "get_projects" to find the matching project and use its ID as projectId;`,
+    inputSchema: {
+      title: z.string()
+        .describe('User story title'),
+      header: z.object({
+        storyId: z.string()
+          .optional()
+          .describe('Story ID if already known (e.g. US-12345), omit for new stories'),
+        asA: z.string()
+          .describe('Role or persona — the "As a ..." part'),
+        iWant: z.string()
+          .describe('Goal — the "I want ..." part'),
+        soThat: z.string()
+          .describe('Benefit — the "so that ..." part'),
+      })
+        .describe('Story header following the As a / I want / so that format'),
+      definitions: z.string()
+        .optional()
+        .describe('Any module names, feature flags, or domain terms referenced in the scenarios that need clarification'),
+      acceptanceCriteria: z.array(z.string())
+        .min(1)
+        .describe('Bullet checklist items for quick review sign-off — each string is one criterion'),
+      scenarios: z.array(z.object({
+        name: z.string()
+          .describe('Scenario name'),
+        steps: z.array(z.string())
+          .min(1)
+          .describe('Gherkin steps — each string is a full step line, e.g. "Given I am on the login page"'),
+      }))
+        .min(1)
+        .describe('Gherkin scenario blocks, one per behavior branch'),
+      examplesTable: z.string()
+        .optional()
+        .describe('Examples table for parameterized or matrix behavior (plain text or Gherkin Examples: table format)'),
+      edgeCases: z.array(z.object({
+        name: z.string()
+          .describe('Edge case scenario name'),
+        steps: z.array(z.string())
+          .min(1)
+          .describe('Gherkin steps for this edge case'),
+      }))
+        .optional()
+        .describe('Explicit edge case or boundary condition scenarios'),
+      references: z.string()
+        .optional()
+        .describe('Links to Axure mockups or other external references (not inline in prose)'),
+      notes: z.string()
+        .optional()
+        .describe('Anything that helps understand the story context but does not fit other sections'),
+      featureId: z.string()
+        .min(5)
+        .max(6)
+        .optional()
+        .describe('Optional Feature ID to link this user story to (e.g. 145636)'),
+      releaseId: z.string()
+        .min(5)
+        .max(6)
+        .optional()
+        .describe('Optional Release ID to link this user story to (e.g. 145200)'),
+      projectId: z.string()
+        .optional()
+        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+      teamId: z.string()
+        .optional()
+        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
+    },
+  },
+  async ({ title, header, definitions, acceptanceCriteria, scenarios, examplesTable, edgeCases, references, notes, featureId, releaseId, projectId, teamId }) => {
+    const gherkinBlock = (items: { name: string; steps: string[] }[]) =>
+      items.map(s => `<pre>Scenario: ${s.name}\n${s.steps.map(step => `  ${step}`).join('\n')}</pre>`).join('\n')
+
+    const parts: string[] = ['<div>']
+
+    parts.push('<h3>Header</h3>')
+    if (header.storyId) parts.push(`<p><strong>Story ID:</strong> ${header.storyId}</p>`)
+    parts.push(`<p><strong>Title:</strong> ${title}</p>`)
+    parts.push(`<p>As a ${header.asA} / I want ${header.iWant} / so that ${header.soThat}</p>`)
+
+    if (definitions) {
+      parts.push('<h3>Definitions</h3>')
+      parts.push(`<p>${definitions}</p>`)
+    }
+
+    parts.push('<h3>Acceptance Criteria</h3>')
+    parts.push('<ul>')
+    for (const criterion of acceptanceCriteria) {
+      parts.push(`<li>[ ] ${criterion}</li>`)
+    }
+    parts.push('</ul>')
+
+    parts.push('<h3>Scenarios</h3>')
+    parts.push(gherkinBlock(scenarios))
+
+    if (examplesTable) {
+      parts.push('<h3>Examples</h3>')
+      parts.push(`<pre>${examplesTable}</pre>`)
+    }
+
+    if (edgeCases && edgeCases.length > 0) {
+      parts.push('<h3>Edge Cases</h3>')
+      parts.push(gherkinBlock(edgeCases))
+    }
+
+    if (references) {
+      parts.push('<h3>References</h3>')
+      parts.push(`<p>${references}</p>`)
+    }
+
+    if (notes) {
+      parts.push('<h3>Notes</h3>')
+      parts.push(`<p>${notes}</p>`)
+    }
+
+    parts.push('</div>')
+
+    const description = parts.join('\n')
+
+    const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId });
+
+    if (!userStoryResponse) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to create formatted user story "${title}"\n JSON: ${JSON.stringify(userStoryResponse, null, 2)}`
+        }]
+      };
+    }
+
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(userStoryResponse)
+      }],
+    };
+  }
+)
+
+server.registerTool(
   'create_feature',
   {
     title: 'Create a new feature',
