@@ -26,7 +26,7 @@ import { handleAddComment } from "./handlers/add_comment.js";
 import { handleGetUserStoryComments } from "./handlers/get_user_story_comments.js";
 import { handleGetBugComments } from "./handlers/get_bug_comments.js";
 import { handleCreateBug } from "./handlers/create_bug.js";
-import { handleCreateUserStory } from "./handlers/create_user_story.js";
+// import { handleCreateUserStory } from "./handlers/create_user_story.js";
 import { handleCreateFeature } from "./handlers/create_feature.js";
 import { handleCreateTask } from "./handlers/create_task.js";
 import { handleUpdateBug } from "./handlers/update_bug.js";
@@ -649,41 +649,41 @@ server.registerTool(
     handleCreateBug(tp, { title, bugContent, origin, projectId, teamId, entityStateId })
 )
 
-server.registerTool(
-  'create_user_story',
-  {
-    title: 'Create a new user story',
-    description: `Create a new user story in Targetprocess.`,
-    inputSchema: {
-      title: z.string()
-        .describe('User story title'),
-      description: z.string()
-        .optional()
-        .describe('Optional user story description (when provided, format as HTML)'),
-      featureId: z.string()
-        .min(5)
-        .max(6)
-        .optional()
-        .describe('Optional Feature ID to link this user story to (e.g. 145636)'),
-      releaseId: z.string()
-        .min(5)
-        .max(6)
-        .optional()
-        .describe('Optional Release ID to link this user story to (e.g. 145200)'),
-      projectId: z.string()
-        .optional()
-        .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
-      teamId: z.string()
-        .optional()
-        .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
-    },
-  },
-  async ({ title, description, featureId, releaseId, projectId, teamId }) =>
-    handleCreateUserStory(tp, { title, description, featureId, releaseId, projectId, teamId })
-)
+// server.registerTool(
+//   'create_user_story',
+//   {
+//     title: 'Create a new user story',
+//     description: `Create a new user story in Targetprocess.`,
+//     inputSchema: {
+//       title: z.string()
+//         .describe('User story title'),
+//       description: z.string()
+//         .optional()
+//         .describe('Optional user story description (when provided, format as HTML)'),
+//       featureId: z.string()
+//         .min(5)
+//         .max(6)
+//         .optional()
+//         .describe('Optional Feature ID to link this user story to (e.g. 145636)'),
+//       releaseId: z.string()
+//         .min(5)
+//         .max(6)
+//         .optional()
+//         .describe('Optional Release ID to link this user story to (e.g. 145200)'),
+//       projectId: z.string()
+//         .optional()
+//         .describe('Optional Project ID — defaults to TP_PROJECT_ID from config'),
+//       teamId: z.string()
+//         .optional()
+//         .describe('Optional Team ID — defaults to TP_TEAM_ID from config'),
+//     },
+//   },
+//   async ({ title, description, featureId, releaseId, projectId, teamId }) =>
+//     handleCreateUserStory(tp, { title, description, featureId, releaseId, projectId, teamId })
+// )
 
 server.registerTool(
-  'create_formatted_user_story',
+  'create_user_story',
   {
     title: 'Create a formatted user story',
     description: `Create a new user story in Targetprocess with a structured, template-driven description.
@@ -708,9 +708,12 @@ server.registerTool(
           .describe('Benefit — the "so that ..." part'),
       })
         .describe('Story header following the As a / I want / so that format'),
-      definitions: z.string()
-        .optional()
-        .describe('Any module names, feature flags, or domain terms referenced in the scenarios that need clarification'),
+      definitions: z.array(z.object({
+        term: z.string()
+          .describe('The term, module name, or feature flag being defined'),
+        description: z.string()
+          .describe('Explanation of the term'),
+      })),
       acceptanceCriteria: z.array(z.string())
         .min(1)
         .describe('Bullet checklist items for quick review sign-off — each string is one criterion'),
@@ -761,26 +764,29 @@ server.registerTool(
   },
   async ({ title, header, definitions, acceptanceCriteria, scenarios, examplesTable, edgeCases, references, notes, featureId, releaseId, projectId, teamId }) => {
     const gherkinBlock = (items: { name: string; steps: string[] }[]) =>
-      items.map(s => `<strong>${s.name}</strong><div>:\n${s.steps.map(step => `<div>\t${step}</div>`).join('\n')}</div>`).join('\n')
+      items.map((s, indx) => `<div><strong>Scenario ${indx + 1} - ${s.name}:</strong></div><div>${s.steps.map(step => `<div>\t${step}</div>`).join('\n')}</div>`).join('\n')
 
     const parts: string[] = ['<div>']
 
     parts.push('<h3>Header</h3>')
     if (header.storyId) parts.push(`<p><strong>Story ID:</strong> ${header.storyId}</p>`)
-    parts.push(`<p><strong>Title:</strong> ${title}</p>`)
     parts.push(`<p>As a ${header.asA} / I want ${header.iWant} / so that ${header.soThat}</p>`)
 
     if (definitions) {
       parts.push('<h3>Definitions</h3>')
-      parts.push(`<p>${definitions}</p>`)
+      parts.push(`<div>`)
+      for (const def of definitions) {
+        parts.push(`<p><strong>${def.term}</strong> — ${def.description}</p>`)
+      }
+      parts.push(`</div>`)
     }
 
     parts.push('<h3>Acceptance Criteria</h3>')
-    parts.push('<ul>')
+    parts.push('<ol>')
     for (const criterion of acceptanceCriteria) {
-      parts.push(`<li>[ ] ${criterion}</li>`)
+      parts.push(`<li>${criterion}</li>`)
     }
-    parts.push('</ul>')
+    parts.push('</ol>')
 
     parts.push('<h3>Scenarios</h3>')
     parts.push(gherkinBlock(scenarios))
