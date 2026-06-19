@@ -312,6 +312,38 @@ export class TpClient {
   }
 
 
+  async getEpic<T>(epicId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Epics", epicId],
+      param: { "format": "json" },
+    }) as T
+  }
+
+  async updateEpic<T>({ id, title, description, releaseId, projectId }: { id: string, title?: string, description?: string, releaseId?: string, projectId?: string }): Promise<T> {
+    const epic: Record<string, any> = { "Id": id }
+    if (title) epic["Name"] = title
+    if (description) epic["Description"] = description
+    if (projectId) epic["Project"] = { "Id": projectId }
+    if (releaseId) epic["Release"] = { "Id": releaseId }
+
+    return this.post<any, T>({
+      pathParam: ["Epics"],
+      param: { "format": "json" },
+    }, epic) as T
+  }
+
+  async getEpicFeatures<T>(epicId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Features"],
+      param: {
+        "format": "json",
+        "where": `Epic.Id eq ${epicId}`,
+        "include": "[Id,Name,Description,EntityState[Name],Team[Name],Release[Name],Progress,Effort]",
+        "take": 100,
+      },
+    }) as T
+  }
+
   async createEpic<T>({ title, description, releaseId, projectId }: { title: string, description?: string, releaseId?: string, projectId?: string }): Promise<T | null> {
     const epic: Record<string, any> = {
       "Name": title,

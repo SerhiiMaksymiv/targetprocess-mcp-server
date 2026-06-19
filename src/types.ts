@@ -363,6 +363,42 @@ export interface Epic {
   Name: string
 }
 
+export interface EpicDetail {
+  ResourceType: string
+  Id: number
+  Name: string
+  Description: string
+  StartDate: any
+  EndDate: any
+  CreateDate: string
+  ModifyDate: string
+  LastCommentDate: any
+  Tags: string
+  NumericPriority: number
+  EntityVersion: number
+  EntityType: EntityType
+  LastEditor: LastEditor
+  Owner: Owner
+  Creator: Creator
+  LastCommentedUser: any
+  Project: Project
+  Effort: number
+  EffortCompleted: number
+  EffortToDo: number
+  Progress: number
+  TimeSpent: number
+  TimeRemain: number
+  LastStateChangeDate: string
+  PlannedStartDate: any
+  PlannedEndDate: any
+  Units: string
+  Release: any
+  Priority: Priority
+  EntityState: EntityState
+  PortfolioEpic: PortfolioEpic
+  CustomFields: CustomField[]
+}
+
 export interface CustomField {
   Name: string
   Type: string

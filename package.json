@@ -27,7 +27,7 @@
   "engines": {
     "node": ">=20.x"
   },
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "MCP server for Tartget Process",
   "main": "build/index.js",
   "keywords": [
