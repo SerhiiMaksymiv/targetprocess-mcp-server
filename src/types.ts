@@ -586,6 +586,15 @@ export interface TestCase {
   ModifyDate: string
   Project: Project
   LinkedTestPlan: TestPlan | null
+  TestPlans?: {
+    Items: Array<{
+      ResourceType: string
+      Id: number
+      Name: string
+    }>
+  }
+  TestPlanId?: number
+  TestPlanName?: string
 }
 
 export interface TestStep {

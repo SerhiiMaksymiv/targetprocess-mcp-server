@@ -29,6 +29,10 @@ import { handleCreateBug } from "./handlers/create_bug.js";
 import { handleCreateUserStory } from "./handlers/create_user_story.js";
 import { handleCreateFeature } from "./handlers/create_feature.js";
 import { handleCreateEpic } from "./handlers/create_epic.js";
+import { handleGetTestPlanById } from "./handlers/get_test_plan_by_id.js";
+import { handleGetTestPlanTestCasesById } from "./handlers/get_test_plan_test_cases_by_id.js";
+import { handleGetTestPlanTestCasesWithStepsById } from "./handlers/get_test_plan_test_cases_with_steps_by_id.js";
+import { handleGetTestCaseById } from "./handlers/get_test_case_by_id.js";
 import { handleGetEpicContent } from "./handlers/get_epic_content.js";
 import { handleUpdateEpic } from "./handlers/update_epic.js";
 import { handleGetEpicFeatures } from "./handlers/get_epic_features.js";
@@ -1000,6 +1004,81 @@ server.registerTool(
 )
 
 server.registerTool(
+  'get_test_plan_by_id',
+  {
+    title: 'Get test plan by ID',
+    description: 'Get a Targetprocess Test Plan by its ID, including name, plain-text description, state, and linked card.',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('Test plan ID (e.g. 145789)'),
+    },
+  },
+  async ({ id }) => handleGetTestPlanById(tp, id)
+);
+
+server.registerTool(
+  'get_test_plan_test_cases_by_id',
+  {
+    title: 'Get test plan test cases by ID',
+    description: 'Get test cases belonging to a Targetprocess Test Plan by plan ID, including cases in nested child test plans/containers. Returns id, name, plain-text description, and containing test plan metadata (no steps).',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('Test plan ID (e.g. 145789)'),
+    },
+  },
+  async ({ id }) => handleGetTestPlanTestCasesById(tp, id)
+);
+
+server.registerTool(
+  'get_test_cases_by_id',
+  {
+    title: 'Get test cases by test plan ID',
+    description: 'Short alias for get_test_plan_test_cases_by_id. Gets test cases belonging to a Targetprocess Test Plan by plan ID, including nested child test plans/containers, without steps.',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('Test plan ID (e.g. 145789)'),
+    },
+  },
+  async ({ id }) => handleGetTestPlanTestCasesById(tp, id)
+);
+
+server.registerTool(
+  'get_test_plan_test_cases_with_steps_by_id',
+  {
+    title: 'Get test plan test cases with steps by ID',
+    description: 'Get test cases belonging to a Targetprocess Test Plan by plan ID, including nested child test plans/containers and each test case steps.',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('Test plan ID (e.g. 145789)'),
+    },
+  },
+  async ({ id }) => handleGetTestPlanTestCasesWithStepsById(tp, id)
+);
+
+server.registerTool(
+  'get_test_case_by_id',
+  {
+    title: 'Get test case by ID',
+    description: 'Get a single Targetprocess Test Case by its ID, including plain-text description and its steps.',
+    inputSchema: {
+      id: z.string()
+        .min(5)
+        .max(6)
+        .describe('Test case ID (e.g. 145789)'),
+    },
+  },
+  async ({ id }) => handleGetTestCaseById(tp, id)
+);
+
+server.registerTool(
   'get_not_covered_user_stories_in_feature',
   {
     title: 'Get not covered user stories in feature',
@@ -1173,7 +1252,7 @@ server.registerTool(
   'get_user_story_test_cases',
   {
     title: 'Get test cases for TP UserStory card',
-    description: `Fetches a TP UserStory Linked Test Plan and fetches its Test Cases by provided card ID.`,
+    description: `Fetches a TP UserStory Linked Test Plan and fetches its Test Cases, including nested child test plans/containers, by provided card ID.`,
     inputSchema: {
       resourceId: z.string()
         .min(5)
@@ -1214,6 +1293,15 @@ server.registerTool(
     }
 
     const testCases = await tp.getTestPlanTestCases<TP.TpResponse<TP.TestCase>>(String(testPlan.id))
+    if (!testCases) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to get test cases in test plan id: ${testPlan.id}`,
+        }],
+      };
+    }
+
     if (testCases.Items.length === 0) {
       return {
         content: [{
@@ -1239,6 +1327,8 @@ server.registerTool(
         testCaseId: item.Id,
         testCaseName: item.Name,
         testCaseDescription: item.Description,
+        testPlanId: item.TestPlanId,
+        testPlanName: item.TestPlanName,
         testCaseSteps: testCaseSteps.Items.map((step) => ({
           description: step.Description,
           result: step.Result,

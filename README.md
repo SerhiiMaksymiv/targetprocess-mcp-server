@@ -60,7 +60,7 @@ Cards — Read
 - `get_user_story_content` — Fetch full content of a user story by ID (id)
 - `get_bug_comments` — Get comments on a bug (id, optional results)
 - `get_user_story_comments` — Get comments on a user story (id, optional results)
-- `get_user_story_test_cases` — Fetch the linked test plan and all its test cases (with steps) for a user story (resourceId)
+- `get_user_story_test_cases` — Fetch the linked test plan and all its test cases, including nested child test plans/containers, with steps for a user story (resourceId)
 - `get_card_relations` — Get all relations (Dependency, Blocker, Relation, Link, Duplicate) for a card, with direction and the related card (id)
 - `get_relation_types` — List the relation types available in this instance (id + name); use to find the `relationType` name for `create_card_relation` (no params)
 - `search_tp_cards` — Search TP cards by keyword or phrase in description (keyword, optional entityType: UserStories | Bugs, default: UserStories)
@@ -107,6 +107,11 @@ Cards — Write
 > requires `TP_PROJECT_ID`, 
 
 Test Case Workflows
+- `get_test_plan_by_id` — Get a Targetprocess Test Plan by ID, including plain-text description, state, project, linked card, and dates (id)
+- `get_test_plan_test_cases_by_id` — Get the test cases belonging to a test plan by plan ID, including nested child test plans/containers, returning id, name, plain-text description, and containing test plan metadata without steps (id)
+- `get_test_cases_by_id` — Short alias for `get_test_plan_test_cases_by_id` (id)
+- `get_test_plan_test_cases_with_steps_by_id` — Get the test cases belonging to a test plan by plan ID, including nested child test plans/containers, containing test plan metadata, and steps (id)
+- `get_test_case_by_id` — Get a single Targetprocess Test Case by ID, including plain-text description and steps (id)
 - `write_test_cases` — Fetch a card (UserStory, Bug, or Feature) by ID and trigger the full test case writing workflow: Claude analyzes the card, generates detailed test cases covering happy path, edge cases, and error scenarios, creates a linked test plan via `create_test_plan`, then calls `add_test_cases_to_test_plan`. Each test case description contains Preconditions and Test Type as HTML; steps are passed as a structured array (resourceId, optional resourceType)
 - `add_test_cases_to_test_plan` — Add pre-generated test cases to an existing test plan. Each test case has a `name`, an HTML `description` (Preconditions and Test Type only), and a `steps` array of `{ description, result }` objects — steps are created via the TP test step API rather than embedded in the description (testPlanId, testCases array of {name, description, steps})
 
@@ -214,7 +219,7 @@ npx vitest            # watch mode
 
 ### Coverage
 
-**33 of 46 tools (72%) are covered by unit tests.**
+**The table below lists tools and handlers covered by unit tests.**
 
 | Test file | Handlers covered |
 |---|---|
@@ -231,3 +236,4 @@ npx vitest            # watch mode
 | `creation_tools.test.ts` | `create_bug`, `create_user_story`, `create_feature`, `create_task`, `update_bug`, `update_user_story_state` |
 | `my_work_tools.test.ts` | `get_in_progress_tasks_and_bugs`, `list_my_user_stories`, `list_my_bugs`, `log_time`, `get_my_time_logs` |
 | `entity_tools.test.ts` | `get_feature_user_stories`, `get_user_story_bugs`, `get_card_current_status` |
+| `test_plan_tools.test.ts` | `get_test_plan_by_id`, `get_test_plan_test_cases_by_id`, `get_test_cases_by_id`, `get_test_plan_test_cases_with_steps_by_id`, `get_test_case_by_id` |
