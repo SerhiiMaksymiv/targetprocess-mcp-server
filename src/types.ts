@@ -815,6 +815,25 @@ export interface TimeLog {
   User: Owner
 }
 
+export interface RoleAssignment {
+  ResourceType: string
+  Id: number
+  Assignable: Assignable
+  GeneralUser: {
+    ResourceType: string
+    Id: number
+    FirstName: string
+    LastName: string
+    Login: string
+    FullName: string
+  }
+  Role: {
+    ResourceType: string
+    Id: number
+    Name: string
+  }
+}
+
 export interface Context {
   ResourceType: string
   Acid: string

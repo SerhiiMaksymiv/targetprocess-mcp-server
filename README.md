@@ -132,6 +132,11 @@ Time Tracking
 - `log_time` — Log time spent on a Task, User Story, or Bug (entityId, entityType: Task | UserStory | Bug, hours, optional description, optional date)
 - `get_my_time_logs` — Get recent time log entries submitted by the current user (optional take)
 
+Assignments
+- `assign_role` — Assign a user to a role (e.g. Business Analyst, Developer, QA Engineer) on a TP card (cardId, userId, roleId)
+- `assign_role_to_feature` — Assign a user to a role on all user stories in a feature in one call (featureId, userId, roleId)
+- `get_assignment_roles` — List all available assignment roles with their IDs
+
 Developer Tools
 - `get_commit_message` — Returns a formatted commit message string for a task or bug ID (id, type: task | bug)
   > Format for task on a user story: `F#<featureId> US#<userStoryId> T#<taskId> <title>`

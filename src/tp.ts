@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
-import { TpClientParameters, TpResponse, TpResult, Relation, BugInputSchema, Bug, Task, LoggedUser } from "./types.js";
+import { TpClientParameters, TpResponse, TpResult, Relation, BugInputSchema, Bug, Task, LoggedUser, RoleAssignment } from "./types.js";
 import { config } from "./config.js";
 
 export class TpClient {
@@ -910,6 +910,40 @@ export class TpClient {
       pathParam: ["Times"],
       param: { "format": "json" },
     }, body) as T
+  }
+
+  async assignRole(cardId: string, userId: string, roleId: string): Promise<RoleAssignment | null> {
+    return this.post<any, RoleAssignment>({
+      pathParam: ["Assignments"],
+      param: { "format": "json" },
+    }, {
+      Assignable: { Id: parseInt(cardId) },
+      GeneralUser: { Id: parseInt(userId) },
+      Role: { Id: parseInt(roleId) },
+    })
+  }
+
+  async assignRoleToAllStoriesInFeature(featureId: string, userId: string, roleId: string): Promise<{ succeeded: RoleAssignment[]; failed: number[] }> {
+    const storiesResponse = await this.getFeatureUserStories<{ items: { userStories: { items: { id: number; name: string }[] } }[] }>(featureId)
+    const storyItems = storiesResponse?.items?.[0]?.userStories?.items ?? []
+    const succeeded: RoleAssignment[] = []
+    const failed: number[] = []
+    await Promise.all(storyItems.map(async (story) => {
+      const result = await this.assignRole(String(story.id), userId, roleId)
+      if (result) {
+        succeeded.push(result)
+      } else {
+        failed.push(story.id)
+      }
+    }))
+    return { succeeded, failed }
+  }
+
+  async getAssignmentRoles<T>(): Promise<T | null> {
+    return this.get<T>({
+      pathParam: ["Roles"],
+      param: { "format": "json" },
+    })
   }
 
   async getMyTimeLogs<T>(take: number = 25): Promise<T> {
