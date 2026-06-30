@@ -3,6 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { JSDOM } from "jsdom";
+import { createRequire } from "module";
 
 import { TpClient } from "./tp.js";
 import * as TP from "./types.js";
@@ -1792,6 +1793,21 @@ server.registerTool(
     },
   },
   async ({ take }) => handleGetMyTimeLogs(tp, take)
+)
+
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
+
+server.registerTool(
+  'get_version',
+  {
+    title: 'Get server version',
+    description: 'Returns the current version of the MCP server from package.json.',
+    inputSchema: {},
+  },
+  async () => ({
+    content: [{ type: "text", text: version }]
+  })
 )
 
 async function main() {
