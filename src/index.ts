@@ -69,6 +69,7 @@ import { handleGetUserStoryWorkflows } from "./handlers/get_user_story_workflows
 import { handleGetRelationTypes } from "./handlers/get_relation_types.js";
 import { handleGetVersion } from "./handlers/get_version.js";
 
+export function createServer(): McpServer {
 const server = new McpServer(
   {
     name: "tp",
@@ -2067,13 +2068,20 @@ server.registerTool('delete_test_case_step_by_id', {
   },
 }, async ({ id }) => handleDeleteTestCaseStepById(tp, id));
 
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("Weather MCP Server running on stdio");
+  return server;
 }
 
-main().catch((error) => {
-  console.error("Fatal error in main():", error);
-  process.exit(1);
-});
+async function main() {
+  const server = createServer();
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("TP MCP Server running on stdio");
+}
+
+const isEntryPoint = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isEntryPoint) {
+  main().catch((error) => {
+    console.error("Fatal error in main():", error);
+    process.exit(1);
+  });
+}

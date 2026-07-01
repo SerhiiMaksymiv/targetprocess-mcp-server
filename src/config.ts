@@ -1,6 +1,10 @@
 import "dotenv/config";
 
 export const config = {
+  http: {
+    port: Number(process.env.PORT) || 3000,
+    authToken: process.env.MCP_AUTH_TOKEN || "",
+  },
   tp: {
     url: process.env.TP_BASE_URL || "",
     token: process.env.TP_TOKEN || "",
