@@ -48,6 +48,7 @@ import { handleGetCardRelations } from "./handlers/get_card_relations.js";
 import { handleCreateCardRelation } from "./handlers/create_card_relation.js";
 import { handleDeleteCardRelation } from "./handlers/delete_card_relation.js";
 
+export function createServer(): McpServer {
 const server = new McpServer(
   {
     name: "tp",
@@ -1813,13 +1814,20 @@ server.registerTool(
   })
 )
 
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("Weather MCP Server running on stdio");
+  return server;
 }
 
-main().catch((error) => {
-  console.error("Fatal error in main():", error);
-  process.exit(1);
-});
+async function main() {
+  const server = createServer();
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("TP MCP Server running on stdio");
+}
+
+const isEntryPoint = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isEntryPoint) {
+  main().catch((error) => {
+    console.error("Fatal error in main():", error);
+    process.exit(1);
+  });
+}

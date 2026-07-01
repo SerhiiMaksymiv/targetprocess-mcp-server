@@ -199,6 +199,73 @@ claude mcp add targetprocess -s user \
   -e TP_TOKEN=<your-tp-token> -e TP_BASE_URL=<tp-api-endpoint> -- npx -y targetprocess-mcp-server
 ```
 
+### Remote (HTTP) Server
+
+The server can also run as a remote MCP server over the [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http) transport instead of stdio, so it can be hosted somewhere and shared across machines/clients instead of running as a local child process per client.
+
+```bash
+npm run build
+TP_TOKEN=<your-tp-token> TP_BASE_URL=<tp-api-endpoint> \
+MCP_AUTH_TOKEN=<a-long-random-secret> PORT=3000 \
+npm run start:http
+```
+
+| Variable | Purpose |
+|----------|---------|
+| `PORT` | Port to listen on (default `3000`) |
+| `MCP_AUTH_TOKEN` | Shared secret required as a `Bearer` token on every request to `/mcp`. **Strongly recommended** — without it, anyone who can reach the port can use your Targetprocess credentials. Generate one with `node -e "console.log(require('crypto').randomUUID())"`. |
+
+`npm run start:http` reads these from `.env` like everything else, so you can just add `PORT` and `MCP_AUTH_TOKEN` to your existing `.env` instead of passing them inline.
+
+The server exposes:
+- `POST /mcp` — the MCP endpoint (requires `Authorization: Bearer <MCP_AUTH_TOKEN>` if set)
+- `GET /health` — unauthenticated liveness check
+
+#### Verify it's running
+
+```bash
+curl http://localhost:3000/health
+# {"status":"ok"}
+
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Authorization: Bearer <MCP_AUTH_TOKEN>" \
+  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
+```
+
+The second call should return the full tool list; the same request without the `Authorization` header gets a `401`.
+
+#### Point a client at it
+
+Claude Code:
+```bash
+claude mcp add --transport http targetprocess http://localhost:3000/mcp \
+  -H "Authorization: Bearer <MCP_AUTH_TOKEN>"
+```
+
+Claude Desktop / other JSON-config clients:
+```json
+{
+  "mcpServers": {
+    "targetprocess": {
+      "url": "https://your-host:3000/mcp",
+      "headers": {
+        "Authorization": "Bearer <MCP_AUTH_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+#### Making it actually reachable remotely
+
+By default the server binds to all interfaces on `PORT`, but `http://localhost:3000` is only reachable from the machine it runs on. To share it beyond localhost:
+- **Quick/temporary**: tunnel it, e.g. `ngrok http 3000`, and use the resulting `https://...ngrok.io/mcp` URL.
+- **Permanent**: deploy `build/http.js` behind HTTPS (reverse proxy or platform-managed TLS) on a host you control, with `TP_TOKEN`, `TP_BASE_URL`, and `MCP_AUTH_TOKEN` set as env vars there.
+
+The transport runs in stateless mode (each request is handled independently, no session pinning), and the server's Targetprocess credentials (`TP_TOKEN`, `TP_BASE_URL`, etc.) are shared across all callers — this is a single-account deployment, not a multi-tenant one. Always put it behind HTTPS in anything beyond local testing, since the bearer token and Targetprocess data otherwise travel in plaintext.
+
 ## Local Development
 ```
 git clone --recursive https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git
