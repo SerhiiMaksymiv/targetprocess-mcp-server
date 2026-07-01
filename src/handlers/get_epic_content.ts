@@ -3,7 +3,7 @@ import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
 
 export async function handleGetEpicContent(tp: TpClient, id: string) {
-  const epic = await tp.getEpic<TP.EpicDetail>(id)
+  const epic = await tp.getEpic<TP.Epic>(id)
 
   if (!epic) {
     return {

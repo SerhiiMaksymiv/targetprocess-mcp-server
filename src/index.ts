@@ -3,6 +3,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { JSDOM } from "jsdom";
+import { createRequire } from "module";
 
 import { TpClient } from "./tp.js";
 import * as TP from "./types.js";
@@ -771,13 +772,13 @@ server.registerTool(
   },
   async ({ title, header, definitions, acceptanceCriteria, scenarios, examplesTable, edgeCases, references, notes, featureId, releaseId, projectId, teamId }) => {
     const gherkinBlock = (items: { name: string; steps: string[] }[]) =>
-      items.map((s, indx) => `<div><strong>Scenario ${indx + 1} - ${s.name}:</strong></div><div>${s.steps.map(step => `<div>\t${step}</div>`).join('\n')}</div>`).join('\n')
+      items.map((s, indx) => `<div><strong>Scenario ${indx + 1} - ${s.name}:</strong></div><div>${s.steps.map(step => `<div>\t${step}</div>`).join('\n')}</div>`).join('<br>')
 
     const parts: string[] = ['<div>']
 
     parts.push('<h3>Header</h3>')
     if (header.storyId) parts.push(`<p><strong>Story ID:</strong> ${header.storyId}</p>`)
-    parts.push(`<p>As a ${header.asA} / I want ${header.iWant} / so that ${header.soThat}</p>`)
+    parts.push(`<p>As a ${header.asA} <br> I want ${header.iWant} <br> so that ${header.soThat}</p>`)
 
     if (definitions) {
       parts.push('<h3>Definitions</h3>')
@@ -1797,94 +1798,19 @@ server.registerTool(
   async ({ take }) => handleGetMyTimeLogs(tp, take)
 )
 
-server.registerTool(
-  'assign_role',
-  {
-    title: 'Assign a user to a role on a TP card',
-    description: `Assigns a user to a role (e.g. Business Analyst, Developer, QA Engineer) on a Targetprocess card.
-      CRITICAL WORKFLOW: Before calling this tool:
-        1) IF the user is specified by name (not ID), call "get_users" to find the matching user ID.
-        2) IF the role is specified by name (not ID), call "get_assignment_roles" to find the matching role ID.`,
-    inputSchema: {
-      cardId: z.string()
-        .min(5)
-        .max(6)
-        .describe('TP card ID (e.g. 145789)'),
-      userId: z.string()
-        .describe('ID of the user to assign'),
-      roleId: z.string()
-        .describe('ID of the role to assign (e.g. 7 for Business Analyst). Use get_assignment_roles to list available roles.'),
-    },
-  },
-  async ({ cardId, userId, roleId }) => {
-    const result = await tp.assignRole(cardId, userId, roleId)
-    if (!result) {
-      return { content: [{ type: 'text', text: `Failed to assign role on card ${cardId}` }] }
-    }
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          assignmentId: result.Id,
-          cardId: result.Assignable?.Id,
-          cardName: result.Assignable?.Name,
-          user: result.GeneralUser?.FullName,
-          role: result.Role?.Name,
-        })
-      }]
-    }
-  }
-)
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
 
 server.registerTool(
-  'assign_role_to_feature',
+  'get_version',
   {
-    title: 'Assign a user to a role on all stories in a TP feature',
-    description: `Assigns a user to a role on every user story in a Targetprocess feature in one call.
-      CRITICAL WORKFLOW: Before calling this tool:
-        1) IF the user is specified by name (not ID), call "get_users" to find the matching user ID.
-        2) IF the role is specified by name (not ID), call "get_assignment_roles" to find the matching role ID.`,
-    inputSchema: {
-      featureId: z.string()
-        .min(5)
-        .max(6)
-        .describe('TP feature ID (e.g. 148970)'),
-      userId: z.string()
-        .describe('ID of the user to assign'),
-      roleId: z.string()
-        .describe('ID of the role to assign (e.g. 7 for Business Analyst). Use get_assignment_roles to list available roles.'),
-    },
+    title: 'Get server version',
+    description: 'Returns the current version of the MCP server from package.json.',
+    inputSchema: {},
   },
-  async ({ featureId, userId, roleId }) => {
-    const { succeeded, failed } = await tp.assignRoleToAllStoriesInFeature(featureId, userId, roleId)
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          assigned: succeeded.map(a => ({ storyId: a.Assignable?.Id, storyName: a.Assignable?.Name, user: a.GeneralUser?.FullName, role: a.Role?.Name })),
-          failed,
-          total: succeeded.length + failed.length,
-        })
-      }]
-    }
-  }
-)
-
-server.registerTool(
-  'get_assignment_roles',
-  {
-    title: 'Get available assignment roles',
-    description: 'Returns all assignment roles available in Targetprocess (e.g. Business Analyst, Developer, QA Engineer). Use this to find the role ID before calling assign_role.',
-  },
-  async () => {
-    const result = await tp.getAssignmentRoles<TP.TpResponse<{ ResourceType: string; Id: number; Name: string }>>()
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(result?.Items?.map(r => ({ id: r.Id, name: r.Name })) ?? [])
-      }]
-    }
-  }
+  async () => ({
+    content: [{ type: "text", text: version }]
+  })
 )
 
 async function main() {

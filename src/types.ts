@@ -361,12 +361,6 @@ export interface Epic {
   ResourceType: string
   Id: number
   Name: string
-}
-
-export interface EpicDetail {
-  ResourceType: string
-  Id: number
-  Name: string
   Description: string
   StartDate: any
   EndDate: any
