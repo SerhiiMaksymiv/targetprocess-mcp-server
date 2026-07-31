@@ -70,28 +70,28 @@ import { handleGetRelationTypes } from "./handlers/get_relation_types.js";
 import { handleGetVersion } from "./handlers/get_version.js";
 
 export function createServer(): McpServer {
-const server = new McpServer(
-  {
-    name: "tp",
-    version: "1.0.0"
-  },
-  {
-    capabilities: {
-      "tools": {
-        "listChanged": true
-      },
-      "prompts": {
-        "listChanged": true
-      },
-      "resources": {
-        "subscribe": true,
-        "listChanged": true
+  const server = new McpServer(
+    {
+      name: "tp",
+      version: "1.0.0"
+    },
+    {
+      capabilities: {
+        "tools": {
+          "listChanged": true
+        },
+        "prompts": {
+          "listChanged": true
+        },
+        "resources": {
+          "subscribe": true,
+          "listChanged": true
+        }
       }
     }
-  }
-)
+  )
 
-const tp = new TpClient()
+  const tp = new TpClient()
 
 server.registerTool(
   'get_user_story_content',
@@ -108,31 +108,31 @@ server.registerTool(
   async ({ id }) => handleGetUserStoryContent(tp, id)
 );
 
-server.registerTool(
-  'get_current_releases',
-  {
-    title: 'Get current releases',
-    description: 'Get current releases',
-  },
-  async () => handleGetCurrentReleases(tp)
-);
-
-server.registerTool(
-  'get_release_user_stories',
-  {
-    title: 'Get release user stories',
-    description: 'Get release user stories',
-    inputSchema: {
-      name: z.string()
-        .describe('Release name'),
-      results: z.number()
-        .default(50)
-        .optional()
-        .describe('Number of results to return, default is 50'),
+  server.registerTool(
+    'get_current_releases',
+    {
+      title: 'Get current releases',
+      description: 'Get current releases',
     },
-  },
-  async ({ name, results }) => handleGetReleaseUserStories(tp, name, results)
-);
+    async () => handleGetCurrentReleases(tp)
+  );
+
+  server.registerTool(
+    'get_release_user_stories',
+    {
+      title: 'Get release user stories',
+      description: 'Get release user stories',
+      inputSchema: {
+        name: z.string()
+          .describe('Release name'),
+        results: z.number()
+          .default(50)
+          .optional()
+          .describe('Number of results to return, default is 50'),
+      },
+    },
+    async ({ name, results }) => handleGetReleaseUserStories(tp, name, results)
+  );
 
 server.registerTool(
   'get_release_bugs',
@@ -153,137 +153,137 @@ server.registerTool(
   async ({ name, results, withDescription }) => handleGetReleaseBugs(tp, name, results, withDescription)
 );
 
-server.registerTool(
-  'get_release_features',
-  {
-    title: 'Get release features',
-    description: 'Get release features',
-    inputSchema: {
-      name: z.string()
-        .describe('Release name'),
-      results: z.number()
-        .default(50)
-        .optional()
-        .describe('Number of results to return, default is 100'),
+  server.registerTool(
+    'get_release_features',
+    {
+      title: 'Get release features',
+      description: 'Get release features',
+      inputSchema: {
+        name: z.string()
+          .describe('Release name'),
+        results: z.number()
+          .default(50)
+          .optional()
+          .describe('Number of results to return, default is 100'),
+      },
     },
-  },
-  async ({ name, results }) => handleGetReleaseFeatures(tp, name, results)
-);
+    async ({ name, results }) => handleGetReleaseFeatures(tp, name, results)
+  );
 
-server.registerTool(
-  'get_release_user_stories_with_description',
-  {
-    title: 'Get release user stories with description',
-    description: `Get release user stories with description in the response.
+  server.registerTool(
+    'get_release_user_stories_with_description',
+    {
+      title: 'Get release user stories with description',
+      description: `Get release user stories with description in the response.
       Note: this is slower than "get_release_user_stories_names" tool,
       but if user wants to get descriptions, then this tool is the way to go.
     `,
-    inputSchema: {
-      name: z.string()
-        .describe('Release name'),
-      withDescription: z.boolean()
-        .describe('Include description in the response'),
+      inputSchema: {
+        name: z.string()
+          .describe('Release name'),
+        withDescription: z.boolean()
+          .describe('Include description in the response'),
+      },
     },
-  },
-  async ({ name, withDescription }) => handleGetReleaseUserStories(tp, name, undefined, withDescription)
-);
+    async ({ name, withDescription }) => handleGetReleaseUserStories(tp, name, undefined, withDescription)
+  );
 
-server.registerTool(
-  'get_release_open_bugs',
-  {
-    title: 'Get release active bugs',
-    description: `Get release active bugs (bugs that are not closed, done, passed, ready to deploy)`,
-    inputSchema: {
-      name: z.string()
-        .describe('Release name'),
-      results: z.number()
-        .default(200)
-        .optional()
-        .describe('Number of results to return, default is 50'),
-      withDescription: z.boolean()
-        .describe('Include description in the response'),
+  server.registerTool(
+    'get_release_open_bugs',
+    {
+      title: 'Get release active bugs',
+      description: `Get release active bugs (bugs that are not closed, done, passed, ready to deploy)`,
+      inputSchema: {
+        name: z.string()
+          .describe('Release name'),
+        results: z.number()
+          .default(200)
+          .optional()
+          .describe('Number of results to return, default is 50'),
+        withDescription: z.boolean()
+          .describe('Include description in the response'),
+      },
     },
-  },
-  async ({ name, results, withDescription }) => handleGetReleaseOpenBugs(tp, name, results, withDescription)
-);
+    async ({ name, results, withDescription }) => handleGetReleaseOpenBugs(tp, name, results, withDescription)
+  );
 
-server.registerTool(
-  'get_release_open_user_stories',
-  {
-    title: 'Get release active user stories',
-    description: `Get release active user stories (user stories that are not closed, done, passed, ready to deploy)`,
-    inputSchema: {
-      name: z.string()
-        .describe('Release name'),
-      results: z.number()
-        .default(100)
-        .optional()
-        .describe('Number of results to return, default is 50'),
-      withDescription: z.boolean()
-        .describe('Include description in the response'),
+  server.registerTool(
+    'get_release_open_user_stories',
+    {
+      title: 'Get release active user stories',
+      description: `Get release active user stories (user stories that are not closed, done, passed, ready to deploy)`,
+      inputSchema: {
+        name: z.string()
+          .describe('Release name'),
+        results: z.number()
+          .default(100)
+          .optional()
+          .describe('Number of results to return, default is 50'),
+        withDescription: z.boolean()
+          .describe('Include description in the response'),
+      },
     },
-  },
-  async ({ name, results, withDescription }) => handleGetReleaseOpenUserStories(tp, name, results, withDescription)
-);
+    async ({ name, results, withDescription }) => handleGetReleaseOpenUserStories(tp, name, results, withDescription)
+  );
 
-server.registerTool('search_tp_cards', {
-  title: 'Search TP cards by keyword or phrase in description',
-  description: `Searches TP cards (UserStories or Bugs) by keyword or phrase or partial keyphrase in Card Description e.g. "Text Element", "Font field"
+  server.registerTool('search_tp_cards', {
+    title: 'Search TP cards by keyword or phrase in description',
+    description: `Searches TP cards (UserStories or Bugs) by keyword or phrase or partial keyphrase in Card Description e.g. "Text Element", "Font field"
     NOTE: after results are returned, try analyze and filter results by most relevant to what user is looking for in the description text
     FALLBACK: if no results are found, try spliting phrase by spaces and searching for each word and with "Generals" entity type`,
-  inputSchema: {
-    keyword: z.string()
-      .describe('Keyword or partial name or keyphrase to search for in description'),
-    entityType: z.enum(["UserStories", "Bugs", "Generals"])
-      .default("UserStories")
-      .optional()
-      .describe('Type of TP entity to search — UserStories or Bugs (default: UserStories)'),
+    inputSchema: {
+      keyword: z.string()
+        .describe('Keyword or partial name or keyphrase to search for in description'),
+      entityType: z.enum(["UserStories", "Bugs", "Generals"])
+        .default("UserStories")
+        .optional()
+        .describe('Type of TP entity to search — UserStories or Bugs (default: UserStories)'),
+    },
   },
-},
-  async ({ keyword, entityType = "UserStories" }) => {
-    const results = await Promise.all<TP.TpResponse<TP.General>>([
-      tp.searchContainsNameText<TP.TpResponse<TP.UserStory>>({ text: keyword, entityType }),
-      tp.searchContainsDescriptionText<TP.TpResponse<TP.General>>({ text: keyword, entityType })
-    ])
-    if (!results) {
+    async ({ keyword, entityType = "UserStories" }) => {
+      const results = await Promise.all<TP.TpResponse<TP.General>>([
+        tp.searchContainsNameText<TP.TpResponse<TP.UserStory>>({ text: keyword, entityType }),
+        tp.searchContainsDescriptionText<TP.TpResponse<TP.General>>({ text: keyword, entityType })
+      ])
+      if (!results) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to search for keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
+          }],
+        }
+      }
+
+      const items = results.map((item: TP.TpResponse<TP.General>) => item.Items).flat()
+
+      if (items.length == 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to find card by keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
+          }],
+        }
+      }
+
+      const parsedItems = items.map((item) => {
+        const dom = new JSDOM(`<html><body><div id="content">${item.Description}</div></body></html>`)
+        const descriptionText = dom.window.document.getElementById('content')?.textContent
+        return {
+          title: item.Name,
+          id: item.Id,
+          description: descriptionText,
+          url: `${config.tp.url}/entity/${item.Id}`,
+        }
+      })
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to search for keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
+          text: JSON.stringify(parsedItems)
         }],
-      }
+      };
     }
-
-    const items = results.map((item: TP.TpResponse<TP.General>) => item.Items).flat()
-
-    if (items.length == 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to find card by keyword: "${keyword}"\n JSON: ${JSON.stringify(results, null, 2)}`
-        }],
-      }
-    }
-
-    const parsedItems = items.map((item) => {
-      const dom = new JSDOM(`<html><body><div id="content">${item.Description}</div></body></html>`)
-      const descriptionText = dom.window.document.getElementById('content')?.textContent
-      return {
-        title: item.Name,
-        id: item.Id,
-        description: descriptionText,
-        url: `${config.tp.url}/entity/${item.Id}`,
-      }
-    })
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(parsedItems)
-      }],
-    };
-  }
-)
+  )
 
 server.registerTool(
   'get_bug_content',
@@ -300,33 +300,33 @@ server.registerTool(
   async ({ id }) => handleGetBugContent(tp, id)
 );
 
-server.registerTool(
-  'get_user_by_id',
-  {
-    title: 'Get user by id',
-    description: 'Get user by id',
-    inputSchema: {
-      id: z.string()
-        .describe('User email'),
+  server.registerTool(
+    'get_user_by_id',
+    {
+      title: 'Get user by id',
+      description: 'Get user by id',
+      inputSchema: {
+        id: z.string()
+          .describe('User email'),
+      },
     },
-  },
-  async ({ id }) => handleGetUserById(tp, id)
-);
+    async ({ id }) => handleGetUserById(tp, id)
+  );
 
-server.registerTool(
-  'get_users',
-  {
-    title: 'Get users',
-    description: 'Get all users',
-  },
-  async () => handleGetUsers(tp)
-);
+  server.registerTool(
+    'get_users',
+    {
+      title: 'Get users',
+      description: 'Get all users',
+    },
+    async () => handleGetUsers(tp)
+  );
 
-server.registerTool(
-  'add_comment_with_user',
-  {
-    title: 'Adds provided content to TP card (user story) as a comment',
-    description: `Adds provided content as a comment to the specified tp card by id, e.g. 145789 and mentions the user in the comment
+  server.registerTool(
+    'add_comment_with_user',
+    {
+      title: 'Adds provided content to TP card (user story) as a comment',
+      description: `Adds provided content as a comment to the specified tp card by id, e.g. 145789 and mentions the user in the comment
     CRITICAL WORKFLOW:
       1) call 'get_users' to get list of available users
       2) find the user by email, first name, or last name in the users list
@@ -435,11 +435,11 @@ server.registerTool(
   async ({ id, results }) => handleGetBugComments(tp, id, results)
 )
 
-server.registerTool(
-  'create_bug_based_on_card',
-  {
-    title: 'Create a new bug card based on provided card id',
-    description: `Create a new bug card based on provided card id that summarizes the problem in concise, descriptive manner answering questions What? Where? When?, and content explaining what happened in detail. 
+  server.registerTool(
+    'create_bug_based_on_card',
+    {
+      title: 'Create a new bug card based on provided card id',
+      description: `Create a new bug card based on provided card id that summarizes the problem in concise, descriptive manner answering questions What? Where? When?, and content explaining what happened in detail. 
       NOTE: this tool requires a user story, bug, or feature card as a reference (i.e. card ID).
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) IF you already have user story, bug, or feature card content, proceed to step 3 skipping step 2;
@@ -464,54 +464,54 @@ server.registerTool(
                   Be specific and avoid assumptions.
                   Clearly outline the actions needed to trigger the bug.
                   Number each step so anyone can follow them easily`),
-      origin: z.enum([
-        "Production - Customer",
-        "Production - Internal",
-        "Pre-Release - Customer",
-        "Pre-Release - Internal",
-        "Regression - Dev01",
-        "Regression - Team Env",
-        "Manual QA",
-        "Developer Raised",
-        "Operations",
-      ])
-        .default("Manual QA")
-        .optional()
-        .describe('Where the bug was found, defaults to "Manual QA" if no origin was specified'),
-      projectId: z.string()
-        .optional()
-        .describe('Optional Project ID — if user gave a project name, resolve it via "get_projects" first; defaults to TP_PROJECT_ID from config'),
-      teamId: z.string()
-        .optional()
-        .describe('Optional Team ID — if user gave a team name, resolve it via "get_teams" first; defaults to TP_TEAM_ID from config'),
+        origin: z.enum([
+          "Production - Customer",
+          "Production - Internal",
+          "Pre-Release - Customer",
+          "Pre-Release - Internal",
+          "Regression - Dev01",
+          "Regression - Team Env",
+          "Manual QA",
+          "Developer Raised",
+          "Operations",
+        ])
+          .default("Manual QA")
+          .optional()
+          .describe('Where the bug was found, defaults to "Manual QA" if no origin was specified'),
+        projectId: z.string()
+          .optional()
+          .describe('Optional Project ID — if user gave a project name, resolve it via "get_projects" first; defaults to TP_PROJECT_ID from config'),
+        teamId: z.string()
+          .optional()
+          .describe('Optional Team ID — if user gave a team name, resolve it via "get_teams" first; defaults to TP_TEAM_ID from config'),
+      },
     },
-  },
-  async ({ title, card, bugContent, origin, projectId, teamId }) => {
-    const bugResponse = await tp.createBug<TP.Bug>({ title, card, bugContent, origin, projectId, teamId });
+    async ({ title, card, bugContent, origin, projectId, teamId }) => {
+      const bugResponse = await tp.createBug<TP.Bug>({ title, card, bugContent, origin, projectId, teamId });
 
-    if (!bugResponse) {
+      if (!bugResponse) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to create bug "${title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
+          }]
+        };
+      }
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to create bug "${title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
-        }]
+          text: JSON.stringify(bugResponse)
+        }],
       };
     }
+  )
 
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(bugResponse)
-      }],
-    };
-  }
-)
-
-server.registerTool(
-  'update_bug',
-  {
-    title: 'Update a bug card',
-    description: `Update a bug card with data proded from user input.
+  server.registerTool(
+    'update_bug',
+    {
+      title: 'Update a bug card',
+      description: `Update a bug card with data proded from user input.
       NOTE: pass only the fields that user wants to update.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
@@ -563,11 +563,11 @@ server.registerTool(
     handleUpdateBug(tp, { id, title, bugContent, origin, projectId, teamId, entityStateId, tags, teamIterationId })
 )
 
-server.registerTool(
-  'update_user_story_state',
-  {
-    title: 'Update a user story card sub state',
-    description: `Update a user story card sub state with data provided from user input.
+  server.registerTool(
+    'update_user_story_state',
+    {
+      title: 'Update a user story card sub state',
+      description: `Update a user story card sub state with data provided from user input.
     CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
       1) call "get_user_story_content" to find the matching team, assigned (responsible) team and their IDs
       1) call "get_user_story_workflows" to find matching state and use its ID in entityStateId`,
@@ -588,11 +588,11 @@ server.registerTool(
     },
   }, async ({ id, teamId, teamAssignmentId, entityStateId }) => handleUpdateUserStorySubState(tp, { id, teamId, teamAssignmentId, entityStateId }))
 
-server.registerTool(
-  'update_user_story',
-  {
-    title: 'Update a user story card',
-    description: `Update a user story card with data provided from user input.
+  server.registerTool(
+    'update_user_story',
+    {
+      title: 'Update a user story card',
+      description: `Update a user story card with data provided from user input.
       NOTE: pass only the fields that user wants to update.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
@@ -633,29 +633,29 @@ server.registerTool(
   async ({ id, title, description, projectId, teamId, entityStateId, featureId, tags, teamIterationId }) => {
     const response = await tp.updateUserStory<any>({ id, title, description, projectId, teamId, entityStateId, featureId, tags, teamIterationId });
 
-    if (!response) {
+      if (!response) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to update user story id: ${id}\n JSON: ${JSON.stringify(response, null, 2)}`
+          }]
+        };
+      }
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to update user story id: ${id}\n JSON: ${JSON.stringify(response, null, 2)}`
-        }]
+          text: JSON.stringify(response)
+        }],
       };
     }
+  )
 
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(response)
-      }],
-    };
-  }
-)
-
-server.registerTool(
-  'create_bug',
-  {
-    title: 'Create a new bug card',
-    description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
+  server.registerTool(
+    'create_bug',
+    {
+      title: 'Create a new bug card',
+      description: `Create a new bug card that summarizes the problem in concise, descriptive manner answering questions "What? Where? When?" and content explaining what happened in detail.
       NOTE: this tool does not require a user story or bug card reference.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
         1) format the new bug inside html <div> tags with Environment(describes where bug was found, dev, feature, review or uat Environment), Issue Description, Steps to Reproduce, Expected Behavior, Actual Behavior and Attachments sections (note: section titles should be wrapped in <h3> tags, e.g. <h3>Issue Description</h3>, step to reproduce should be wrapped in <ol>);
@@ -1157,23 +1157,23 @@ server.registerTool(
   async ({ title, resourceId, resourceType, description }) => {
     const testPlanResponse = await tp.createTestPlan<TP.TestPlan>(title, resourceId, resourceType, { description });
 
-    if (!testPlanResponse) {
+      if (!testPlanResponse) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to create test plan "${title}" for ${resourceType} id: ${resourceId}`
+          }]
+        };
+      }
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to create test plan "${title}" for ${resourceType} id: ${resourceId}`
-        }]
+          text: JSON.stringify(testPlanResponse)
+        }],
       };
     }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(testPlanResponse)
-      }],
-    };
-  }
-)
+  )
 
 server.registerTool(
   'get_not_covered_user_stories_in_feature',
@@ -1190,98 +1190,98 @@ server.registerTool(
   async ({ id }) => {
     const response = await tp.getUserStoriesIdsByFeatureId<TP.TpResponseItemsV2<{ id: string }>>(id)
 
-    if (!response) {
+      if (!response) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to get user stories for feature id: ${id}`
+          }],
+        }
+      }
+
+      const userStoriesIds = response.items || []
+      if (userStoriesIds.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No user stories found in outer items for feature id: ${id}`,
+          }],
+        }
+      }
+
+      const userStoriesPromise = userStoriesIds.map((item: { id: string }) => tp.getUserStory<TP.UserStory>(item.id))
+      let userStoriesResults = []
+      try {
+        const results = await Promise.all(userStoriesPromise)
+        userStoriesResults = results.map((item: TP.UserStory) => item).flat()
+      } catch (error) {
+        console.error("Error getting user stories:", error);
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to get user stories for feature id: ${id}. Error: ${error}.`
+          }],
+        }
+      }
+
+      if (userStoriesResults.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No user stories promise found for feature id: ${id}`,
+          }],
+        }
+      }
+
+      let userStories: {
+        id: number
+        name: string
+        description: string
+        featureId?: number
+        featureName?: string
+        covered: boolean
+      }[] = []
+
+      try {
+        for (const userStory of userStoriesResults) {
+          const covered = userStory?.CustomFields.find((field: any) => field.Name === "Test Automation")?.Value === "Done"
+
+          userStories.push({
+            id: userStory.Id,
+            name: userStory.Name,
+            description: userStory.Description,
+            featureId: userStory.Feature.Id,
+            featureName: userStory.Feature.Name,
+            covered,
+          })
+        }
+      } catch (error) {
+        console.error("Error getting user stories:", error);
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to get user stories array for feature id: ${id}: Error: ${error}.`
+          }],
+        }
+      }
+
+      if (userStories.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No user stories unable to convert to TP card found for feature id: ${id}`,
+          }],
+        }
+      }
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to get user stories for feature id: ${id}`
+          text: JSON.stringify(userStories)
         }],
       }
     }
-
-    const userStoriesIds = response.items || []
-    if (userStoriesIds.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No user stories found in outer items for feature id: ${id}`,
-        }],
-      }
-    }
-
-    const userStoriesPromise = userStoriesIds.map((item: { id: string }) => tp.getUserStory<TP.UserStory>(item.id))
-    let userStoriesResults = []
-    try {
-      const results = await Promise.all(userStoriesPromise)
-      userStoriesResults = results.map((item: TP.UserStory) => item).flat()
-    } catch (error) {
-      console.error("Error getting user stories:", error);
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to get user stories for feature id: ${id}. Error: ${error}.`
-        }],
-      }
-    }
-
-    if (userStoriesResults.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No user stories promise found for feature id: ${id}`,
-        }],
-      }
-    }
-
-    let userStories: {
-      id: number
-      name: string
-      description: string
-      featureId?: number
-      featureName?: string
-      covered: boolean
-    }[] = []
-
-    try {
-      for (const userStory of userStoriesResults) {
-        const covered = userStory?.CustomFields.find((field: any) => field.Name === "Test Automation")?.Value === "Done"
-
-        userStories.push({
-          id: userStory.Id,
-          name: userStory.Name,
-          description: userStory.Description,
-          featureId: userStory.Feature.Id,
-          featureName: userStory.Feature.Name,
-          covered,
-        })
-      }
-    } catch (error) {
-      console.error("Error getting user stories:", error);
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to get user stories array for feature id: ${id}: Error: ${error}.`
-        }],
-      }
-    }
-
-    if (userStories.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No user stories unable to convert to TP card found for feature id: ${id}`,
-        }],
-      }
-    }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(userStories)
-      }],
-    }
-  }
-)
+  )
 
 server.registerTool(
   'get_feature_user_stories',
@@ -1400,19 +1400,19 @@ server.registerTool(
   async ({ id }) => handleGetUserStoryBugs(tp, id)
 );
 
-server.registerTool(
-  'get_projects',
-  {
-    title: 'Get projects',
-    description: 'Get all Targetprocess projects',
-  },
-  async () => handleGetProjects(tp)
-);
+  server.registerTool(
+    'get_projects',
+    {
+      title: 'Get projects',
+      description: 'Get all Targetprocess projects',
+    },
+    async () => handleGetProjects(tp)
+  );
 
-server.registerTool('get_teams_and_team_assignments', {
-  title: 'Get teams and team assignments',
-  description: 'Get all Targetprocess teams and team assignments',
-}, async () => handleGetTeamsAndTeamAssignments(tp))
+  server.registerTool('get_teams_and_team_assignments', {
+    title: 'Get teams and team assignments',
+    description: 'Get all Targetprocess teams and team assignments',
+  }, async () => handleGetTeamsAndTeamAssignments(tp))
 
 server.registerTool(
   'get_teams',
@@ -1438,14 +1438,14 @@ server.registerTool(
   async ({ teamId }) => handleGetTeamIterations(tp, { teamId })
 );
 
-server.registerTool(
-  'get_logged_in_user',
-  {
-    title: 'Get logged in user',
-    description: 'Get logged in user',
-  },
-  async () => handleGetLoggedInUser(tp)
-);
+  server.registerTool(
+    'get_logged_in_user',
+    {
+      title: 'Get logged in user',
+      description: 'Get logged in user',
+    },
+    async () => handleGetLoggedInUser(tp)
+  );
 
 server.registerTool(
   'get_user_story_test_cases',
@@ -1462,83 +1462,83 @@ server.registerTool(
   async ({ resourceId }) => {
     const userStoryResponse = await tp.getUserStoryTestPlan<TP.TpResponseV2<Record<"linkedTestPlan", TP.TpResultItemV2>>>(resourceId)
 
-    if (!userStoryResponse) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to get test user story, JSON: ${JSON.stringify(userStoryResponse, null, 2)}`
-        }],
+      if (!userStoryResponse) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to get test user story, JSON: ${JSON.stringify(userStoryResponse, null, 2)}`
+          }],
+        }
       }
-    }
 
-    const items = userStoryResponse.items
-    if (items.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No items in ${resourceId} user story response`,
-        }],
-      };
-    }
-
-    const testPlan = items[0].linkedTestPlan
-    if (!testPlan) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No linked test plan found for user story id: ${resourceId}`,
-        }],
-      };
-    }
-
-    const testCases = await tp.getTestPlanTestCases<TP.TpResponse<TP.TestCase>>(String(testPlan.id))
-    if (testCases.Items.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No test cases found in test plan id: ${testPlan.id}`,
-        }],
-      };
-    }
-
-    const testCaseItems = testCases.Items
-    if (!testCaseItems || testCaseItems.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: `No test case items found in test plan id: ${testPlan.id}`,
-        }],
-      };
-    }
-
-    const testCasesData = await Promise.all(testCaseItems.map(async (item) => {
-      const testCaseSteps = await tp.getTestCaseSteps<TP.TpResponse<TP.TestStep>>(String(item.Id))
-      return {
-        testCaseId: item.Id,
-        testCaseName: item.Name,
-        testCaseDescription: item.Description,
-        testCaseSteps: testCaseSteps.Items.map((step) => ({
-          description: step.Description,
-          result: step.Result,
-          runOrder: step.RunOrder,
-        }))
+      const items = userStoryResponse.items
+      if (items.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No items in ${resourceId} user story response`,
+          }],
+        };
       }
-    }))
 
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(testCasesData)
-      }],
-    };
-  }
-)
+      const testPlan = items[0].linkedTestPlan
+      if (!testPlan) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No linked test plan found for user story id: ${resourceId}`,
+          }],
+        };
+      }
 
-server.registerTool(
-  'write_test_cases',
-  {
-    title: 'Write test cases for a TP card (UserStory, Bug, or Feature)',
-    description: `Fetches a TP card (UserStory, Bug, or Feature) content by ID.
+      const testCases = await tp.getTestPlanTestCases<TP.TpResponse<TP.TestCase>>(String(testPlan.id))
+      if (testCases.Items.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No test cases found in test plan id: ${testPlan.id}`,
+          }],
+        };
+      }
+
+      const testCaseItems = testCases.Items
+      if (!testCaseItems || testCaseItems.length === 0) {
+        return {
+          content: [{
+            type: 'text',
+            text: `No test case items found in test plan id: ${testPlan.id}`,
+          }],
+        };
+      }
+
+      const testCasesData = await Promise.all(testCaseItems.map(async (item) => {
+        const testCaseSteps = await tp.getTestCaseSteps<TP.TpResponse<TP.TestStep>>(String(item.Id))
+        return {
+          testCaseId: item.Id,
+          testCaseName: item.Name,
+          testCaseDescription: item.Description,
+          testCaseSteps: testCaseSteps.Items.map((step) => ({
+            description: step.Description,
+            result: step.Result,
+            runOrder: step.RunOrder,
+          }))
+        }
+      }))
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(testCasesData)
+        }],
+      };
+    }
+  )
+
+  server.registerTool(
+    'write_test_cases',
+    {
+      title: 'Write test cases for a TP card (UserStory, Bug, or Feature)',
+      description: `Fetches a TP card (UserStory, Bug, or Feature) content by ID.
       CRITICAL WORKFLOW — after receiving the card content, you MUST:
         1) Thoroughly analyze the card name and description to understand the feature or issue being tested
         2) Write detailed test cases covering: happy path, edge cases, boundary conditions, and error scenarios
@@ -1562,45 +1562,45 @@ server.registerTool(
   async ({ resourceId, resourceType = 'UserStory' }) => {
     let card: TP.UserStory | TP.Bug | TP.Feature | null = null
 
-    if (resourceType === 'Bug') {
-      card = await tp.getBug<TP.Bug>(resourceId)
-    } else if (resourceType === 'Feature') {
-      card = await tp.getFeature<TP.Feature>(resourceId)
-    } else {
-      card = await tp.getUserStory<TP.UserStory>(resourceId)
-    }
+      if (resourceType === 'Bug') {
+        card = await tp.getBug<TP.Bug>(resourceId)
+      } else if (resourceType === 'Feature') {
+        card = await tp.getFeature<TP.Feature>(resourceId)
+      } else {
+        card = await tp.getUserStory<TP.UserStory>(resourceId)
+      }
 
-    if (!card) {
+      if (!card) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Failed to get ${resourceType} with id: ${resourceId}`
+          }],
+        }
+      }
+
+      let description = ''
+      try {
+        const dom = new JSDOM(`<html><body><div id="content">${card.Description}</div></body></html>`)
+        description = dom.window.document.getElementById('content')?.textContent || ''
+      } catch (error) {
+        console.error("Error parsing card description:", error)
+      }
+
       return {
         content: [{
           type: 'text',
-          text: `Failed to get ${resourceType} with id: ${resourceId}`
+          text: JSON.stringify({
+            id: card.Id,
+            name: card.Name,
+            resourceType,
+            description,
+            customFields: card.CustomFields,
+          })
         }],
       }
     }
-
-    let description = ''
-    try {
-      const dom = new JSDOM(`<html><body><div id="content">${card.Description}</div></body></html>`)
-      description = dom.window.document.getElementById('content')?.textContent || ''
-    } catch (error) {
-      console.error("Error parsing card description:", error)
-    }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          id: card.Id,
-          name: card.Name,
-          resourceType,
-          description,
-          customFields: card.CustomFields,
-        })
-      }],
-    }
-  }
-)
+  )
 
 server.registerTool(
   'add_test_cases_to_test_plan',
@@ -1634,35 +1634,35 @@ server.registerTool(
     const created: { id: number; name: string; stepsAdded: number; stepsFailed: number }[] = []
     const failed: string[] = []
 
-    for (const tc of testCases) {
-      const testCase = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
-      if (!testCase) {
-        failed.push(tc.name)
-        continue
-      }
-
-      let stepsAdded = 0
-      let stepsFailed = 0
-      for (const step of tc.steps) {
-        const stepResult = await tp.addTestStep<TP.TestStep>(String(testCase.Id), step)
-        if (stepResult) {
-          stepsAdded++
-        } else {
-          stepsFailed++
+      for (const tc of testCases) {
+        const testCase = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
+        if (!testCase) {
+          failed.push(tc.name)
+          continue
         }
+
+        let stepsAdded = 0
+        let stepsFailed = 0
+        for (const step of tc.steps) {
+          const stepResult = await tp.addTestStep<TP.TestStep>(String(testCase.Id), step)
+          if (stepResult) {
+            stepsAdded++
+          } else {
+            stepsFailed++
+          }
+        }
+
+        created.push({ id: testCase.Id, name: testCase.Name, stepsAdded, stepsFailed })
       }
 
-      created.push({ id: testCase.Id, name: testCase.Name, stepsAdded, stepsFailed })
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({ created, failed })
+        }]
+      }
     }
-
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({ created, failed })
-      }]
-    }
-  }
-)
+  )
 
 server.registerTool(
   'get_process_workflows',
@@ -1722,11 +1722,11 @@ server.registerTool(
   async ({ id, resourceType = 'UserStory' }) => handleGetCardCurrentStatus(tp, id, resourceType)
 )
 
-server.registerTool(
-  'get_card_relations',
-  {
-    title: 'Get card relations',
-    description: `Get all relations (Dependency, Blocker, Relation, Link, Duplicate) for a TP card (UserStory, Bug, Feature, etc.) by its ID.
+  server.registerTool(
+    'get_card_relations',
+    {
+      title: 'Get card relations',
+      description: `Get all relations (Dependency, Blocker, Relation, Link, Duplicate) for a TP card (UserStory, Bug, Feature, etc.) by its ID.
       Each relation shows the related card and the direction:
       - "outbound" — this card is the Master (e.g. for Dependency, the related card depends on this card)
       - "inbound" — this card is the Slave (e.g. for Dependency, this card depends on the related card)`,
@@ -1749,11 +1749,11 @@ server.registerTool(
   async () => handleGetRelationTypes(tp)
 )
 
-server.registerTool(
-  'create_card_relation',
-  {
-    title: 'Create a relation between two cards',
-    description: `Create a relation between two TP cards (UserStory, Bug, Feature, etc.).
+  server.registerTool(
+    'create_card_relation',
+    {
+      title: 'Create a relation between two cards',
+      description: `Create a relation between two TP cards (UserStory, Bug, Feature, etc.).
       The Master is the source of the relation and the Slave is the target — e.g. for a "Depends on" relation, the Slave depends on the Master (Master must be done first).
       NOTE: relationType is matched by name against this instance's relation types. If unsure of the exact name, call "get_relation_types" first. The handler resolves the name to its ID before creating the relation.`,
     inputSchema: {
@@ -1773,11 +1773,11 @@ server.registerTool(
   async ({ masterId, slaveId, relationType }) => handleCreateCardRelation(tp, { masterId, slaveId, relationType })
 )
 
-server.registerTool(
-  'delete_card_relation',
-  {
-    title: 'Delete a relation between two cards',
-    description: `Delete (remove) a relation between two TP cards by the relation's own ID — not the card IDs.
+  server.registerTool(
+    'delete_card_relation',
+    {
+      title: 'Delete a relation between two cards',
+      description: `Delete (remove) a relation between two TP cards by the relation's own ID — not the card IDs.
       To find the relationId, call "get_card_relations" for one of the cards; each entry includes a "relationId" field.`,
     inputSchema: {
       relationId: z.string()
@@ -1803,18 +1803,18 @@ server.registerTool(
   async ({ id, type }) => handleDeleteCard(tp, { id, type })
 )
 
-server.registerTool(
-  'get_in_progress_tasks_and_bugs',
-  {
-    title: 'Get in-progress tasks and bugs for a user',
-    description: 'Get all Tasks and Bugs currently in "In Progress" state assigned to a given user ID',
-    inputSchema: {
-      userId: z.string()
-        .describe('Targetprocess user ID (e.g. 123)'),
+  server.registerTool(
+    'get_in_progress_tasks_and_bugs',
+    {
+      title: 'Get in-progress tasks and bugs for a user',
+      description: 'Get all Tasks and Bugs currently in "In Progress" state assigned to a given user ID',
+      inputSchema: {
+        userId: z.string()
+          .describe('Targetprocess user ID (e.g. 123)'),
+      },
     },
-  },
-  async ({ userId }) => handleGetInProgressTasksAndBugs(tp, userId)
-);
+    async ({ userId }) => handleGetInProgressTasksAndBugs(tp, userId)
+  );
 
 server.registerTool(
   'create_task',
@@ -1837,46 +1837,46 @@ server.registerTool(
     handleCreateTask(tp, { title, userStoryId, description })
 )
 
-server.registerTool(
-  'get_commit_message',
-  {
-    title: 'Get commit message for a task or bug',
-    description: `Returns the formatted commit message string for a given task or bug ID.
+  server.registerTool(
+    'get_commit_message',
+    {
+      title: 'Get commit message for a task or bug',
+      description: `Returns the formatted commit message string for a given task or bug ID.
 Formats:
 - Task on a user story: "F#<featureId> US#<userStoryId> T#<taskId> <title>"
 - Bug on a user story: "F#<featureId> US#<userStoryId> B#<bugId> <title>"
 - Standalone bug (no user story): "B#<bugId> <title>"`,
-    inputSchema: {
-      id: z.string()
-        .describe('The task or bug ID (e.g. 145789)'),
-      type: z.enum(['task', 'bug'])
-        .describe('Whether the ID refers to a task or a bug'),
+      inputSchema: {
+        id: z.string()
+          .describe('The task or bug ID (e.g. 145789)'),
+        type: z.enum(['task', 'bug'])
+          .describe('Whether the ID refers to a task or a bug'),
+      },
     },
-  },
-  async ({ id, type }) => handleGetCommitMessage(tp, id, type)
-)
+    async ({ id, type }) => handleGetCommitMessage(tp, id, type)
+  )
 
-server.registerTool(
-  'list_my_user_stories',
-  {
-    title: 'List my user stories',
-    description: 'List User Stories assigned to me. Use this to get an overview of current work. Optionally filter by state.',
-    inputSchema: {
-      state: z.string()
-        .optional()
-        .describe('Filter by state name (e.g. "Open", "In Progress", "Done")'),
-      take: z.number()
-        .default(25)
-        .optional()
-        .describe('Number of results to return, default is 25'),
-      skip: z.number()
-        .default(0)
-        .optional()
-        .describe('Pagination offset, default is 0'),
+  server.registerTool(
+    'list_my_user_stories',
+    {
+      title: 'List my user stories',
+      description: 'List User Stories assigned to me. Use this to get an overview of current work. Optionally filter by state.',
+      inputSchema: {
+        state: z.string()
+          .optional()
+          .describe('Filter by state name (e.g. "Open", "In Progress", "Done")'),
+        take: z.number()
+          .default(25)
+          .optional()
+          .describe('Number of results to return, default is 25'),
+        skip: z.number()
+          .default(0)
+          .optional()
+          .describe('Pagination offset, default is 0'),
+      },
     },
-  },
-  async ({ state, take, skip }) => handleListMyUserStories(tp, { state, take, skip })
-)
+    async ({ state, take, skip }) => handleListMyUserStories(tp, { state, take, skip })
+  )
 
 server.registerTool(
   'list_my_bugs',
@@ -1923,23 +1923,23 @@ server.registerTool(
   },
   async ({ entityId, entityType, hours, description, date }) => handleLogTime(tp, { entityId, entityType, hours, description, date }))
 
-server.registerTool(
-  'get_my_time_logs',
-  {
-    title: 'Get my recent time log entries',
-    description: 'Get recent time log entries submitted by me.',
-    inputSchema: {
-      take: z.number()
-        .default(25)
-        .optional()
-        .describe('Number of entries to return, default is 25'),
+  server.registerTool(
+    'get_my_time_logs',
+    {
+      title: 'Get my recent time log entries',
+      description: 'Get recent time log entries submitted by me.',
+      inputSchema: {
+        take: z.number()
+          .default(25)
+          .optional()
+          .describe('Number of entries to return, default is 25'),
+      },
     },
-  },
-  async ({ take }) => handleGetMyTimeLogs(tp, take)
-)
+    async ({ take }) => handleGetMyTimeLogs(tp, take)
+  )
 
-const require = createRequire(import.meta.url);
-const { version } = require("../package.json");
+  const require = createRequire(import.meta.url);
+  const { version } = require("../package.json");
 
 server.registerTool(
   'get_version',
