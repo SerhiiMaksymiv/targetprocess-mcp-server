@@ -253,6 +253,76 @@ Each org member points their MCP client at the hosted URL and supplies both head
 
 The `HOSTING_API_KEY` is the same for everyone in the org; `X-TP-Token` is personal to each user (Targetprocess → Settings → Authentication and Security → New Access Token) and should never be shared between people, since it's what the server uses to tell them apart.
 
+### Trying it with curl
+
+A real MCP client speaks this protocol for you, but it's worth seeing the raw flow once. Every call needs `Authorization: Bearer <HOSTING_API_KEY>`; only the first one also needs `X-TP-Token`.
+
+**1. Initialize** — start a session and capture its ID from the `mcp-session-id` response header:
+
+```bash
+curl -sD - -o /dev/null -X POST http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer <HOSTING_API_KEY>" \
+  -H "X-TP-Token: <your-personal-tp-token>" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0", "id": 1, "method": "initialize",
+    "params": {
+      "protocolVersion": "2024-11-05",
+      "capabilities": {},
+      "clientInfo": { "name": "curl-test", "version": "0.0.1" }
+    }
+  }'
+```
+
+```bash
+SESSION_ID=<the uuid from the mcp-session-id header above>
+```
+
+**2. Complete the handshake** (required by the MCP spec before any other call):
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer <HOSTING_API_KEY>" \
+  -H "mcp-session-id: $SESSION_ID" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+```
+
+**3. List tools:**
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer <HOSTING_API_KEY>" \
+  -H "mcp-session-id: $SESSION_ID" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+```
+
+**4. Call a tool** — same shape, `tools/call` with `name` + `arguments`:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer <HOSTING_API_KEY>" \
+  -H "mcp-session-id: $SESSION_ID" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0", "id": 3, "method": "tools/call",
+    "params": { "name": "get_current_releases", "arguments": {} }
+  }'
+```
+
+**5. End the session** (optional — the server also cleans up on disconnect):
+
+```bash
+curl -s -X DELETE http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer <HOSTING_API_KEY>" \
+  -H "mcp-session-id: $SESSION_ID"
+```
+
 ## Local Development
 ```
 git clone --recursive https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git
