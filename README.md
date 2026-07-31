@@ -211,6 +211,48 @@ claude mcp add targetprocess -s user \
   -e TP_TOKEN=<your-tp-token> -e TP_BASE_URL=<tp-api-endpoint> -- npx -y targetprocess-mcp-server
 ```
 
+## Hosted Streamable HTTP (multi-user)
+
+The installs above run one `TpClient` per stdio process, tied to whichever `TP_TOKEN` is in its env — fine for one person on one machine. `src/http.ts` runs the same set of tools over **Streamable HTTP** instead, so one deployment can serve an entire org, with each person's tool calls attributed to *their own* Targetprocess account rather than one shared token.
+
+### Auth model
+
+Every request needs two things, layered:
+
+1. **Hosting API key** — one shared secret for the whole deployment, sent as `Authorization: Bearer <HOSTING_API_KEY>`. This just gates access to the server itself; it has nothing to do with Targetprocess. Generate one with `openssl rand -hex 32` and set it as `HOSTING_API_KEY` in the server's environment. The server refuses to start without it.
+2. **Personal TP token** — each user's own Targetprocess API token, sent as `X-TP-Token: <their-token>` on every request. On session start, the server calls Targetprocess's `Context` endpoint with that token to confirm it's valid and to resolve the caller's own user ID — that ID (not a shared `TP_OWNER_ID`) is what gets used for comment attribution, time logging, and "my stories"/"my bugs" queries for the rest of that session. A missing or rejected token gets a 401 before any tool runs.
+
+`TP_TOKEN` / `TP_OWNER_ID` in the server's env are **not used** in this mode — they only matter for the stdio path. `TP_BASE_URL`, `TP_PROJECT_ID`, and `TP_TEAM_ID` still apply org-wide, same as today.
+
+### Running it
+
+```bash
+npm run build
+HOSTING_API_KEY=<generated-key> TP_BASE_URL=<tp-api-endpoint> npm run start:http
+```
+
+See `.env.example` for the full list of `HTTP_*` variables (port, host, allowed hosts). Reverse proxy / TLS / process management are outside this server's scope — put it behind whatever you already use for other internal HTTP services.
+
+### Client configuration
+
+Each org member points their MCP client at the hosted URL and supplies both headers:
+
+```json
+{
+  "mcpServers": {
+    "targetprocess": {
+      "url": "https://<your-hosted-endpoint>/mcp",
+      "headers": {
+        "Authorization": "Bearer <HOSTING_API_KEY>",
+        "X-TP-Token": "<their-own-tp-token>"
+      }
+    }
+  }
+}
+```
+
+The `HOSTING_API_KEY` is the same for everyone in the org; `X-TP-Token` is personal to each user (Targetprocess → Settings → Authentication and Security → New Access Token) and should never be shared between people, since it's what the server uses to tell them apart.
+
 ## Local Development
 ```
 git clone --recursive https://github.com/SerhiiMaksymiv/targetprocess-mcp-server.git

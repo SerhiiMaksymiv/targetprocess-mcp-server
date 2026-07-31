@@ -24,12 +24,15 @@ type TestPlanNode = {
 export class TpClient {
 
   private baseUrl: string = config.tp.url
-  private token: string = config.tp.token
+  private token: string
+  private ownerId: string
   private headers: HeadersInit
   private readonly v1 = '/api/v1'
   private readonly v2 = '/api/v2'
 
-  constructor() {
+  constructor(token: string = config.tp.token, ownerId: string = config.tp.ownerId) {
+    this.token = token
+    this.ownerId = ownerId
     this.headers = {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -583,7 +586,7 @@ export class TpClient {
     const commentData = {
       description: commentContent,
       owner: {
-        id: config.tp.ownerId
+        id: this.ownerId
       },
       general: {
         id: userStoryId,
@@ -600,7 +603,7 @@ export class TpClient {
     const commentData = {
       description: comment,
       owner: {
-        id: config.tp.ownerId
+        id: this.ownerId
       },
       general: {
         id: userStoryId,
@@ -1162,7 +1165,7 @@ export class TpClient {
     const body: Record<string, any> = {
       Spent: hours,
       Date: `/Date(${timestamp})/`,
-      User: { Id: config.tp.ownerId },
+      User: { Id: this.ownerId },
       Assignable: { Id: entityId, ResourceType: entityType },
     }
     if (description) body["Description"] = description
@@ -1212,7 +1215,7 @@ export class TpClient {
       pathParam: ["Times"],
       param: {
         "format": "json",
-        "where": `User.Id eq ${config.tp.ownerId}`,
+        "where": `User.Id eq ${this.ownerId}`,
         "include": "[Id,Spent,Date,Description,Assignable[Id,Name,ResourceType]]",
         "orderByDesc": "Date",
         "take": take,
@@ -1221,7 +1224,7 @@ export class TpClient {
   }
 
   async getMyUserStories<T>({ state, take = 25, skip = 0 }: { state?: string, take?: number, skip?: number }): Promise<T> {
-    const whereParts = [`AssignedUser.Id eq ${config.tp.ownerId}`]
+    const whereParts = [`AssignedUser.Id eq ${this.ownerId}`]
     if (state) whereParts.push(`EntityState.Name contains '${state}'`)
 
     return this.get<T>({
@@ -1238,7 +1241,7 @@ export class TpClient {
   }
 
   async getMyBugs<T>({ state, take = 25, skip = 0 }: { state?: string, take?: number, skip?: number }): Promise<T> {
-    const whereParts = [`AssignedUser.Id eq ${config.tp.ownerId}`]
+    const whereParts = [`AssignedUser.Id eq ${this.ownerId}`]
     if (state) whereParts.push(`EntityState.Name contains '${state}'`)
 
     return this.get<T>({
