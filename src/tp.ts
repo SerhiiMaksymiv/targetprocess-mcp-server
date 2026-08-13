@@ -310,6 +310,14 @@ export class TpClient {
     }, userStory) as T
   }
 
+  async setBusinessValue<T>({ id, entityType, priorityId }: { id: string, entityType: string, priorityId: string }): Promise<T> {
+    const entity: Record<string, any> = { "Id": id, "Priority": { "Id": priorityId } }
+    return this.post<any, T>({
+      pathParam: [entityType, id],
+      param: { "format": "json" },
+    }, entity) as T
+  }
+
   async updateBug<T>({ id, title, bugContent, origin, releaseId, projectId, teamId, entityStateId, tags, teamIterationId }: { id: string, title?: string, bugContent?: string, origin?: string, releaseId?: string, projectId?: string, teamId?: string, entityStateId?: string, tags?: string, teamIterationId?: string }): Promise<T> {
     const bug: Record<string, any> = { "Id": id }
 
@@ -981,6 +989,13 @@ export class TpClient {
     return this.get<T>({
       pathParam: ["Projects"],
       param: { "format": "json" },
+    }) as T
+  }
+
+  async getPriorities<T>(): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Priorities"],
+      param: { "format": "json", "take": "200" },
     }) as T
   }
 

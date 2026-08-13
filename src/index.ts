@@ -583,6 +583,44 @@ server.registerTool(
   }, async ({ id, teamId, teamAssignmentId, entityStateId }) => handleUpdateUserStorySubState(tp, { id, teamId, teamAssignmentId, entityStateId }))
 
 server.registerTool(
+  'set_business_value',
+  {
+    title: 'Set Business Value on a TP card',
+    description: `Set the Business Value (Priority) on a Targetprocess User Story, Feature, or Epic.
+      Business Value in the TP UI maps to the Priority field in the API.
+      CRITICAL WORKFLOW: Call "get_priorities" first to retrieve the list of valid priority IDs and their names for this instance before calling this tool — do not guess priority IDs.`,
+    inputSchema: {
+      id: z.string()
+        .describe('ID of the card to update (e.g. "151282")'),
+      entityType: z.enum(['UserStories', 'Features', 'Epics'])
+        .describe('Entity type of the card'),
+      priorityId: z.string()
+        .describe('Priority ID — resolve via "get_priorities" first'),
+    },
+  },
+  async ({ id, entityType, priorityId }) => {
+    const response = await tp.setBusinessValue<any>({ id, entityType, priorityId })
+    if (!response) {
+      return { content: [{ type: 'text' as const, text: `Failed to set business value on ${entityType} ${id}` }] }
+    }
+    return { content: [{ type: 'text' as const, text: JSON.stringify(response) }] }
+  }
+)
+
+server.registerTool(
+  'get_priorities',
+  {
+    title: 'Get available Business Value / Priority options',
+    description: `Returns the list of Priority options available in this Targetprocess instance. Use this before calling "set_business_value" to resolve a priority name (e.g. "Must Have", "Normal", "10") to its ID.`,
+    inputSchema: {},
+  },
+  async () => {
+    const response = await tp.getPriorities<any>()
+    return { content: [{ type: 'text' as const, text: JSON.stringify(response) }] }
+  }
+)
+
+server.registerTool(
   'update_user_story',
   {
     title: 'Update a user story card',
@@ -964,7 +1002,7 @@ server.registerTool(
   'create_feature',
   {
     title: 'Create a new feature',
-    description: `Create a new Feature in Targetprocess.`,
+    description: `DEPRECATED — use "create_formatted_feature" instead for all new features. Only call this tool when you have a fully pre-written HTML description and the user has explicitly opted out of the structured template.`,
     inputSchema: {
       title: z.string()
         .describe('Feature title'),
