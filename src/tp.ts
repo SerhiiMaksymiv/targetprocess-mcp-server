@@ -318,6 +318,18 @@ export class TpClient {
     }, entity) as T
   }
 
+  async getUserStoriesInFeatureWithPriority<T>(featureId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: ["UserStories"],
+      param: {
+        "format": "json",
+        "where": `(Feature.Id eq ${featureId})`,
+        "select": "Id,Name,Priority",
+        "take": "200",
+      },
+    }) as T
+  }
+
   async updateBug<T>({ id, title, bugContent, origin, releaseId, projectId, teamId, entityStateId, tags, teamIterationId }: { id: string, title?: string, bugContent?: string, origin?: string, releaseId?: string, projectId?: string, teamId?: string, entityStateId?: string, tags?: string, teamIterationId?: string }): Promise<T> {
     const bug: Record<string, any> = { "Id": id }
 

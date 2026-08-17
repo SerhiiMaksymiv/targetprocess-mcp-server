@@ -599,6 +599,24 @@ server.registerTool(
     },
   },
   async ({ id, entityType, priorityId }) => {
+    if (entityType === 'UserStories') {
+      const story = await tp.getUserStory<any>(id)
+      const featureId = story?.Feature?.Id
+      if (featureId) {
+        const siblings = await tp.getUserStoriesInFeatureWithPriority<any>(String(featureId))
+        const conflict = (siblings?.Items ?? []).find(
+          (s: any) => String(s.Id) !== String(id) && s.Priority?.Id === parseInt(priorityId)
+        )
+        if (conflict) {
+          return {
+            content: [{
+              type: 'text' as const,
+              text: `Cannot set Business Value: story "${conflict.Name}" (${conflict.Id}) in the same feature already has this priority. Choose a different value.`,
+            }],
+          }
+        }
+      }
+    }
     const response = await tp.setBusinessValue<any>({ id, entityType, priorityId })
     if (!response) {
       return { content: [{ type: 'text' as const, text: `Failed to set business value on ${entityType} ${id}` }] }
