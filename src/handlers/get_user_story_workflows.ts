@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetUserStoryWorkflows(tp: TpClient) {
   const response = await tp.getUserStoryWorkflowsWithSubStates<TP.TpResponseV2<TP.WorkflowV2WithSubStates>>()
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get user story entity statuses, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get user story entity statuses, Error: ${response.message}`
       }],
     }
   }

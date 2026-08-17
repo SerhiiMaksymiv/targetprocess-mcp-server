@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetTeamIterations(tp: TpClient, params: { teamId?: string }) {
   const response = await tp.getTeamIterations<TP.TpResponse<TP.TeamIteration>>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get team iterations, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get team iterations, Error: ${response.message}`
       }],
     }
   }

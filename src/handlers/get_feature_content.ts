@@ -5,11 +5,11 @@ import type * as TP from '../types.js'
 export async function handleGetFeatureContent(tp: TpClient, id: string) {
   const feature = await tp.getFeature<TP.Feature>(id)
 
-  if (!feature) {
+  if (feature instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get feature, id: ${id}\n JSON: ${JSON.stringify(feature, null, 2)}`
+        text: `Failed to get feature, id: ${id}\n Error: ${feature.message}`
       }],
     }
   }

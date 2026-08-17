@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetMyTimeLogs(tp: TpClient, take?: number) {
   const response = await tp.getMyTimeLogs<TP.TpResponse<TP.TimeLog>>(take)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get time logs, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get time logs, Error: ${response.message}`
       }],
     }
   }

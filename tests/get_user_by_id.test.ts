@@ -28,7 +28,7 @@ describe('handleGetUserById', () => {
   })
 
   it('returns failure message when user is not found', async () => {
-    vi.mocked(mockTp.getUser).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUser).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUserById(mockTp, '99')
 

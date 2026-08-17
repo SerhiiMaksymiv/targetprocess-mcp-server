@@ -7,11 +7,11 @@ export async function handleListMyBugs(
 ) {
   const response = await tp.getMyBugs<TP.TpResponse<TP.Bug>>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get bugs, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get bugs, Error: ${response.message}`
       }],
     }
   }

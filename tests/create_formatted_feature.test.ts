@@ -29,7 +29,7 @@ describe('handleCreateFormattedFeature', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createFeature).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createFeature).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateFormattedFeature(mockTp, baseParams)
 

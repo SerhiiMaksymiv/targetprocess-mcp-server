@@ -28,7 +28,7 @@ describe('handleCreateEpic', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createEpic).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createEpic).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateEpic(mockTp, { title: 'New Epic' })
 
@@ -60,7 +60,7 @@ describe('handleGetEpicContent', () => {
   })
 
   it('returns failure message when epic is not found', async () => {
-    vi.mocked(mockTp.getEpic).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getEpic).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetEpicContent(mockTp, '148813')
 
@@ -80,7 +80,7 @@ describe('handleUpdateEpic', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.updateEpic).mockResolvedValue(null as any)
+    vi.mocked(mockTp.updateEpic).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateEpic(mockTp, { id: '148813' })
 
@@ -104,7 +104,7 @@ describe('handleGetEpicFeatures', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getEpicFeatures).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getEpicFeatures).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetEpicFeatures(mockTp, '148813')
 

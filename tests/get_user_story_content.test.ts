@@ -62,7 +62,7 @@ describe('handleGetUserStoryContent', () => {
   })
 
   it('returns failure message when user story is not found', async () => {
-    vi.mocked(mockTp.getUserStory).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUserStory).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUserStoryContent(mockTp, '999999')
 

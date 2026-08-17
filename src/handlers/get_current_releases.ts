@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetCurrentReleases(tp: TpClient) {
   const releases = await tp.getCurrentReleases<TP.TpResponse<TP.Release>>()
 
-  if (!releases) {
+  if (releases instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get current releases, JSON: ${JSON.stringify(releases, null, 2)}`
+        text: `Failed to get current releases, Error: ${releases.message}`
       }],
     }
   }

@@ -8,7 +8,7 @@ export async function handleGetCardCurrentStatus(
 ) {
   const response = await tp.getCardStatus<TP.TpResponseV2<TP.CardStatus>>(id, resourceType)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,

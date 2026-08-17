@@ -42,7 +42,7 @@ describe('handleGetTestCaseById', () => {
   })
 
   it('returns failure message when test case is not found', async () => {
-    vi.mocked(mockTp.getTestCase).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTestCase).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTestCaseById(mockTp, '145789')
 
@@ -69,7 +69,7 @@ describe('handleUpdateTestCaseById', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.updateTestCase).mockResolvedValue(null as any)
+    vi.mocked(mockTp.updateTestCase).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateTestCaseById(mockTp, { id: '145789', description: 'New desc' })
 
@@ -89,7 +89,7 @@ describe('handleAddTestCaseStepById', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.addTestStep).mockResolvedValue(null as any)
+    vi.mocked(mockTp.addTestStep).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleAddTestCaseStepById(mockTp, { testCaseId: '145789', description: 'Click login', result: 'Logged in' })
 
@@ -117,7 +117,7 @@ describe('handleUpdateTestCaseStepById', () => {
   })
 
   it('returns failure message when existing step is not found', async () => {
-    vi.mocked(mockTp.getTestStep).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTestStep).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateTestCaseStepById(mockTp, { id: '1', description: 'New desc' })
 

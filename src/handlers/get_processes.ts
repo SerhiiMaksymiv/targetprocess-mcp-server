@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetProcesses(tp: TpClient) {
   const response = await tp.getProcesses<TP.TpResponseV2<TP.ProcessV2>>()
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get processes, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get processes, Error: ${response.message}`
       }],
     }
   }

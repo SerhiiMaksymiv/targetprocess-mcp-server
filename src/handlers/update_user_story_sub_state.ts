@@ -13,11 +13,11 @@ export async function handleUpdateUserStorySubState(
 ) {
   const response = await tp.updateUserStorySubState<TP.UserStory>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update user story sub state id: ${params.id}\n JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to update user story sub state id: ${params.id}\n Error: ${response.message}`
       }],
     }
   }

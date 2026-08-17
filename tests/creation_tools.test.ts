@@ -34,7 +34,7 @@ describe('handleCreateBug', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createBugOnly).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createBugOnly).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateBug(mockTp, { title: 'Login fails', bugContent: '<div>Steps</div>' })
 
@@ -94,7 +94,7 @@ describe('handleCreateBugBasedOnCard', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createBug).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createBug).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateBugBasedOnCard(mockTp, {
       title: 'Login fails', card, bugContent: '<div>Steps</div>',
@@ -140,7 +140,7 @@ describe('handleCreateUserStory', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createUserStory).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createUserStory).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateUserStory(mockTp, { title: 'Some story' })
 
@@ -179,7 +179,7 @@ describe('handleCreateFeature', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createFeature).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createFeature).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateFeature(mockTp, { title: 'Auth Module' })
 
@@ -199,7 +199,7 @@ describe('handleCreateTask', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createTask).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createTask).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateTask(mockTp, { title: 'Write tests', userStoryId: '145789' })
 
@@ -226,7 +226,7 @@ describe('handleUpdateBug', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.updateBug).mockResolvedValue(null as any)
+    vi.mocked(mockTp.updateBug).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateBug(mockTp, { id: '100', title: 'Fixed title' })
 
@@ -270,7 +270,7 @@ describe('handleUpdateUserStorySubState', () => {
   })
 
   it('returns failure message when response is null', async () => {
-    vi.mocked(mockTp.updateUserStorySubState).mockResolvedValue(null as any)
+    vi.mocked(mockTp.updateUserStorySubState).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateUserStorySubState(mockTp, { id: '145789' })
 

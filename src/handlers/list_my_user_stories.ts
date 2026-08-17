@@ -7,11 +7,11 @@ export async function handleListMyUserStories(
 ) {
   const response = await tp.getMyUserStories<TP.TpResponse<TP.UserStory>>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get user stories, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get user stories, Error: ${response.message}`
       }],
     }
   }

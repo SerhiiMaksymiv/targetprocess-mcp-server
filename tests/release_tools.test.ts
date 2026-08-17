@@ -33,7 +33,7 @@ describe('handleGetReleaseUserStories', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getReleaseUserStories).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getReleaseUserStories).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetReleaseUserStories(mockTp, 'v1.0')
 
@@ -74,7 +74,7 @@ describe('handleGetReleaseBugs', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getReleaseBugs).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getReleaseBugs).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetReleaseBugs(mockTp, 'v1.0')
 
@@ -104,7 +104,7 @@ describe('handleGetReleaseFeatures', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getReleaseFeatures).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getReleaseFeatures).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetReleaseFeatures(mockTp, 'v2.0')
 
@@ -134,7 +134,7 @@ describe('handleGetReleaseOpenBugs', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getReleaseOpenBugs).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getReleaseOpenBugs).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetReleaseOpenBugs(mockTp, 'v1.0')
 
@@ -164,7 +164,7 @@ describe('handleGetReleaseOpenUserStories', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getReleaseOpenUserStories).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getReleaseOpenUserStories).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetReleaseOpenUserStories(mockTp, 'v1.0')
 

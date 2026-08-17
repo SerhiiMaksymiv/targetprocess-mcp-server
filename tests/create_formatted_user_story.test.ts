@@ -28,7 +28,7 @@ describe('handleCreateFormattedUserStory', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.createUserStory).mockResolvedValue(null as any)
+    vi.mocked(mockTp.createUserStory).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleCreateFormattedUserStory(mockTp, baseParams)
 

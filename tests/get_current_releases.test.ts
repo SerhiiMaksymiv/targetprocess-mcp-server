@@ -27,7 +27,7 @@ describe('handleGetCurrentReleases', () => {
   })
 
   it('returns failure message when request returns null', async () => {
-    vi.mocked(mockTp.getCurrentReleases).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getCurrentReleases).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetCurrentReleases(mockTp)
 

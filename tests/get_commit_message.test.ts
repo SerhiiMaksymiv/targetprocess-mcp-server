@@ -37,7 +37,7 @@ describe('handleGetCommitMessage — task', () => {
   })
 
   it('returns failure message when task is not found', async () => {
-    vi.mocked(mockTp.getTask).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTask).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetCommitMessage(mockTp, '999', 'task')
 
@@ -113,7 +113,7 @@ describe('handleGetCommitMessage — bug', () => {
   })
 
   it('returns failure message when bug is not found', async () => {
-    vi.mocked(mockTp.getBugWithRelations).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getBugWithRelations).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetCommitMessage(mockTp, '998', 'bug')
 

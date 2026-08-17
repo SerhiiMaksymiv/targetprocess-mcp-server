@@ -13,7 +13,7 @@ export async function handleLogTime(
 ) {
   const response = await tp.logTime<TP.TimeLog>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,

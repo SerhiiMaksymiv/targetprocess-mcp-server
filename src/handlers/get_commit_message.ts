@@ -5,7 +5,7 @@ export async function handleGetCommitMessage(tp: TpClient, id: string, type: 'ta
   if (type === 'task') {
     const task = await tp.getTask<TP.Task>(id)
 
-    if (!task) {
+    if (task instanceof Error) {
       return {
         content: [{ type: 'text' as const, text: `Failed to get task with id: ${id}` }],
       }
@@ -30,7 +30,7 @@ export async function handleGetCommitMessage(tp: TpClient, id: string, type: 'ta
 
   const bug = await tp.getBugWithRelations<TP.Bug>(id)
 
-  if (!bug) {
+  if (bug instanceof Error) {
     return {
       content: [{ type: 'text' as const, text: `Failed to get bug with id: ${id}` }],
     }

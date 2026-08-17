@@ -40,7 +40,7 @@ describe('handleGetTestPlanById', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getTestPlan).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTestPlan).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTestPlanById(mockTp, '145789')
 
@@ -100,7 +100,7 @@ describe('handleGetTestPlanTestCasesWithStepsById', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getTestPlanTestCases).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTestPlanTestCases).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTestPlanTestCasesWithStepsById(mockTp, '145789')
 

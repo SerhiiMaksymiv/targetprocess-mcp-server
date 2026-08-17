@@ -70,7 +70,7 @@ describe('handleListMyUserStories', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getMyUserStories).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getMyUserStories).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleListMyUserStories(mockTp, {})
 
@@ -108,7 +108,7 @@ describe('handleListMyBugs', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getMyBugs).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getMyBugs).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleListMyBugs(mockTp, {})
 
@@ -135,7 +135,7 @@ describe('handleLogTime', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.logTime).mockResolvedValue(null as any)
+    vi.mocked(mockTp.logTime).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleLogTime(mockTp, { entityId: '145789', entityType: 'Bug', hours: 1.5 })
 
@@ -169,7 +169,7 @@ describe('handleGetMyTimeLogs', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getMyTimeLogs).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getMyTimeLogs).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetMyTimeLogs(mockTp)
 

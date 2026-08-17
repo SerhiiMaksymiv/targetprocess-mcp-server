@@ -354,7 +354,7 @@ server.registerTool(
   async ({ id, comment, user }) => {
     try {
       const addCommentResponse = await tp.addCommentWithUser<TP.Comment>(id, comment, (user as TP.LoggedUser));
-      if (!addCommentResponse) {
+      if (addCommentResponse instanceof Error) {
         return {
           content: [{
             type: 'text',
@@ -618,7 +618,7 @@ server.registerTool(
       }
     }
     const response = await tp.setBusinessValue<any>({ id, entityType, priorityId })
-    if (!response) {
+    if (response instanceof Error) {
       return { content: [{ type: 'text' as const, text: `Failed to set business value on ${entityType} ${id}` }] }
     }
     return { content: [{ type: 'text' as const, text: JSON.stringify(response) }] }
@@ -683,7 +683,7 @@ server.registerTool(
   async ({ id, title, description, projectId, teamId, entityStateId, featureId, tags, teamIterationId }) => {
     const response = await tp.updateUserStory<any>({ id, title, description, projectId, teamId, entityStateId, featureId, tags, teamIterationId });
 
-    if (!response) {
+    if (response instanceof Error) {
       return {
         content: [{
           type: 'text',
@@ -1212,7 +1212,7 @@ server.registerTool(
   async ({ title, resourceId, resourceType, description }) => {
     const testPlanResponse = await tp.createTestPlan<TP.TestPlan>(title, resourceId, resourceType, { description });
 
-    if (!testPlanResponse) {
+    if (testPlanResponse instanceof Error) {
       return {
         content: [{
           type: 'text',
@@ -1245,7 +1245,7 @@ server.registerTool(
   async ({ id }) => {
     const response = await tp.getUserStoriesIdsByFeatureId<TP.TpResponseItemsV2<{ id: string }>>(id)
 
-    if (!response) {
+    if (response instanceof Error) {
       return {
         content: [{
           type: 'text',
@@ -1517,7 +1517,7 @@ server.registerTool(
   async ({ resourceId }) => {
     const userStoryResponse = await tp.getUserStoryTestPlan<TP.TpResponseV2<Record<"linkedTestPlan", TP.TpResultItemV2>>>(resourceId)
 
-    if (!userStoryResponse) {
+    if (userStoryResponse instanceof Error) {
       return {
         content: [{
           type: 'text',
@@ -1625,7 +1625,7 @@ server.registerTool(
       card = await tp.getUserStory<TP.UserStory>(resourceId)
     }
 
-    if (!card) {
+    if (card instanceof Error) {
       return {
         content: [{
           type: 'text',
@@ -1691,7 +1691,7 @@ server.registerTool(
 
     for (const tc of testCases) {
       const testCase = await tp.createTestCase<TP.TestCase>(tc.name, tc.description, String(testPlanId))
-      if (!testCase) {
+      if (testCase instanceof Error) {
         failed.push(tc.name)
         continue
       }
@@ -1700,10 +1700,10 @@ server.registerTool(
       let stepsFailed = 0
       for (const step of tc.steps) {
         const stepResult = await tp.addTestStep<TP.TestStep>(String(testCase.Id), step)
-        if (stepResult) {
-          stepsAdded++
-        } else {
+        if (stepResult instanceof Error) {
           stepsFailed++
+        } else {
+          stepsAdded++
         }
       }
 

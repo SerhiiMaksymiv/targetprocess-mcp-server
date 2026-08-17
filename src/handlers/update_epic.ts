@@ -12,11 +12,11 @@ export async function handleUpdateEpic(
 ) {
   const response = await tp.updateEpic(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update epic id: ${params.id}\n JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to update epic id: ${params.id}\n Error: ${response.message}`
       }],
     }
   }

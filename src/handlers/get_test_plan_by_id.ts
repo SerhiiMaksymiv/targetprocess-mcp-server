@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 
 export async function handleGetTestPlanById(tp: TpClient, id: string) {
   const testPlan = await tp.getTestPlan<TP.TestPlan>(id);
-  if (!testPlan) {
+  if (testPlan instanceof Error) {
     return {
       content: [{
         type: "text" as const,
-        text: `Failed to get test plan id: ${id}\n JSON: ${JSON.stringify(testPlan, null, 2)}`
+        text: `Failed to get test plan id: ${id}\n Error: ${testPlan.message}`
       }],
     };
   }

@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetProcessWorkflows(tp: TpClient, processId: string) {
   const response = await tp.getProcessWorkflows<TP.TpResponseV2<TP.ProcessV2>>({ processId })
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get process workflows, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get process workflows, Error: ${response.message}`
       }],
     }
   }

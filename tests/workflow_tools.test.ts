@@ -30,7 +30,7 @@ describe('handleGetProcesses', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getProcesses).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getProcesses).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetProcesses(mockTp)
 
@@ -58,7 +58,7 @@ describe('handleGetProcessWorkflows', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getProcessWorkflows).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getProcessWorkflows).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetProcessWorkflows(mockTp, '10')
 
@@ -100,7 +100,7 @@ describe('handleGetBugWorkflows', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getBugWorkflows).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getBugWorkflows).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetBugWorkflows(mockTp)
 
@@ -148,7 +148,7 @@ describe('handleGetUserStoryWorkflows', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getUserStoryWorkflowsWithSubStates).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUserStoryWorkflowsWithSubStates).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUserStoryWorkflows(mockTp)
 
@@ -177,7 +177,7 @@ describe('handleGetRelationTypes', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.getRelationTypes).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getRelationTypes).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetRelationTypes(mockTp)
 

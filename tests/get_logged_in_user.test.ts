@@ -22,7 +22,7 @@ describe('handleGetLoggedInUser', () => {
   })
 
   it('returns failure message when context is null', async () => {
-    vi.mocked(mockTp.getContext).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getContext).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetLoggedInUser(mockTp)
 

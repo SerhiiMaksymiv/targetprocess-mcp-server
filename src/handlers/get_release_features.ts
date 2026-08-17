@@ -8,11 +8,11 @@ export async function handleGetReleaseFeatures(
 ) {
   const release = await tp.getReleaseFeatures<TP.TpResponse<TP.Feature>>({ name, results })
 
-  if (!release) {
+  if (release instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get ${name} release features, JSON: ${JSON.stringify(release, null, 2)}`
+        text: `Failed to get ${name} release features, Error: ${release.message}`
       }],
     }
   }

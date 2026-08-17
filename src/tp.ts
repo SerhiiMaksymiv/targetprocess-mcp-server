@@ -88,10 +88,10 @@ export class TpClient {
       }
 
       return (await response.json()) as T
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error making TP request:", error);
       console.error("Request URL:", this.redact(_url));
-      return null;
+      return error
     }
   }
 
@@ -110,9 +110,9 @@ export class TpClient {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return (await response.json()) as U
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error making TP request:", error);
-      return null;
+      return error
     }
   }
 
@@ -178,7 +178,7 @@ export class TpClient {
           skip,
         },
       })
-      if (!page) return null
+      if (page instanceof Error) return null
       if (!page?.Items?.length) break
       allItems.push(...page.Items)
       if (!page.Next) break
@@ -342,11 +342,13 @@ export class TpClient {
     }]
     if (releaseId) bug["Release"] = { "Id": releaseId }
     if (projectId) bug["Project"] = { "Id": projectId }
-    if (teamId) bug["assignedTeams"] = [{
-      "team": {
-        "Id": teamId || config.tp.teamId
-      }
-    }]
+    if (teamId) {
+      bug["assignedTeams"] = [{
+        "team": {
+          "id": teamId || config.tp.teamId
+        }
+      }]
+    }
     if (entityStateId) bug["entityState"] = { "Id": entityStateId }
     if (tags) bug["Tags"] = tags
     if (teamIterationId) bug["TeamIteration"] = { "Id": teamIterationId }
@@ -1221,7 +1223,7 @@ export class TpClient {
     const failed: number[] = []
     await Promise.all(storyItems.map(async (story) => {
       const result = await this.assignRole(String(story.id), userId, roleId)
-      if (result) {
+      if (result && !(result instanceof Error)) {
         succeeded.push(result)
       } else {
         failed.push(story.id)

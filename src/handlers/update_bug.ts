@@ -16,12 +16,11 @@ export async function handleUpdateBug(
   },
 ) {
   const bugResponse = await tp.updateBug<any>(params)
-
-  if (!bugResponse) {
+  if (bugResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update bug "${params.title}"\n JSON: ${JSON.stringify(bugResponse, null, 2)}`
+        text: `Failed to update bug "${params.title}"\n Error: ${bugResponse.message}`
       }],
     }
   }

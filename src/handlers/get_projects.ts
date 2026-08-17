@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetProjects(tp: TpClient) {
   const response = await tp.getProjects<TP.TpResponse<TP.Project>>()
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get projects, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get projects, Error: ${response.message}`
       }],
     }
   }

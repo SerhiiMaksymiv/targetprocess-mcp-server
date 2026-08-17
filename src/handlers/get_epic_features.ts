@@ -4,7 +4,7 @@ import type * as TP from '../types.js'
 export async function handleGetEpicFeatures(tp: TpClient, epicId: string) {
   const response = await tp.getEpicFeatures<TP.TpResponse<TP.Feature>>(epicId)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,

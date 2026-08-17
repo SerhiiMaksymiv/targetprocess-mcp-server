@@ -34,7 +34,7 @@ describe('handleGetUsers', () => {
   })
 
   it('returns failure message when request returns null', async () => {
-    vi.mocked(mockTp.getUsers).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUsers).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUsers(mockTp)
 
@@ -70,7 +70,7 @@ describe('handleGetTeams', () => {
   })
 
   it('returns failure message when request returns null', async () => {
-    vi.mocked(mockTp.getTeams).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTeams).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTeams(mockTp)
 
@@ -105,7 +105,7 @@ describe('handleGetTeamsAndTeamAssignments', () => {
   })
 
   it('returns failure message when teams returns null', async () => {
-    vi.mocked(mockTp.getTeams).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTeams).mockResolvedValue(new Error('Simulated failure') as any)
     vi.mocked(mockTp.getTeamAssignments).mockResolvedValue({ Next: '', Items: [] })
 
     const result = await handleGetTeamsAndTeamAssignments(mockTp)
@@ -115,7 +115,7 @@ describe('handleGetTeamsAndTeamAssignments', () => {
 
   it('returns failure message when team assignments returns null', async () => {
     vi.mocked(mockTp.getTeams).mockResolvedValue({ Next: '', Items: [{ Id: 10, Name: 'Alpha Team' }] as any })
-    vi.mocked(mockTp.getTeamAssignments).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTeamAssignments).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTeamsAndTeamAssignments(mockTp)
 
@@ -149,7 +149,7 @@ describe('handleGetTeamIterations', () => {
   })
 
   it('returns failure message when request returns null', async () => {
-    vi.mocked(mockTp.getTeamIterations).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getTeamIterations).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetTeamIterations(mockTp, {})
 

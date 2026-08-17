@@ -17,11 +17,11 @@ export async function handleUpdateFeature(
 ) {
   const response = await tp.updateFeature(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update feature id: ${params.id}\n JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to update feature id: ${params.id}\n Error: ${response.message}`
       }],
     }
   }

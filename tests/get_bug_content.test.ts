@@ -44,7 +44,7 @@ describe('handleGetBugContent', () => {
   })
 
   it('returns failure message when bug is not found', async () => {
-    vi.mocked(mockTp.getBug).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getBug).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetBugContent(mockTp, '145789')
 

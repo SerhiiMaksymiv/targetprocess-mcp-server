@@ -5,7 +5,7 @@ import type * as TP from '../types.js'
 export async function handleGetUserStoryComments(tp: TpClient, id: string, results?: number) {
   const response = await tp.getUserStoryComments<TP.TpResponse<TP.Comment>>(id, results)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,

@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetUserById(tp: TpClient, id: string) {
   const user = await tp.getUser<TP.User>(id)
 
-  if (!user) {
+  if (user instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get user, id: ${id}\n JSON: ${JSON.stringify(user, null, 2)}`
+        text: `Failed to get user, id: ${id}\n Error: ${user.message}`
       }],
     }
   }

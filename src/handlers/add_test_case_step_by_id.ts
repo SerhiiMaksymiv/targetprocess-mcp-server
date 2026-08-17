@@ -5,11 +5,11 @@ export async function handleAddTestCaseStepById(tp: TpClient, params: { testCase
     description: params.description,
     result: params.result,
   });
-  if (!testStepResponse) {
+  if (testStepResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to add test step to test case id: ${params.testCaseId}\n JSON: ${JSON.stringify(testStepResponse, null, 2)}`
+        text: `Failed to add test step to test case id: ${params.testCaseId}\n Error: ${testStepResponse.message}`
       }],
     };
   }

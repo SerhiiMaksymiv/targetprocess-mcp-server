@@ -9,11 +9,11 @@ export async function handleGetReleaseOpenBugs(
 ) {
   const release = await tp.getReleaseOpenBugs<TP.TpResponse<TP.Bug>>({ name, results, withDescription })
 
-  if (!release) {
+  if (release instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get ${name} release bugs, JSON: ${JSON.stringify(release, null, 2)}`
+        text: `Failed to get ${name} release bugs, Error: ${release.message}`
       }],
     }
   }

@@ -5,11 +5,11 @@ import type * as TP from '../types.js'
 export async function handleGetEpicContent(tp: TpClient, id: string) {
   const epic = await tp.getEpic<TP.Epic>(id)
 
-  if (!epic) {
+  if (epic instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get epic, id: ${id}\n JSON: ${JSON.stringify(epic, null, 2)}`
+        text: `Failed to get epic, id: ${id}\n Error: ${epic.message}`
       }],
     }
   }

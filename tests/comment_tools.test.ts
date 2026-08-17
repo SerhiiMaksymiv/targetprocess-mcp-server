@@ -26,7 +26,7 @@ describe('handleAddComment', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.addComment).mockResolvedValue(null as any)
+    vi.mocked(mockTp.addComment).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleAddComment(mockTp, '145789', 'Test comment')
 
@@ -65,7 +65,7 @@ describe('handleGetUserStoryComments', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getUserStoryComments).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUserStoryComments).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUserStoryComments(mockTp, '145789')
 
@@ -103,7 +103,7 @@ describe('handleGetBugComments', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getBugComments).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getBugComments).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetBugComments(mockTp, '100001')
 

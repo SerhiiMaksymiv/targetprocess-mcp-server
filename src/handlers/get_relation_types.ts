@@ -4,7 +4,7 @@ import type * as TP from '../types.js'
 export async function handleGetRelationTypes(tp: TpClient) {
   const response = await tp.getRelationTypes<TP.TpResponse<TP.RelationType>>()
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{ type: 'text' as const, text: `Failed to get relation types` }],
     }

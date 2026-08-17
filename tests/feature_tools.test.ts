@@ -36,7 +36,7 @@ describe('handleGetFeatureContent', () => {
   })
 
   it('returns failure message when feature is not found', async () => {
-    vi.mocked(mockTp.getFeature).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getFeature).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetFeatureContent(mockTp, '145636')
 
@@ -56,7 +56,7 @@ describe('handleUpdateFeature', () => {
   })
 
   it('returns failure message when null', async () => {
-    vi.mocked(mockTp.updateFeature).mockResolvedValue(null as any)
+    vi.mocked(mockTp.updateFeature).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleUpdateFeature(mockTp, { id: '145636' })
 

@@ -102,11 +102,11 @@ export async function handleCreateFormattedFeature(
 
   const featureResponse = await tp.createFeature<TP.Feature>({ title, description, epicId, releaseId, projectId, teamId })
 
-  if (!featureResponse) {
+  if (featureResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to create formatted feature "${title}"\n JSON: ${JSON.stringify(featureResponse, null, 2)}`
+        text: `Failed to create formatted feature "${title}"\n Error: ${featureResponse.message}`
       }],
     }
   }

@@ -5,11 +5,11 @@ import type * as TP from '../types.js'
 export async function handleGetBugContent(tp: TpClient, id: string) {
   const bug = await tp.getBug<TP.Bug>(id)
 
-  if (!bug) {
+  if (bug instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get bug, id: ${id}\n JSON: ${JSON.stringify(bug, null, 2)}`
+        text: `Failed to get bug, id: ${id}\n Error: ${bug.message}`
       }],
     }
   }

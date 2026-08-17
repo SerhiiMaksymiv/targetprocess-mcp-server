@@ -9,11 +9,11 @@ export async function handleGetReleaseOpenUserStories(
 ) {
   const release = await tp.getReleaseOpenUserStories<TP.TpResponse<TP.UserStory>>({ name, results, withDescription })
 
-  if (!release) {
+  if (release instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get ${name} release user stories, JSON: ${JSON.stringify(release, null, 2)}`
+        text: `Failed to get ${name} release user stories, Error: ${release.message}`
       }],
     }
   }

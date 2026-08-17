@@ -79,11 +79,11 @@ export async function handleCreateFormattedUserStory(
 
   const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId })
 
-  if (!userStoryResponse) {
+  if (userStoryResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to create formatted user story "${title}"\n JSON: ${JSON.stringify(userStoryResponse, null, 2)}`
+        text: `Failed to create formatted user story "${title}"\n Error: ${userStoryResponse.message}`
       }],
     }
   }

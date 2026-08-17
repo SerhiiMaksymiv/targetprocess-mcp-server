@@ -11,11 +11,11 @@ export async function handleUpdateTestCaseStepById(tp: TpClient, params: { id: s
     };
   }
   const existingTestStep = await tp.getTestStep<TP.TestStep>(params.id);
-  if (!existingTestStep) {
+  if (existingTestStep instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get test step id: ${params.id}\n JSON: ${JSON.stringify(existingTestStep, null, 2)}`
+        text: `Failed to get test step id: ${params.id}\n Error: ${existingTestStep.message}`
       }],
     };
   }
@@ -24,11 +24,11 @@ export async function handleUpdateTestCaseStepById(tp: TpClient, params: { id: s
     description: params.description ?? existingTestStep.Description,
     result: params.result ?? existingTestStep.Result,
   });
-  if (!testStepResponse) {
+  if (testStepResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update test step id: ${params.id}\n JSON: ${JSON.stringify(testStepResponse, null, 2)}`
+        text: `Failed to update test step id: ${params.id}\n Error: ${testStepResponse.message}`
       }],
     };
   }

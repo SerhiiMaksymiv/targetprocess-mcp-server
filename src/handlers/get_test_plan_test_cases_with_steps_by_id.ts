@@ -5,11 +5,11 @@ import type * as TP from '../types.js'
 export async function handleGetTestPlanTestCasesWithStepsById(tp: TpClient, id: string) {
   const response = await tp.getTestPlanTestCases<TP.TpResponse<TP.TestCase>>(id)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get test cases for test plan id: ${id}\n JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get test cases for test plan id: ${id}\n Error: ${response.message}`
       }],
     }
   }

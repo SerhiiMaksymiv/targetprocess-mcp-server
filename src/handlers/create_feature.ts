@@ -14,11 +14,11 @@ export async function handleCreateFeature(
 ) {
   const response = await tp.createFeature<TP.Feature>(params)
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to create feature "${params.title}"\n JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to create feature "${params.title}"\n Error: ${response.message}`
       }],
     }
   }

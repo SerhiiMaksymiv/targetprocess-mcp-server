@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetUsers(tp: TpClient) {
   const response = await tp.getUsers<TP.TpResponse<TP.User>>()
 
-  if (!response) {
+  if (response instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get users, JSON: ${JSON.stringify(response, null, 2)}`
+        text: `Failed to get users, Error: ${response.message}`
       }],
     }
   }

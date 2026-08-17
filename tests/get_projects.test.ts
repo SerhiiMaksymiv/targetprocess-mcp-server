@@ -30,7 +30,7 @@ describe('handleGetProjects', () => {
   })
 
   it('returns failure message when request returns null', async () => {
-    vi.mocked(mockTp.getProjects).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getProjects).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetProjects(mockTp)
 

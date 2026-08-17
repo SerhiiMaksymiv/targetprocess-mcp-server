@@ -28,7 +28,7 @@ describe('handleGetFeatureUserStories', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getFeatureUserStories).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getFeatureUserStories).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetFeatureUserStories(mockTp, '145636')
 
@@ -66,7 +66,7 @@ describe('handleGetUserStoryBugs', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getUserStoryBugs).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getUserStoryBugs).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetUserStoryBugs(mockTp, '145789')
 
@@ -98,7 +98,7 @@ describe('handleGetCardCurrentStatus', () => {
   })
 
   it('returns failure when null', async () => {
-    vi.mocked(mockTp.getCardStatus).mockResolvedValue(null as any)
+    vi.mocked(mockTp.getCardStatus).mockResolvedValue(new Error('Simulated failure') as any)
 
     const result = await handleGetCardCurrentStatus(mockTp, '145789')
 

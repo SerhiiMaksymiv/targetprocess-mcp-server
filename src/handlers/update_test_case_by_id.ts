@@ -10,11 +10,11 @@ export async function handleUpdateTestCaseById(tp: TpClient, params: { id: strin
     };
   }
   const testCaseResponse = await tp.updateTestCase(params);
-  if (!testCaseResponse) {
+  if (testCaseResponse instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to update test case id: ${params.id}\n JSON: ${JSON.stringify(testCaseResponse, null, 2)}`
+        text: `Failed to update test case id: ${params.id}\n Error: ${testCaseResponse.message}`
       }],
     };
   }

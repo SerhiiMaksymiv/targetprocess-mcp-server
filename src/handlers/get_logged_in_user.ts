@@ -4,11 +4,11 @@ import type * as TP from '../types.js'
 export async function handleGetLoggedInUser(tp: TpClient) {
   const ctx = await tp.getContext<TP.Context>()
 
-  if (!ctx) {
+  if (ctx instanceof Error) {
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to get context, JSON: ${JSON.stringify(ctx, null, 2)}`
+        text: `Failed to get context, Error: ${ctx.message}`
       }],
     }
   }
