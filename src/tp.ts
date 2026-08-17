@@ -344,10 +344,10 @@ export class TpClient {
     if (projectId) bug["Project"] = { "Id": projectId }
     if (teamId) bug["assignedTeams"] = [{
       "team": {
-        "id": teamId || config.tp.teamId
+        "Id": teamId || config.tp.teamId
       }
     }]
-    if (entityStateId) bug["entityState"] = { "id": entityStateId }
+    if (entityStateId) bug["entityState"] = { "Id": entityStateId }
     if (tags) bug["Tags"] = tags
     if (teamIterationId) bug["TeamIteration"] = { "Id": teamIterationId }
 
