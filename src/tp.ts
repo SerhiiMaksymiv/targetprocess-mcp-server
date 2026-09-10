@@ -50,9 +50,10 @@ export class TpClient {
   }
 
   // Strips the access_token value out of a URL before it's logged, so the
-  // live TP credential never ends up in stderr/log files.
+  // live TP credential never ends up in stderr/log files. Matches on the
+  // parameter name, not the token value: params() percent-encodes the token.
   private redact(url: string): string {
-    return url.replace(this.token, "***")
+    return url.replace(/([?&]access_token=)[^&]*/gi, "$1***")
   }
 
   // @ts-ignore
@@ -77,7 +78,7 @@ export class TpClient {
   private async get<T>(params: TpClientParameters): Promise<T | null> {
     params.param["access_token"] = this.token
     let _url = this.params(params)
-    console.error(JSON.stringify({ "TP_GET_URL": _url }))
+    console.error(JSON.stringify({ "TP_GET_URL": this.redact(_url) }))
     try {
       const response = await fetch(_url, {
         method: "GET",
