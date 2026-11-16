@@ -8,6 +8,7 @@ const mockTp = {
   addComment: vi.fn(),
   getUserStoryComments: vi.fn(),
   getBugComments: vi.fn(),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -79,6 +80,25 @@ describe('handleGetUserStoryComments', () => {
 
     expect(result.content[0].text).toContain('No comments found for user story id: 145789')
   })
+
+  it('returns comment images as image content blocks', async () => {
+    vi.mocked(mockTp.getUserStoryComments).mockResolvedValue({
+      Next: '',
+      Items: [{
+        Id: 5,
+        Description: '<p>See screenshot</p><img src="/Attachments.ashx?AttachmentID=1">',
+        CreateDate: '2024-01-01',
+        Owner: { FullName: 'Jane Doe' },
+      }] as any,
+    })
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetUserStoryComments(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed[0].imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
+  })
 })
 
 describe('handleGetBugComments', () => {
@@ -116,5 +136,24 @@ describe('handleGetBugComments', () => {
     const result = await handleGetBugComments(mockTp, '100001')
 
     expect(result.content[0].text).toContain('No comments found for bug id: 100001')
+  })
+
+  it('returns comment images as image content blocks', async () => {
+    vi.mocked(mockTp.getBugComments).mockResolvedValue({
+      Next: '',
+      Items: [{
+        Id: 7,
+        Description: '<p>See screenshot</p><img src="/Attachments.ashx?AttachmentID=1">',
+        CreateDate: '2024-02-01',
+        Owner: { FullName: 'John Smith' },
+      }] as any,
+    })
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetBugComments(mockTp, '100001')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed[0].imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
   })
 })

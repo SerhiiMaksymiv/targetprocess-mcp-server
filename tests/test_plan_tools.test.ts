@@ -9,6 +9,8 @@ const mockTp = {
   getIndirectTestPlanTestCases: vi.fn(),
   getTestPlanTestCases: vi.fn(),
   getTestCaseSteps: vi.fn(),
+  getAttachments: vi.fn().mockResolvedValue({ Items: [] }),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -46,6 +48,21 @@ describe('handleGetTestPlanById', () => {
 
     expect(result.content[0].text).toContain('Failed to get test plan id: 145789')
   })
+
+  it('returns description images as image content blocks', async () => {
+    vi.mocked(mockTp.getTestPlan).mockResolvedValue({
+      Id: 145789,
+      Name: 'Login Test Plan',
+      Description: '<img src="/a.png">',
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetTestPlanById(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
+  })
 })
 
 describe('handleGetTestPlanTestCasesById', () => {
@@ -78,6 +95,21 @@ describe('handleGetTestPlanTestCasesById', () => {
     const result = await handleGetTestPlanTestCasesById(mockTp, '145789')
 
     expect(result.content[0].text).toContain('No test cases found for test plan id: 145789')
+  })
+
+  it('returns test case images as image content blocks', async () => {
+    vi.mocked(mockTp.getIndirectTestPlanTestCases).mockResolvedValue({
+      Items: [
+        { Id: 1, Name: 'TC1', Description: '<img src="/a.png">', TestPlanId: 145789, TestPlanName: 'Login Test Plan' },
+      ],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetTestPlanTestCasesById(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed[0].imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
   })
 })
 
@@ -113,5 +145,21 @@ describe('handleGetTestPlanTestCasesWithStepsById', () => {
     const result = await handleGetTestPlanTestCasesWithStepsById(mockTp, '145789')
 
     expect(result.content[0].text).toContain('No test cases found for test plan id: 145789')
+  })
+
+  it('returns test case and step images as image content blocks', async () => {
+    vi.mocked(mockTp.getTestPlanTestCases).mockResolvedValue({
+      Items: [{ Id: 1, Name: 'TC1', Description: '<img src="/a.png">', TestPlanId: 145789, TestPlanName: 'Plan A' }],
+    } as any)
+    vi.mocked(mockTp.getTestCaseSteps).mockResolvedValue({
+      Items: [{ Description: 'Click login <img src="/b.png">', Result: 'User is logged in', RunOrder: 1 }],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetTestPlanTestCasesWithStepsById(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed[0].imagesFound).toBe(2)
+    expect(result.content).toHaveLength(3)
   })
 })

@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { collectCardImages } from './images.js'
 
 export async function handleGetTestPlanById(tp: TpClient, id: string) {
   const testPlan = await tp.getTestPlan<TP.TestPlan>(id);
@@ -32,9 +33,13 @@ export async function handleGetTestPlanById(tp: TpClient, id: string) {
     linkedAssignable: testPlan.LinkedAssignable?.Name,
     createDate: testPlan.CreateDate,
     modifyDate: testPlan.ModifyDate,
+    imagesFound: 0,
   };
 
+  const { foundCount, images } = await collectCardImages(tp, id, testPlan.Description || '');
+  result.imagesFound = foundCount;
+
   return {
-    content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+    content: [{ type: 'text' as const, text: JSON.stringify(result) }, ...images],
   };
 }

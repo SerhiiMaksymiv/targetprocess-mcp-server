@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom'
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { collectCardImages } from './images.js'
 
 export async function handleGetEpicContent(tp: TpClient, id: string) {
   const epic = await tp.getEpic<TP.Epic>(id)
@@ -24,6 +25,7 @@ export async function handleGetEpicContent(tp: TpClient, id: string) {
     progress: epic.Progress,
     effort: epic.Effort,
     customFields: epic.CustomFields,
+    imagesFound: 0,
   }
 
   const description = epic.Description || ''
@@ -37,7 +39,10 @@ export async function handleGetEpicContent(tp: TpClient, id: string) {
     }
   }
 
+  const { foundCount, images } = await collectCardImages(tp, id, description)
+  result.imagesFound = foundCount
+
   return {
-    content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+    content: [{ type: 'text' as const, text: JSON.stringify(result) }, ...images],
   }
 }

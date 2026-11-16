@@ -14,6 +14,8 @@ const mockTp = {
   getTestStep: vi.fn(),
   updateTestStep: vi.fn(),
   deleteTestStep: vi.fn(),
+  getAttachments: vi.fn().mockResolvedValue({ Items: [] }),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -47,6 +49,25 @@ describe('handleGetTestCaseById', () => {
     const result = await handleGetTestCaseById(mockTp, '145789')
 
     expect(result.content[0].text).toContain('Failed to get test case id: 145789')
+  })
+
+  it('returns description and step images as image content blocks', async () => {
+    vi.mocked(mockTp.getTestCase).mockResolvedValue({
+      Id: 145789,
+      Name: 'TC Login',
+      Description: '<img src="/a.png">',
+      LinkedTestPlan: { Name: 'Login Test Plan' },
+    } as any)
+    vi.mocked(mockTp.getTestCaseSteps).mockResolvedValue({
+      Items: [{ Description: 'Open login page <img src="/b.png">', Result: 'Page loads', RunOrder: 1 }],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetTestCaseById(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(2)
+    expect(result.content).toHaveLength(3)
   })
 })
 
