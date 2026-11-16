@@ -4,6 +4,8 @@ import type { TpClient } from '../src/tp.js'
 
 const mockTp = {
   getUserStory: vi.fn(),
+  getAttachments: vi.fn().mockResolvedValue({ Items: [] }),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -97,5 +99,22 @@ describe('handleGetUserStoryContent', () => {
     expect(parsed.description).not.toContain('<li>')
     expect(parsed.description).toContain('Open app')
     expect(parsed.description).toContain('Click sign in')
+  })
+
+  it('returns description images as image content blocks', async () => {
+    vi.mocked(mockTp.getUserStory).mockResolvedValue({
+      Id: 145789,
+      Name: 'Story with screenshot',
+      Description: '<p>See attached</p><img src="/Attachments.ashx?AttachmentID=1">',
+      Feature: null,
+      CustomFields: [],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetUserStoryContent(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
   })
 })
