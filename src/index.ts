@@ -25,6 +25,7 @@ import { handleGetUsers } from "./handlers/get_users.js";
 import { handleGetTeams, handleGetTeamsAndTeamAssignments } from "./handlers/get_teams.js";
 import { handleGetTeamIterations } from "./handlers/get_team_iterations.js";
 import { handleAddComment } from "./handlers/add_comment.js";
+import { handleAddAttachment } from "./handlers/add_attachment.js";
 import { handleGetUserStoryComments } from "./handlers/get_user_story_comments.js";
 import { handleGetBugComments } from "./handlers/get_bug_comments.js";
 import { handleCreateBug } from "./handlers/create_bug.js";
@@ -395,6 +396,30 @@ server.registerTool(
     },
   },
   async ({ id, comment }) => handleAddComment(tp, id, comment)
+)
+
+server.registerTool(
+  'add_attachment',
+  {
+    title: 'Add attachment to TP card',
+    description: 'Upload a file (e.g. a screenshot or mockup) as an attachment on a Targetprocess card (bug, user story, feature, etc.) by its ID. Provide either a local filePath, or fileContent (base64) together with fileName.',
+    inputSchema: {
+      cardId: z.string()
+        .min(5)
+        .max(9)
+        .describe('TP card ID to attach the file to, e.g. 145789'),
+      filePath: z.string()
+        .optional()
+        .describe('Absolute path to a local file to upload'),
+      fileContent: z.string()
+        .optional()
+        .describe('Base64-encoded file content; use together with fileName when no local filePath is available'),
+      fileName: z.string()
+        .optional()
+        .describe('File name to use when uploading via fileContent, e.g. screenshot.png'),
+    },
+  },
+  async ({ cardId, filePath, fileContent, fileName }) => handleAddAttachment(tp, { cardId, filePath, fileContent, fileName })
 )
 
 server.registerTool(

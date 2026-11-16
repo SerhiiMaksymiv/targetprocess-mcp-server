@@ -70,6 +70,7 @@ Cards — Read
 Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
 - `add_comment_with_user` — Post a comment to any card and mention a specific user (id, comment, user object from `get_users`)
+- `add_attachment` — Upload a file (e.g. a screenshot or mockup) as an attachment on any card (cardId, and either filePath or fileContent + fileName)
 - `update_bug` — Update an existing bug (id, optional title, optional bugContent, optional origin, optional projectId, optional teamId, optional entityStateId)
   > Resolve state name → ID via `get_bug_workflows` before passing `entityStateId`
 - `update_user_story` — Update an existing user story (id, optional title, optional description, optional projectId, optional teamId, optional entityStateId)
@@ -282,10 +283,11 @@ npx vitest            # watch mode
 
 ### Coverage
 
-**53 of 64 tools (83%) are covered by unit tests.**
+**54 of 65 tools (83%) are covered by unit tests.**
 
 | Test file | Handlers covered |
 |---|---|
+| `add_attachment.test.ts` | `add_attachment` |
 | `get_bug_content.test.ts` | `get_bug_content` |
 | `get_user_story_content.test.ts` | `get_user_story_content` |
 | `get_commit_message.test.ts` | `get_commit_message` |
