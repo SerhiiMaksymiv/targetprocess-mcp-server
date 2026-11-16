@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom'
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { collectCardImages } from './images.js'
 
 export async function handleGetFeatureContent(tp: TpClient, id: string) {
   const feature = await tp.getFeature<TP.Feature>(id)
@@ -24,6 +25,7 @@ export async function handleGetFeatureContent(tp: TpClient, id: string) {
     progress: feature.Progress,
     effort: feature.Effort,
     customFields: feature.CustomFields,
+    imagesFound: 0,
   }
 
   const description = feature.Description || ''
@@ -37,7 +39,10 @@ export async function handleGetFeatureContent(tp: TpClient, id: string) {
     }
   }
 
+  const { foundCount, images } = await collectCardImages(tp, id, description)
+  result.imagesFound = foundCount
+
   return {
-    content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+    content: [{ type: 'text' as const, text: JSON.stringify(result) }, ...images],
   }
 }

@@ -613,6 +613,14 @@ export interface TestCase {
   TestPlanName?: string
 }
 
+export interface Attachment {
+  ResourceType: string
+  Id: number
+  Name: string
+  Uri: string
+  MimeType: string
+}
+
 export interface TestStep {
   ResourceType: string
   Id: number

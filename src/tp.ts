@@ -21,6 +21,9 @@ type TestPlanNode = {
   name?: string
 }
 
+// Skip images bigger than this rather than ballooning the tool response.
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
 export class TpClient {
 
   private baseUrl: string = config.tp.url
@@ -1378,6 +1381,54 @@ export class TpClient {
       return await response.text()
     } catch (error) {
       console.error("Error uploading file:", error)
+      return null
+    }
+  }
+
+  async getAttachments<T>(generalId: string): Promise<T> {
+    return this.get<T>({
+      pathParam: ["Attachments"],
+      param: {
+        "format": "json",
+        "where": `General.Id eq ${generalId}`,
+        "include": "[Id,Name,Uri,MimeType]",
+        "take": 25,
+      },
+    }) as T
+  }
+
+  // Fetches an image referenced by an inline <img src> or an Attachment's Uri.
+  // TP-hosted URLs need the access token appended; third-party/CDN URLs don't.
+  async fetchImageAsBase64(url: string): Promise<{ data: string; mimeType: string } | null> {
+    const absoluteUrl = /^https?:\/\//i.test(url)
+      ? url
+      : `${this.baseUrl}${url.startsWith("/") ? "" : "/"}${url}`
+
+    let sameOrigin = false
+    try {
+      sameOrigin = new URL(absoluteUrl).origin === new URL(this.baseUrl).origin
+    } catch {
+      sameOrigin = false
+    }
+
+    const fetchUrl = sameOrigin
+      ? `${absoluteUrl}${absoluteUrl.includes("?") ? "&" : "?"}access_token=${this.token}`
+      : absoluteUrl
+
+    try {
+      const response = await fetch(fetchUrl)
+      if (!response.ok) return null
+
+      const contentType = response.headers.get("content-type") || ""
+      if (!contentType.startsWith("image/")) return null
+
+      const buffer = Buffer.from(await response.arrayBuffer())
+      if (buffer.byteLength > MAX_IMAGE_BYTES) return null
+
+      return { data: buffer.toString("base64"), mimeType: contentType.split(";")[0].trim() }
+    } catch (error) {
+      console.error("Error fetching TP image:", error)
+      console.error("Request URL:", this.redact(fetchUrl))
       return null
     }
   }

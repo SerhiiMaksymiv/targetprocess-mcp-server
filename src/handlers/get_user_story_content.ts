@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom'
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { collectCardImages } from './images.js'
 
 export async function handleGetUserStoryContent(tp: TpClient, id: string) {
   const userStory = await tp.getUserStory<TP.UserStory>(id)
@@ -33,6 +34,7 @@ export async function handleGetUserStoryContent(tp: TpClient, id: string) {
     customFields: userStory.CustomFields,
     assignedTeams: userStory.ResponsibleTeam,
     team: userStory.Team,
+    imagesFound: 0,
   }
 
   try {
@@ -45,7 +47,10 @@ export async function handleGetUserStoryContent(tp: TpClient, id: string) {
     console.error('Error parsing user story description:', error)
   }
 
+  const { foundCount, images } = await collectCardImages(tp, id, description)
+  result.imagesFound = foundCount
+
   return {
-    content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+    content: [{ type: 'text' as const, text: JSON.stringify(result) }, ...images],
   }
 }

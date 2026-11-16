@@ -4,6 +4,8 @@ import type { TpClient } from '../src/tp.js'
 
 const mockTp = {
   getBug: vi.fn(),
+  getAttachments: vi.fn().mockResolvedValue({ Items: [] }),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -86,5 +88,34 @@ describe('handleGetBugContent', () => {
     await handleGetBugContent(mockTp, '123456')
 
     expect(mockTp.getBug).toHaveBeenCalledWith('123456')
+  })
+
+  it('returns inline description images as image content blocks', async () => {
+    vi.mocked(mockTp.getBug).mockResolvedValue({
+      Id: 145789,
+      Name: 'Bug with screenshot',
+      Description: '<p>See attached</p><img src="/Attachments.ashx?AttachmentID=1">',
+      CustomFields: [],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetBugContent(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
+  })
+
+  it('includes image attachments even without failing when fetch fails', async () => {
+    vi.mocked(mockTp.getBug).mockResolvedValue({
+      Id: 1, Name: 'B', Description: '<img src="/img.png">', CustomFields: [],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue(null)
+
+    const result = await handleGetBugContent(mockTp, '145789')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(1)
+    expect(result.content).toHaveLength(1)
   })
 })

@@ -10,6 +10,8 @@ const mockTp = {
   getEpic: vi.fn(),
   updateEpic: vi.fn(),
   getEpicFeatures: vi.fn(),
+  getAttachments: vi.fn().mockResolvedValue({ Items: [] }),
+  fetchImageAsBase64: vi.fn(),
 } as unknown as TpClient
 
 beforeEach(() => {
@@ -65,6 +67,22 @@ describe('handleGetEpicContent', () => {
     const result = await handleGetEpicContent(mockTp, '148813')
 
     expect(result.content[0].text).toContain('Failed to get epic, id: 148813')
+  })
+
+  it('returns description images as image content blocks', async () => {
+    vi.mocked(mockTp.getEpic).mockResolvedValue({
+      Id: 148813,
+      Name: 'Epic with screenshot',
+      Description: '<img src="/Attachments.ashx?AttachmentID=1">',
+      CustomFields: [],
+    } as any)
+    vi.mocked(mockTp.fetchImageAsBase64).mockResolvedValue({ data: 'base64data', mimeType: 'image/png' })
+
+    const result = await handleGetEpicContent(mockTp, '148813')
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed.imagesFound).toBe(1)
+    expect(result.content[1]).toEqual({ type: 'image', data: 'base64data', mimeType: 'image/png' })
   })
 })
 
