@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import type { TpClient } from '../tp.js'
 
 export type AddAttachmentParams = {
@@ -15,6 +16,20 @@ export async function handleAddAttachment(tp: TpClient, params: AddAttachmentPar
       content: [{
         type: 'text' as const,
         text: 'Provide either filePath, or both fileContent and fileName.',
+      }],
+    }
+  }
+
+  // filePath is read from this MCP server's own filesystem, not the calling
+  // assistant's. A file attached directly in chat usually only exists in the
+  // assistant's own sandbox, so this is the most common way callers get it
+  // wrong — catch it here with a message that tells them how to recover,
+  // instead of a bare upload failure.
+  if (filePath && !existsSync(filePath)) {
+    return {
+      content: [{
+        type: 'text' as const,
+        text: `"${filePath}" does not exist on this MCP server's filesystem. If this file came from a chat attachment or upload rather than a path already on this machine, read its bytes yourself and retry with fileContent (base64) and fileName instead of filePath.`,
       }],
     }
   }

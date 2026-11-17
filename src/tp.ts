@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
 import { config } from "./config.js";
+import { guessMimeType } from "./mime.js";
 import {
   TpClientParameters,
   TpResponse,
@@ -1351,26 +1352,35 @@ export class TpClient {
   }
 
 
+  // filePath must be readable from this process's own filesystem — it is not
+  // the caller's filesystem. A chat-attached image usually only exists in the
+  // calling assistant's own sandbox, so readFileSync throws ENOENT for it;
+  // that read happens inside the try block (unlike a prior version of this
+  // method) so the failure comes back as a result instead of an unhandled
+  // rejection all the way up through the MCP tool call.
   async addAttachedFile(generalId: string, source: { filePath: string } | { fileContent: string; fileName: string }): Promise<string | null> {
-    let blob: Blob
-    let fileName: string
-
-    if ("filePath" in source) {
-      blob = new Blob([readFileSync(source.filePath)])
-      fileName = basename(source.filePath)
-    } else {
-      blob = new Blob([Buffer.from(source.fileContent, "base64")])
-      fileName = source.fileName
-    }
-
-    const formData = new FormData()
-    formData.append("generalId", generalId)
-    formData.append("file", blob, fileName)
-
-    const url = `${this.baseUrl}/UploadFile.ashx?access_token=${this.token}`
-    console.error(JSON.stringify({ "UPLOAD_URL": this.redact(url) }, null, 2))
-
     try {
+      let blob: Blob
+      let fileName: string
+
+      // TP otherwise sniffs the Content-Type itself and sometimes gets it
+      // wrong (e.g. a .webp screenshot persisted as audio/x-wav), so set it
+      // from the file name rather than leaving it unspecified.
+      if ("filePath" in source) {
+        fileName = basename(source.filePath)
+        blob = new Blob([readFileSync(source.filePath)], { type: guessMimeType(fileName) })
+      } else {
+        fileName = source.fileName
+        blob = new Blob([Buffer.from(source.fileContent, "base64")], { type: guessMimeType(fileName) })
+      }
+
+      const formData = new FormData()
+      formData.append("generalId", generalId)
+      formData.append("file", blob, fileName)
+
+      const url = `${this.baseUrl}/UploadFile.ashx?access_token=${this.token}`
+      console.error(JSON.stringify({ "UPLOAD_URL": this.redact(url) }, null, 2))
+
       const response = await fetch(url, {
         method: "POST",
         body: formData,

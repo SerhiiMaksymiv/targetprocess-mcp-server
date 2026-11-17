@@ -71,6 +71,8 @@ Cards — Write
 - `add_comment` — Post a comment to any card (id, comment)
 - `add_comment_with_user` — Post a comment to any card and mention a specific user (id, comment, user object from `get_users`)
 - `add_attachment` — Upload a file (e.g. a screenshot or mockup) as an attachment on any card (cardId, and either filePath or fileContent + fileName)
+  > `filePath` is read from this MCP server's own filesystem, not the calling assistant's — for an image attached directly in chat, pass `fileContent` (base64) + `fileName` instead
+  > Targetprocess's upload endpoint re-sniffs the file's Content-Type from its bytes and ignores what's declared on upload. WebP files use the same RIFF container as WAV audio, so TP misidentifies them as `audio/x-wav` — convert WebP screenshots to PNG/JPEG before uploading if they need to display correctly as an attachment
 - `update_bug` — Update an existing bug (id, optional title, optional bugContent, optional origin, optional projectId, optional teamId, optional entityStateId)
   > Resolve state name → ID via `get_bug_workflows` before passing `entityStateId`
 - `update_user_story` — Update an existing user story (id, optional title, optional description, optional projectId, optional teamId, optional entityStateId)
