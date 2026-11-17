@@ -402,7 +402,7 @@ server.registerTool(
   'add_attachment',
   {
     title: 'Add attachment to TP card',
-    description: 'Upload a file (e.g. a screenshot or mockup) as an attachment on a Targetprocess card (bug, user story, feature, etc.) by its ID. Provide either a local filePath, or fileContent (base64) together with fileName.',
+    description: 'Upload a file (e.g. a screenshot or mockup) as an attachment on a Targetprocess card (bug, user story, feature, etc.) by its ID. filePath is read from THIS MCP SERVER\'S OWN filesystem, not the calling assistant\'s — it only works for a file already on this machine. For an image attached/pasted/uploaded directly in the chat, read its bytes yourself and pass fileContent (base64) + fileName instead; passing that attachment\'s sandboxed path as filePath will fail with "file not found".',
     inputSchema: {
       cardId: z.string()
         .min(5)
@@ -410,10 +410,10 @@ server.registerTool(
         .describe('TP card ID to attach the file to, e.g. 145789'),
       filePath: z.string()
         .optional()
-        .describe('Absolute path to a local file to upload'),
+        .describe('Absolute path to a file on this MCP server\'s own filesystem. Do not use this for a file that only exists in the calling assistant\'s sandbox (e.g. a chat-attached image) — use fileContent instead.'),
       fileContent: z.string()
         .optional()
-        .describe('Base64-encoded file content; use together with fileName when no local filePath is available'),
+        .describe('Base64-encoded file content; use together with fileName. This is the reliable option for an image that came from a chat attachment/upload rather than a path already on this machine.'),
       fileName: z.string()
         .optional()
         .describe('File name to use when uploading via fileContent, e.g. screenshot.png'),
