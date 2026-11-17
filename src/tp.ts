@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import { basename } from "path";
 import { config } from "./config.js";
+import { guessMimeType } from "./mime.js";
 import {
   TpClientParameters,
   TpResponse,
@@ -1362,12 +1363,15 @@ export class TpClient {
       let blob: Blob
       let fileName: string
 
+      // TP otherwise sniffs the Content-Type itself and sometimes gets it
+      // wrong (e.g. a .webp screenshot persisted as audio/x-wav), so set it
+      // from the file name rather than leaving it unspecified.
       if ("filePath" in source) {
-        blob = new Blob([readFileSync(source.filePath)])
         fileName = basename(source.filePath)
+        blob = new Blob([readFileSync(source.filePath)], { type: guessMimeType(fileName) })
       } else {
-        blob = new Blob([Buffer.from(source.fileContent, "base64")])
         fileName = source.fileName
+        blob = new Blob([Buffer.from(source.fileContent, "base64")], { type: guessMimeType(fileName) })
       }
 
       const formData = new FormData()
