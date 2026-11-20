@@ -1,12 +1,13 @@
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { requireExistingFeature } from './require_feature.js'
 
 export async function handleCreateUserStory(
   tp: TpClient,
   params: {
     title: string
     description?: string
-    featureId?: string
+    featureId: string
     releaseId?: string
     projectId?: string
     teamId?: string
@@ -14,7 +15,10 @@ export async function handleCreateUserStory(
     teamIterationId?: string
   },
 ) {
-  const response = await tp.createUserStory<TP.UserStory>(params)
+  const featureError = await requireExistingFeature(tp, params.featureId)
+  if (featureError) return featureError
+
+  const response = await tp.createUserStory<TP.UserStory>({ ...params, featureId: params.featureId.trim() })
 
   if (response instanceof Error) {
     return {

@@ -397,7 +397,7 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createUserStory<T>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId }: { title: string, description?: string, featureId?: string, releaseId?: string, projectId?: string, teamId?: string, tags?: string, teamIterationId?: string }): Promise<T> {
+  async createUserStory<T>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId }: { title: string, description?: string, featureId: string, releaseId?: string, projectId?: string, teamId?: string, tags?: string, teamIterationId?: string }): Promise<T> {
     const userStory: Record<string, any> = {
       "Name": title,
       "Project": { "Id": projectId || config.tp.projectId },
@@ -405,7 +405,11 @@ export class TpClient {
     }
 
     if (description) userStory["Description"] = description
-    if (featureId) userStory["Feature"] = { "Id": featureId }
+    // Every user story must have a parent Feature — never POST an orphan story.
+    if (!/^[1-9]\d*$/.test(String(featureId ?? "").trim())) {
+      throw new Error(`createUserStory requires a parent Feature ID (positive integer); got "${featureId}"`)
+    }
+    userStory["Feature"] = { "Id": Number(String(featureId).trim()) }
     if (releaseId) userStory["Release"] = { "Id": releaseId }
     if (tags) userStory["Tags"] = tags
     if (teamIterationId) userStory["TeamIteration"] = { "Id": teamIterationId }
