@@ -786,9 +786,9 @@ server.registerTool(
   'create_user_story',
   {
     title: 'Create a new user story',
-    description: `Create a new user story in Targetprocess. A parent Feature is REQUIRED — a user story cannot be created without "featureId", and the tool fails (creating nothing) if the ID is not an existing Feature.
+    description: `Create a new user story in Targetprocess. Every user story should be assigned to a parent Feature ("featureId"). If a featureId is given it must be an existing Feature, or the tool fails and creates nothing. If it is omitted, the story is still created, but the response includes a reminder that you MUST pass on to the user.
       CRITICAL WORKFLOW: Before calling this tool:
-        1) IF the user named the parent feature rather than giving its ID, resolve the ID first via "search_tp_cards" (entityType "Generals") or "get_epic_features"; IF no feature was given at all, ask the user which feature the story belongs to;
+        1) IF the user named the parent feature rather than giving its ID, resolve the ID first via "search_tp_cards" (entityType "Generals") or "get_epic_features"; IF no feature was given at all, ask the user which feature the story belongs to before creating it (if they have none yet, create it without one and remind them to assign it later with "update_user_story" featureId);
         2) IF the user specified a sprint/iteration by name, call "get_team_iterations" to find the matching iteration and use its ID as teamIterationId.`,
     inputSchema: {
       title: z.string()
@@ -799,7 +799,8 @@ server.registerTool(
       featureId: z.string()
         .trim()
         .regex(/^[1-9]\d*$/, 'Feature ID must be a positive integer (e.g. 153044)')
-        .describe('REQUIRED parent Feature ID (positive integer, e.g. 153044) — every user story must sit under a Feature. If the user named the feature rather than giving its ID, resolve it first via "search_tp_cards" (entityType "Generals") or "get_epic_features"'),
+        .optional()
+        .describe('Parent Feature ID (positive integer, e.g. 153044) — every user story should sit under a Feature. If given, it must be an existing Feature or nothing is created. If omitted, the story is created without a feature and the response reminds you to assign one. If the user named the feature rather than giving its ID, resolve it first via "search_tp_cards" (entityType "Generals") or "get_epic_features"'),
       releaseId: z.string()
         .min(5)
         .max(9)
@@ -837,9 +838,9 @@ server.registerTool(
         6) Acceptance Criteria — every bullet MUST be traceable to a specific scenario or edge case above; if a bullet isn't backed by a scenario, it isn't a criterion yet — put it in "notes" as a flagged gap instead;
         7) References — put mockup/spec links here, not inline in prose;
         8) Notes — capture open questions or known constraints here; don't let them hide inside acceptanceCriteria;
-      A parent Feature is REQUIRED — a user story cannot be created without "featureId", and the tool fails (creating nothing) if the ID is not an existing Feature.
+      Every user story should be assigned to a parent Feature ("featureId"). If a featureId is given it must be an existing Feature, or the tool fails and creates nothing. If it is omitted, the story is still created, but the response includes a reminder that you MUST pass on to the user.
       CRITICAL WORKFLOW: Before calling this tool, you MUST follow these steps:
-        1) IF the user named the parent feature rather than giving its ID, resolve the ID first via "search_tp_cards" (entityType "Generals") or "get_epic_features"; IF no feature was given at all, ask the user which feature the story belongs to;
+        1) IF the user named the parent feature rather than giving its ID, resolve the ID first via "search_tp_cards" (entityType "Generals") or "get_epic_features"; IF no feature was given at all, ask the user which feature the story belongs to before creating it (if they have none yet, create it without one and remind them to assign it later with "update_user_story" featureId);
         2) IF the user specified a release by name (not ID), call "get_current_releases" to resolve the release ID;
         3) IF the user specified a team by name (not ID), call "get_teams" to find the matching team and use its ID as teamId;
         4) IF the user specified a project by name (not ID), call "get_projects" to find the matching project and use its ID as projectId;
@@ -900,7 +901,8 @@ server.registerTool(
       featureId: z.string()
         .trim()
         .regex(/^[1-9]\d*$/, 'Feature ID must be a positive integer (e.g. 153044)')
-        .describe('REQUIRED parent Feature ID (positive integer, e.g. 153044) — every user story must sit under a Feature. If the user named the feature rather than giving its ID, resolve it first via "search_tp_cards" (entityType "Generals") or "get_epic_features"'),
+        .optional()
+        .describe('Parent Feature ID (positive integer, e.g. 153044) — every user story should sit under a Feature. If given, it must be an existing Feature or nothing is created. If omitted, the story is created without a feature and the response reminds you to assign one. If the user named the feature rather than giving its ID, resolve it first via "search_tp_cards" (entityType "Generals") or "get_epic_features"'),
       releaseId: z.string()
         .min(5)
         .max(9)

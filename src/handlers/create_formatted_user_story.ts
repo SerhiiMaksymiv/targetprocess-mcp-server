@@ -1,6 +1,6 @@
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
-import { requireExistingFeature } from './require_feature.js'
+import { validateFeatureIfGiven, withFeatureReminder } from './feature_check.js'
 
 type ScenarioBlock = { name: string; steps: string[] }
 
@@ -19,7 +19,7 @@ export async function handleCreateFormattedUserStory(
     acceptanceCriteria: string[]
     references?: string
     notes?: string
-    featureId: string
+    featureId?: string
     releaseId?: string
     projectId?: string
     teamId?: string
@@ -29,7 +29,7 @@ export async function handleCreateFormattedUserStory(
 ) {
   const { title, header, definitions, scenarios, examplesTable, edgeCases, acceptanceCriteria, references, notes, featureId, releaseId, projectId, teamId, tags, teamIterationId } = params
 
-  const featureError = await requireExistingFeature(tp, params.featureId)
+  const featureError = await validateFeatureIfGiven(tp, params.featureId)
   if (featureError) return featureError
 
   const parts: string[] = ['<div>']
@@ -81,7 +81,7 @@ export async function handleCreateFormattedUserStory(
 
   const description = parts.join('\n')
 
-  const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId: featureId.trim(), releaseId, projectId, teamId, tags, teamIterationId })
+  const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId })
 
   if (userStoryResponse instanceof Error) {
     return {
@@ -92,7 +92,7 @@ export async function handleCreateFormattedUserStory(
     }
   }
 
-  return {
+  return withFeatureReminder(featureId, {
     content: [{ type: 'text' as const, text: JSON.stringify(userStoryResponse) }],
-  }
+  })
 }

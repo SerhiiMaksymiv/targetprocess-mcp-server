@@ -1,13 +1,13 @@
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
-import { requireExistingFeature } from './require_feature.js'
+import { validateFeatureIfGiven, withFeatureReminder } from './feature_check.js'
 
 export async function handleCreateUserStory(
   tp: TpClient,
   params: {
     title: string
     description?: string
-    featureId: string
+    featureId?: string
     releaseId?: string
     projectId?: string
     teamId?: string
@@ -15,10 +15,10 @@ export async function handleCreateUserStory(
     teamIterationId?: string
   },
 ) {
-  const featureError = await requireExistingFeature(tp, params.featureId)
+  const featureError = await validateFeatureIfGiven(tp, params.featureId)
   if (featureError) return featureError
 
-  const response = await tp.createUserStory<TP.UserStory>({ ...params, featureId: params.featureId.trim() })
+  const response = await tp.createUserStory<TP.UserStory>(params)
 
   if (response instanceof Error) {
     return {
@@ -29,7 +29,7 @@ export async function handleCreateUserStory(
     }
   }
 
-  return {
+  return withFeatureReminder(params.featureId, {
     content: [{ type: 'text' as const, text: JSON.stringify(response) }],
-  }
+  })
 }
