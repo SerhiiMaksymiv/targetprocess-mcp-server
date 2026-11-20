@@ -1,5 +1,7 @@
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { tpErrorText } from './tp_error.js'
+import { validateFeatureIfGiven, withFeatureReminder } from './feature_check.js'
 
 export async function handleCreateUserStory(
   tp: TpClient,
@@ -14,18 +16,23 @@ export async function handleCreateUserStory(
     teamIterationId?: string
   },
 ) {
-  const response = await tp.createUserStory<TP.UserStory>(params)
+  const featureError = await validateFeatureIfGiven(tp, params.featureId)
+  if (featureError) return featureError
 
-  if (response instanceof Error) {
+  const result = await tp.createUserStory<TP.UserStory>(params)
+
+  if (!result.ok) {
     return {
+      isError: true,
       content: [{
         type: 'text' as const,
-        text: `Failed to create user story "${params.title}"\n Error: ${response.message}`
+        text: `Failed to create user story "${params.title}" — Targetprocess said ${tpErrorText(result.status, result.body)}`
       }],
     }
   }
+  const response = result.data
 
-  return {
+  return withFeatureReminder(params.featureId, {
     content: [{ type: 'text' as const, text: JSON.stringify(response) }],
-  }
+  })
 }

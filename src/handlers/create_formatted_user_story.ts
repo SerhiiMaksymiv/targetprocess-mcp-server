@@ -1,5 +1,7 @@
 import type { TpClient } from '../tp.js'
 import type * as TP from '../types.js'
+import { tpErrorText } from './tp_error.js'
+import { validateFeatureIfGiven, withFeatureReminder } from './feature_check.js'
 
 type ScenarioBlock = { name: string; steps: string[] }
 
@@ -27,6 +29,9 @@ export async function handleCreateFormattedUserStory(
   },
 ) {
   const { title, header, definitions, scenarios, examplesTable, edgeCases, acceptanceCriteria, references, notes, featureId, releaseId, projectId, teamId, tags, teamIterationId } = params
+
+  const featureError = await validateFeatureIfGiven(tp, params.featureId)
+  if (featureError) return featureError
 
   const parts: string[] = ['<div>']
 
@@ -77,18 +82,20 @@ export async function handleCreateFormattedUserStory(
 
   const description = parts.join('\n')
 
-  const userStoryResponse = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId })
+  const result = await tp.createUserStory<TP.UserStory>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId })
 
-  if (userStoryResponse instanceof Error) {
+  if (!result.ok) {
     return {
+      isError: true,
       content: [{
         type: 'text' as const,
-        text: `Failed to create formatted user story "${title}"\n Error: ${userStoryResponse.message}`
+        text: `Failed to create formatted user story "${title}" — Targetprocess said ${tpErrorText(result.status, result.body)}`
       }],
     }
   }
+  const userStoryResponse = result.data
 
-  return {
+  return withFeatureReminder(featureId, {
     content: [{ type: 'text' as const, text: JSON.stringify(userStoryResponse) }],
-  }
+  })
 }

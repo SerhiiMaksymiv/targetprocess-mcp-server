@@ -397,7 +397,7 @@ export class TpClient {
     }, bug) as T
   }
 
-  async createUserStory<T>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId }: { title: string, description?: string, featureId?: string, releaseId?: string, projectId?: string, teamId?: string, tags?: string, teamIterationId?: string }): Promise<T> {
+  async createUserStory<T>({ title, description, featureId, releaseId, projectId, teamId, tags, teamIterationId }: { title: string, description?: string, featureId?: string, releaseId?: string, projectId?: string, teamId?: string, tags?: string, teamIterationId?: string }): Promise<TpResult<T>> {
     const userStory: Record<string, any> = {
       "Name": title,
       "Project": { "Id": projectId || config.tp.projectId },
@@ -405,15 +405,15 @@ export class TpClient {
     }
 
     if (description) userStory["Description"] = description
-    if (featureId) userStory["Feature"] = { "Id": featureId }
+    if (featureId) userStory["Feature"] = { "Id": featureId.trim() }
     if (releaseId) userStory["Release"] = { "Id": releaseId }
     if (tags) userStory["Tags"] = tags
     if (teamIterationId) userStory["TeamIteration"] = { "Id": teamIterationId }
 
-    return this.post<any, T>({
+    return this.postRaw<any, T>({
       pathParam: ["UserStories"],
       param: { "format": "json" },
-    }, userStory) as T
+    }, userStory)
   }
 
   async getTeamIterations<T>({ teamId }: { teamId?: string } = {}): Promise<T> {
