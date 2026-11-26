@@ -1,7 +1,7 @@
 {
   "name": "targetprocess-mcp",
   "displayName": "Targetprocess",
-  "version": "2.8.3",
+  "version": "2.8.4",
   "description": "MCP server connecting Claude to Targetprocess REST API",
   "author": {
     "name": "Serhii Maksymiv"
