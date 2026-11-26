@@ -12,6 +12,14 @@ describe('guessMimeType', () => {
     expect(guessMimeType('/tmp/some/dir/1.webp')).toBe('image/webp')
   })
 
+  it('maps common video and audio extensions', () => {
+    expect(guessMimeType('recording.mov')).toBe('video/quicktime')
+    expect(guessMimeType('recording.mp4')).toBe('video/mp4')
+    expect(guessMimeType('recording.webm')).toBe('video/webm')
+    expect(guessMimeType('recording.mkv')).toBe('video/x-matroska')
+    expect(guessMimeType('voice.mp3')).toBe('audio/mpeg')
+  })
+
   it('falls back to application/octet-stream for unknown extensions', () => {
     expect(guessMimeType('data.xyz')).toBe('application/octet-stream')
   })
