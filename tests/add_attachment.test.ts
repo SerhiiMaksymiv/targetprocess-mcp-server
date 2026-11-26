@@ -25,7 +25,7 @@ beforeEach(() => {
 
 describe('handleAddAttachment', () => {
   it('uploads via filePath and returns a parsed JSON response', async () => {
-    vi.mocked(mockTp.addAttachedFile).mockResolvedValue('{"Id":1,"Name":"screenshot.png"}')
+    vi.mocked(mockTp.addAttachedFile).mockResolvedValue({ ok: true, data: '{"Id":1,"Name":"screenshot.png"}' })
 
     const result = await handleAddAttachment(mockTp, { cardId: '145789', filePath: realFilePath })
     const parsed = JSON.parse(result.content[0].text)
@@ -36,7 +36,7 @@ describe('handleAddAttachment', () => {
   })
 
   it('uploads via fileContent and fileName', async () => {
-    vi.mocked(mockTp.addAttachedFile).mockResolvedValue('{"Id":2,"Name":"mockup.png"}')
+    vi.mocked(mockTp.addAttachedFile).mockResolvedValue({ ok: true, data: '{"Id":2,"Name":"mockup.png"}' })
 
     const result = await handleAddAttachment(mockTp, {
       cardId: '145789',
@@ -50,7 +50,7 @@ describe('handleAddAttachment', () => {
   })
 
   it('falls back to the raw response text when it is not JSON', async () => {
-    vi.mocked(mockTp.addAttachedFile).mockResolvedValue('OK')
+    vi.mocked(mockTp.addAttachedFile).mockResolvedValue({ ok: true, data: 'OK' })
 
     const result = await handleAddAttachment(mockTp, { cardId: '145789', filePath: realFilePath })
     const parsed = JSON.parse(result.content[0].text)
@@ -58,12 +58,18 @@ describe('handleAddAttachment', () => {
     expect(parsed.response).toBe('OK')
   })
 
-  it('returns failure message when upload fails', async () => {
-    vi.mocked(mockTp.addAttachedFile).mockResolvedValue(null)
+  it('returns the HTTP status and response body when upload fails', async () => {
+    vi.mocked(mockTp.addAttachedFile).mockResolvedValue({
+      ok: false,
+      status: 413,
+      body: 'Request Entity Too Large',
+    })
 
     const result = await handleAddAttachment(mockTp, { cardId: '145789', filePath: realFilePath })
 
     expect(result.content[0].text).toContain('Failed to upload attachment to card id: 145789')
+    expect(result.content[0].text).toContain('HTTP status: 413')
+    expect(result.content[0].text).toContain('Request Entity Too Large')
   })
 
   it('returns a validation message when neither filePath nor fileContent/fileName is provided', async () => {

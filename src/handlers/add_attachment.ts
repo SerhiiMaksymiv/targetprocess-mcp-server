@@ -1,4 +1,4 @@
-import { existsSync } from 'fs'
+import { existsSync, statSync } from 'fs'
 import type { TpClient } from '../tp.js'
 
 export type AddAttachmentParams = {
@@ -35,22 +35,23 @@ export async function handleAddAttachment(tp: TpClient, params: AddAttachmentPar
   }
 
   const source = filePath ? { filePath } : { fileContent: fileContent as string, fileName: fileName as string }
-  const response = await tp.addAttachedFile(cardId, source)
+  const result = await tp.addAttachedFile(cardId, source)
 
-  if (response === null) {
+  if (!result.ok) {
+    const sizeNote = filePath ? ` (file size: ${statSync(filePath).size} bytes)` : ''
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to upload attachment to card id: ${cardId}`,
+        text: `Failed to upload attachment to card id: ${cardId}${sizeNote}. HTTP status: ${result.status}. ${result.body.slice(0, 1000)}`,
       }],
     }
   }
 
   // TP's UploadFile.ashx returns JSON on success but we fall back to the raw
   // text if it ever doesn't, so the caller still gets something useful.
-  let parsedResponse: unknown = response
+  let parsedResponse: unknown = result.data
   try {
-    parsedResponse = JSON.parse(response)
+    parsedResponse = JSON.parse(result.data)
   } catch {
     // keep raw text
   }

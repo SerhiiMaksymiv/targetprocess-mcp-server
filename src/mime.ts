@@ -13,6 +13,15 @@ const EXTENSION_MIME_TYPES: Record<string, string> = {
   zip: 'application/zip',
   mov: 'video/quicktime',
   mp4: 'video/mp4',
+  m4v: 'video/mp4',
+  webm: 'video/webm',
+  avi: 'video/x-msvideo',
+  mkv: 'video/x-matroska',
+  wmv: 'video/x-ms-wmv',
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  m4a: 'audio/mp4',
+  ogg: 'audio/ogg',
 }
 
 // Attachment uploads otherwise go to TP with no Content-Type, which TP then

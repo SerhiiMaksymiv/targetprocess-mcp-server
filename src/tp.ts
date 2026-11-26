@@ -1358,7 +1358,11 @@ export class TpClient {
   // that read happens inside the try block (unlike a prior version of this
   // method) so the failure comes back as a result instead of an unhandled
   // rejection all the way up through the MCP tool call.
-  async addAttachedFile(generalId: string, source: { filePath: string } | { fileContent: string; fileName: string }): Promise<string | null> {
+  //
+  // Returns a TpResult rather than string|null (unlike before) so a failure
+  // carries TP's actual HTTP status and response body — e.g. a size-limit
+  // rejection on a large file — instead of a bare null that hides why.
+  async addAttachedFile(generalId: string, source: { filePath: string } | { fileContent: string; fileName: string }): Promise<TpResult<string>> {
     try {
       let blob: Blob
       let fileName: string
@@ -1379,19 +1383,21 @@ export class TpClient {
       formData.append("file", blob, fileName)
 
       const url = `${this.baseUrl}/UploadFile.ashx?access_token=${this.token}`
-      console.error(JSON.stringify({ "UPLOAD_URL": this.redact(url) }, null, 2))
+      console.error(JSON.stringify({ "UPLOAD_URL": this.redact(url), "UPLOAD_SIZE_BYTES": blob.size }, null, 2))
 
       const response = await fetch(url, {
         method: "POST",
         body: formData,
       })
+      const text = await response.text()
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        console.error(JSON.stringify({ "UPLOAD_ERROR_STATUS": response.status, "UPLOAD_ERROR_BODY": text }))
+        return { ok: false, status: response.status, body: text }
       }
-      return await response.text()
+      return { ok: true, data: text }
     } catch (error) {
       console.error("Error uploading file:", error)
-      return null
+      return { ok: false, status: 0, body: String(error) }
     }
   }
 
